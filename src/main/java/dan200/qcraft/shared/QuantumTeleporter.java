@@ -37,7 +37,7 @@ public class QuantumTeleporter extends Teleporter
     }
 
     @Override
-    public void placeInPortal( Entity entity, double par2, double par4, double par6, float par8 )
+    public void placeInPortal( Entity entity, float rotationYaw )
     {
         if( entity instanceof EntityPlayer )
         {
@@ -47,7 +47,7 @@ public class QuantumTeleporter extends Teleporter
     }
 
     @Override
-    public boolean placeInExistingPortal(Entity par1Entity, double par2, double par4, double par6, float par8)
+    public boolean placeInExistingPortal(Entity par1Entity, float rotationYaw)
     {
         return false;
     }

@@ -51,13 +51,13 @@ public class ContainerQuantumComputer extends Container
     @Override
     public boolean canInteractWith( EntityPlayer entityplayer )
     {
-        return m_computer.getDistanceFrom( entityplayer.posX, entityplayer.posY, entityplayer.posZ ) <= (8.0 * 8.0);
+        return m_computer.getDistanceSq( entityplayer.posX, entityplayer.posY, entityplayer.posZ ) <= (8.0 * 8.0);
     }
 
     @Override
-    public void addCraftingToCrafters( ICrafting icrafting )
+    public void onCraftGuiOpened( ICrafting icrafting )
     {
-        super.addCraftingToCrafters( icrafting );
+        super.onCraftGuiOpened( icrafting );
         icrafting.sendProgressBarUpdate( this, PROGRESS_ERRORMSG, m_errorMessage.ordinal() );
 
         boolean canEdit = false;

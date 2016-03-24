@@ -17,7 +17,7 @@ limitations under the License.
 
 package dan200.qcraft.shared;
 
-import cpw.mods.fml.common.IWorldGenerator;
+import net.minecraftforge.fml.common.IWorldGenerator;
 import dan200.QCraft;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
@@ -25,6 +25,7 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 
 import java.util.Random;
+import net.minecraft.util.BlockPos;
 
 public class QuantumOreGenerator implements IWorldGenerator
 {
@@ -32,13 +33,13 @@ public class QuantumOreGenerator implements IWorldGenerator
 
     public QuantumOreGenerator()
     {
-        m_oreGen = new WorldGenMinable( QCraft.Blocks.quantumOre, 5 );
+        m_oreGen = new WorldGenMinable( QCraft.Blocks.quantumOre.getDefaultState() , 5 );
     }
 
     @Override
     public void generate( Random random, int chunkX, int chunkZ, World world, IChunkProvider chunkGenerator, IChunkProvider chunkProvider )
     {
-        if( !world.provider.isHellWorld && world.provider.terrainType != WorldType.FLAT )
+        if( !world.provider.isSurfaceWorld() && world.getWorldType() != WorldType.FLAT )
         {
             generateSurface( world, random, chunkX * 16, chunkZ * 16 );
         }
@@ -51,7 +52,7 @@ public class QuantumOreGenerator implements IWorldGenerator
             int firstBlockXCoord = chunkX + rand.nextInt( 16 );
             int firstBlockYCoord = rand.nextInt( 24 );
             int firstBlockZCoord = chunkZ + rand.nextInt( 16 );
-            m_oreGen.generate( world, rand, firstBlockXCoord, firstBlockYCoord, firstBlockZCoord );
+            m_oreGen.generate( world, rand, new BlockPos(firstBlockXCoord, firstBlockYCoord, firstBlockZCoord) );
         }
     }
 }

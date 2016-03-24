@@ -40,12 +40,15 @@ import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Facing;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 
 import java.io.IOException;
 import java.util.*;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.util.BlockPos;
 
 public class TileEntityQuantumComputer extends TileEntity
 {
@@ -109,7 +112,7 @@ public class TileEntityQuantumComputer extends TileEntity
                 Block block = m_blocks[i];
                 if( block != null )
                 {
-                    name = Block.blockRegistry.getNameForObject( block );
+                    name = Block.blockRegistry.getNameForObject( block ).toString();
                 }
                 if( name != null && name.length() > 0 )
                 {
@@ -181,6 +184,9 @@ public class TileEntityQuantumComputer extends TileEntity
     private String m_remoteServerAddress;
     private String m_remoteServerName;
     private String m_remotePortalID;
+    private int xCoord;
+    private int yCoord;
+    private int zCoord;
 
     public TileEntityQuantumComputer()
     {
@@ -195,6 +201,9 @@ public class TileEntityQuantumComputer extends TileEntity
         m_remoteServerAddress = null;
         m_remoteServerName = null;
         m_remotePortalID = null;
+        xCoord = pos.getX();
+        yCoord = pos.getY();
+        zCoord = pos.getZ();
     }
 
     private EntanglementRegistry<TileEntityQuantumComputer> getEntanglementRegistry()
@@ -297,30 +306,30 @@ public class TileEntityQuantumComputer extends TileEntity
         return m_storedData;
     }
 
-    private boolean isPillarBase( int x, int y, int z, int side )
+    private boolean isPillarBase( BlockPos blockPos, EnumFacing side )
     {
-        if( y < 0 || y >= 256 )
+        if( blockPos.getY() < 0 || blockPos.getY() >= 256 )
         {
             return false;
         }
 
-        TileEntity entity = worldObj.getTileEntity( x, y, z );
+        TileEntity entity = worldObj.getTileEntity(blockPos);
         if( entity != null && entity instanceof TileEntityQBlock )
         {
             TileEntityQBlock quantum = (TileEntityQBlock) entity;
-            int[] types = quantum.getTypes();
-            for( int i = 0; i < 6; ++i )
+            Map<EnumFacing, Integer> types = quantum.getTypes();
+            for( EnumFacing i : EnumFacing.values())
             {
                 if( i == side )
                 {
-                    if( types[ i ] != 31 ) // GOLD
+                    if( types.get(i) != 31 ) // GOLD
                     {
                         return false;
                     }
                 }
                 else
                 {
-                    if( types[ i ] != 21 ) // OBSIDIAN
+                    if( types.get(i) != 21 ) // OBSIDIAN
                     {
                         return false;
                     }
@@ -331,14 +340,15 @@ public class TileEntityQuantumComputer extends TileEntity
         return false;
     }
 
-    private boolean isPillar( int x, int y, int z )
+    private boolean isPillar( BlockPos blockPos )
     {
+        int y = blockPos.getY();
         if( y < 0 || y >= 256 )
         {
             return false;
         }
 
-        Block block = worldObj.getBlock( x, y, z );
+        Block block = worldObj.getBlockState(blockPos).getBlock();
         if( block == Blocks.obsidian )
         {
             return true;
@@ -346,14 +356,15 @@ public class TileEntityQuantumComputer extends TileEntity
         return false;
     }
 
-    private boolean isGlass( int x, int y, int z )
+    private boolean isGlass( BlockPos blockPos )
     {
+        int y = blockPos.getY();
         if( y < 0 || y >= 256 )
         {
             return false;
         }
 
-        Block block = worldObj.getBlock( x, y, z );
+        Block block = worldObj.getBlockState(blockPos).getBlock();
         if( block.getMaterial() == Material.glass && !(block instanceof BlockPane) )
         {
             return true;
@@ -372,19 +383,19 @@ public class TileEntityQuantumComputer extends TileEntity
         shape.m_zMax = -99;
         for( int i = 0; i < RANGE; ++i )
         {
-            if( shape.m_xMin == -99 && isPillarBase( xCoord - i - 1, yCoord, zCoord, 5 ) )
+            if( shape.m_xMin == -99 && isPillarBase( new BlockPos(xCoord - i - 1, yCoord, zCoord), EnumFacing.EAST ) )
             {
                 shape.m_xMin = -i;
             }
-            if( shape.m_xMax == -99 && isPillarBase( xCoord + i + 1, yCoord, zCoord, 4 ) )
+            if( shape.m_xMax == -99 && isPillarBase( new BlockPos(xCoord + i + 1, yCoord, zCoord), EnumFacing.WEST ) )
             {
                 shape.m_xMax = i;
             }
-            if( shape.m_zMin == -99 && isPillarBase( xCoord, yCoord, zCoord - i - 1, 3 ) )
+            if( shape.m_zMin == -99 && isPillarBase( new BlockPos(xCoord, yCoord, zCoord - i - 1), EnumFacing.SOUTH ) )
             {
                 shape.m_zMin = -i;
             }
-            if( shape.m_zMax == -99 && isPillarBase( xCoord, yCoord, zCoord + i + 1, 2 ) )
+            if( shape.m_zMax == -99 && isPillarBase( new BlockPos(xCoord, yCoord, zCoord + i + 1), EnumFacing.NORTH ) )
             {
                 shape.m_zMax = i;
             }
@@ -398,10 +409,10 @@ public class TileEntityQuantumComputer extends TileEntity
             // Find Y Min
             for( int i = 1; i < RANGE; ++i )
             {
-                if( isPillar( xCoord + shape.m_xMin - 1, yCoord - i, zCoord ) &&
-                        isPillar( xCoord + shape.m_xMax + 1, yCoord - i, zCoord ) &&
-                        isPillar( xCoord, yCoord - i, zCoord + shape.m_zMin - 1 ) &&
-                        isPillar( xCoord, yCoord - i, zCoord + shape.m_zMax + 1 ) )
+                if( isPillar( new BlockPos(xCoord + shape.m_xMin - 1, yCoord - i, zCoord )) &&
+                        isPillar( new BlockPos(xCoord + shape.m_xMax + 1, yCoord - i, zCoord )) &&
+                        isPillar( new BlockPos(xCoord, yCoord - i, zCoord + shape.m_zMin - 1 )) &&
+                        isPillar( new BlockPos(xCoord, yCoord - i, zCoord + shape.m_zMax + 1 )) )
                 {
                     shape.m_yMin = -i;
                 }
@@ -414,10 +425,10 @@ public class TileEntityQuantumComputer extends TileEntity
             // Find Y Max
             for( int i = 1; i < RANGE; ++i )
             {
-                if( isPillar( xCoord + shape.m_xMin - 1, yCoord + i, zCoord ) &&
-                        isPillar( xCoord + shape.m_xMax + 1, yCoord + i, zCoord ) &&
-                        isPillar( xCoord, yCoord + i, zCoord + shape.m_zMin - 1 ) &&
-                        isPillar( xCoord, yCoord + i, zCoord + shape.m_zMax + 1 ) )
+                if( isPillar( new BlockPos(xCoord + shape.m_xMin - 1, yCoord + i, zCoord) ) &&
+                        isPillar( new BlockPos(xCoord + shape.m_xMax + 1, yCoord + i, zCoord) ) &&
+                        isPillar( new BlockPos(xCoord, yCoord + i, zCoord + shape.m_zMin - 1) ) &&
+                        isPillar( new BlockPos(xCoord, yCoord + i, zCoord + shape.m_zMax + 1) ) )
                 {
                     shape.m_yMax = i;
                 }
@@ -429,10 +440,10 @@ public class TileEntityQuantumComputer extends TileEntity
 
             // Check glass caps
             int top = yCoord + shape.m_yMax + 1;
-            if( isGlass( xCoord + shape.m_xMin - 1, top, zCoord ) &&
-                    isGlass( xCoord + shape.m_xMax + 1, top, zCoord ) &&
-                    isGlass( xCoord, top, zCoord + shape.m_zMin - 1 ) &&
-                    isGlass( xCoord, top, zCoord + shape.m_zMax + 1 ) )
+            if( isGlass( new BlockPos(xCoord + shape.m_xMin - 1, top, zCoord) ) &&
+                    isGlass( new BlockPos(xCoord + shape.m_xMax + 1, top, zCoord) ) &&
+                    isGlass( new BlockPos(xCoord, top, zCoord + shape.m_zMin - 1) ) &&
+                    isGlass( new BlockPos(xCoord, top, zCoord + shape.m_zMax + 1) ) )
             {
                 return shape;
             }
@@ -473,14 +484,15 @@ public class TileEntityQuantumComputer extends TileEntity
                     int worldZ = zCoord + z;
                     if( !( worldX == xCoord && worldY == yCoord && worldZ == zCoord ) )
                     {
-                        TileEntity tileentity = worldObj.getTileEntity( worldX, worldY, worldZ );
+                        BlockPos blockPos = new BlockPos(worldX, worldY, worldZ);
+                        TileEntity tileentity = worldObj.getTileEntity( blockPos );
                         if( tileentity != null )
                         {
                             return null;
                         }
 
-                        Block block = worldObj.getBlock( worldX, worldY, worldZ );
-                        int meta = worldObj.getBlockMetadata( worldX, worldY, worldZ );
+                        Block block = worldObj.getBlockState(blockPos).getBlock();
+                        int meta = worldObj.getBlockState(blockPos).getBlock().getDamageValue(worldObj, blockPos);
                         storedData.m_blocks[ index ] = block;
                         storedData.m_metaData[ index ] = meta;
                     }
@@ -492,9 +504,9 @@ public class TileEntityQuantumComputer extends TileEntity
         return storedData;
     }
 
-    private void notifyBlockOfNeighborChange( int x, int y, int z )
+    private void notifyBlockOfNeighborChange( BlockPos blockPos )
     {
-        worldObj.notifyBlockOfNeighborChange( x, y, z, worldObj.getBlock( x, y, z ) );
+        worldObj.notifyBlockOfNeighborChange( blockPos, worldObj.getBlockState(blockPos).getBlock() );
     }
 
     private void notifyEdgeBlocks( AreaShape shape )
@@ -510,37 +522,37 @@ public class TileEntityQuantumComputer extends TileEntity
         {
             for( int y = minY; y <= maxY; ++y )
             {
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + y, zCoord + minZ );
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + y, zCoord + maxZ );
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + y, zCoord + minZ );
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + y, zCoord + maxZ + 1 );
+                notifyBlockOfNeighborChange( new BlockPos(xCoord + x, yCoord + y, zCoord + minZ) );
+                notifyBlockOfNeighborChange( new BlockPos(xCoord + x, yCoord + y, zCoord + maxZ) );
+                notifyBlockOfNeighborChange( new BlockPos(xCoord + x, yCoord + y, zCoord + minZ) );
+                notifyBlockOfNeighborChange( new BlockPos(xCoord + x, yCoord + y, zCoord + maxZ + 1) );
             }
         }
         for( int x = minX; x <= maxX; ++x )
         {
             for( int z = minZ; z <= maxZ; ++z )
             {
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + minY, zCoord + z );
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + maxY, zCoord + z );
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + minY - 1, zCoord + z );
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + maxY + 1, zCoord + z );
+                notifyBlockOfNeighborChange( new BlockPos(xCoord + x, yCoord + minY, zCoord + z) );
+                notifyBlockOfNeighborChange( new BlockPos(xCoord + x, yCoord + maxY, zCoord + z) );
+                notifyBlockOfNeighborChange( new BlockPos(xCoord + x, yCoord + minY - 1, zCoord + z) );
+                notifyBlockOfNeighborChange( new BlockPos(xCoord + x, yCoord + maxY + 1, zCoord + z) );
             }
         }
         for( int y = minY; y <= maxY; ++y )
         {
             for( int z = minZ; z <= maxZ; ++z )
             {
-                notifyBlockOfNeighborChange( xCoord + minX, yCoord + y, zCoord + z );
-                notifyBlockOfNeighborChange( xCoord + maxX, yCoord + y, zCoord + z );
-                notifyBlockOfNeighborChange( xCoord + minX - 1, yCoord + y, zCoord + z );
-                notifyBlockOfNeighborChange( xCoord + maxX + 1, yCoord + y, zCoord + z );
+                notifyBlockOfNeighborChange( new BlockPos(xCoord + minX, yCoord + y, zCoord + z) );
+                notifyBlockOfNeighborChange( new BlockPos(xCoord + maxX, yCoord + y, zCoord + z) );
+                notifyBlockOfNeighborChange( new BlockPos(xCoord + minX - 1, yCoord + y, zCoord + z) );
+                notifyBlockOfNeighborChange( new BlockPos(xCoord + maxX + 1, yCoord + y, zCoord + z) );
             }
         }
     }
 
     private Set<EntityItem> getEntityItemsInArea( AreaShape shape )
     {
-        AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(
+        AxisAlignedBB aabb = AxisAlignedBB.fromBounds(
                 (double) ( xCoord + shape.m_xMin ),
                 (double) ( yCoord + shape.m_yMin ),
                 (double) ( zCoord + shape.m_zMin ),
@@ -598,7 +610,7 @@ public class TileEntityQuantumComputer extends TileEntity
                     int worldZ = zCoord + z;
                     if( !( worldX == xCoord && worldY == yCoord && worldZ == zCoord ) )
                     {
-                        worldObj.setBlockToAir( worldX, worldY, worldZ );
+                        worldObj.setBlockToAir( new BlockPos( worldX, worldY, worldZ) );
                     }
                 }
             }
@@ -640,11 +652,11 @@ public class TileEntityQuantumComputer extends TileEntity
                         if( block != null )
                         {
                             int meta = storedData.m_metaData[ index ];
-                            worldObj.setBlock( worldX, worldY, worldZ, block, meta, 2 );
+                            worldObj.setBlockState(new BlockPos(worldX, worldY, worldZ) , new BlockState(block, new IProperty()[])); //getting stuck on this
                         }
                         else
                         {
-                            worldObj.setBlockToAir( worldX, worldY, worldZ );
+                            worldObj.setBlockToAir( new BlockPos(worldX, worldY, worldZ) );
                         }
                     }
                     index++;
@@ -662,12 +674,12 @@ public class TileEntityQuantumComputer extends TileEntity
 
     private boolean checkCooling()
     {
-        for( int i = 0; i < 6; ++i )
+        for( EnumFacing i : EnumFacing.values() )
         {
-            int x = xCoord + Facing.offsetsXForSide[ i ];
-            int y = yCoord + Facing.offsetsYForSide[ i ];
-            int z = zCoord + Facing.offsetsZForSide[ i ];
-            Block block = worldObj.getBlock( x, y, z );
+            int x = xCoord + i.getFrontOffsetX();
+            int y = yCoord + i.getFrontOffsetY();
+            int z = zCoord + i.getFrontOffsetZ();
+            Block block = worldObj.getBlockState(new BlockPos(x, y, z)).getBlock();
             if( block != null && (block.getMaterial() == Material.ice || block.getMaterial() == Material.packedIce) )
             {
                 return true;
@@ -828,7 +840,7 @@ public class TileEntityQuantumComputer extends TileEntity
             if( m_portalID == null )
             {
                 m_portalID = getPortalRegistry().getUnusedID();
-                worldObj.markBlockForUpdate( xCoord, yCoord, zCoord );
+                worldObj.markBlockForUpdate( new BlockPos(xCoord, yCoord, zCoord) );
             }
             if( !getPortalRegistry().register( m_portalID, location ) )
             {
@@ -920,30 +932,31 @@ public class TileEntityQuantumComputer extends TileEntity
         return canDeactivatePortal() == TeleportError.Ok;
     }
 
-    private boolean isPortalCorner( int x, int y, int z, int dir )
+    private boolean isPortalCorner( BlockPos blockPos, EnumFacing dir )
     {
+        int y = blockPos.getY();
         if( y < 0 || y >= 256 )
         {
             return false;
         }
 
-        TileEntity entity = worldObj.getTileEntity( x, y, z );
+        TileEntity entity = worldObj.getTileEntity( blockPos );
         if( entity != null && entity instanceof TileEntityQBlock )
         {
             TileEntityQBlock quantum = (TileEntityQBlock) entity;
-            int[] types = quantum.getTypes();
-            for( int i = 0; i < 6; ++i )
+            Map<EnumFacing, Integer> types = quantum.getTypes();
+            for( EnumFacing i : EnumFacing.values() )
             {
-                if( i == dir || i == Facing.oppositeSide[ dir ] )
+                if( i == dir || i == dir.getOpposite() )
                 {
-                    if( types[ i ] != 31 ) // GOLD
+                    if( types.get(i) != 31 ) // GOLD
                     {
                         return false;
                     }
                 }
                 else
                 {
-                    if( types[ i ] != 21 ) // OBSIDIAN
+                    if( types.get(i) != 21 ) // OBSIDIAN
                     {
                         return false;
                     }
@@ -1134,12 +1147,12 @@ public class TileEntityQuantumComputer extends TileEntity
 
     private PortalLocation findPortal()
     {
-        for( int dir = 0; dir < 6; ++dir )
+        for( EnumFacing dir : EnumFacing.values() )
         {
             // See if this adjoining block is part of a portal:
-            int x = xCoord + Facing.offsetsXForSide[ dir ];
-            int y = yCoord + Facing.offsetsYForSide[ dir ];
-            int z = zCoord + Facing.offsetsZForSide[ dir ];
+            int x = xCoord + dir.getFrontOffsetX();
+            int y = yCoord + dir.getFrontOffsetY();
+            int z = zCoord + dir.getFrontOffsetZ();
             if( !isGlass( x, y, z ) && !isPortalCorner( x, y, z, 2 ) && !isPortalCorner( x, y, z, 4 ) )
             {
                 continue;
@@ -1423,7 +1436,7 @@ public class TileEntityQuantumComputer extends TileEntity
         }
     }
 
-    @Override
+    @Deprecated
     public void updateEntity()
     {
         m_timeSinceEnergize++;
@@ -1474,7 +1487,7 @@ public class TileEntityQuantumComputer extends TileEntity
             if( location != null && isPortalDeployed( location ) )
             {
                 // Search for players
-                AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(
+                AxisAlignedBB aabb = AxisAlignedBB.fromBounds(
                     (double) ( location.m_xOrigin ),
                     (double) ( location.m_yOrigin ),
                     (double) ( location.m_zOrigin ),
@@ -1730,18 +1743,18 @@ public class TileEntityQuantumComputer extends TileEntity
         {
             nbttagcompound.setString( "remotePortalID", m_remotePortalID );
         }
-        return new S35PacketUpdateTileEntity( this.xCoord, this.yCoord, this.zCoord, 0, nbttagcompound );
+        return new S35PacketUpdateTileEntity( new BlockPos( this.xCoord, this.yCoord, this.zCoord ), 0, nbttagcompound );
     }
 
     @Override
     public void onDataPacket( NetworkManager net, S35PacketUpdateTileEntity packet )
     {
-        switch( packet.func_148853_f() ) // actionType
+        switch( packet.getTileEntityType() ) // actionType
         {
             case 0:
             {
                 // Read networked state
-                NBTTagCompound nbttagcompound = packet.func_148857_g(); // data
+                NBTTagCompound nbttagcompound = packet.getNbtCompound(); // data
                 setEntanglementFrequency( nbttagcompound.getInteger( "f" ) );
                 if( nbttagcompound.hasKey( "portalID" ) )
                 {

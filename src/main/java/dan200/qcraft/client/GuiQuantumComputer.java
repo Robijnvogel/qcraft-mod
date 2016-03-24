@@ -20,6 +20,9 @@ package dan200.qcraft.client;
 import dan200.QCraft;
 import dan200.qcraft.shared.ContainerQuantumComputer;
 import dan200.qcraft.shared.TileEntityQuantumComputer;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -82,12 +85,12 @@ public class GuiQuantumComputer extends GuiContainer
         m_energizeButton = new GuiButton( BUTTON_ENERGIZE, x + 8, y + 8, xSize - 16, 20, "" );
         m_energizeButton2 = new GuiButton( BUTTON_ENERGIZE, x + 8, y + 8 + 8 + 20 + 6 + 20 + 6, xSize - 16, 20, "" );
 
-        m_localPortalIDField = new GuiTextField( fontRendererObj, x + 9, y - 20, xSize - 18, 20 );
+        m_localPortalIDField = new GuiTextField(1, fontRendererObj, x + 9, y - 20, xSize - 18, 20 );
         m_localPortalIDField.setFocused( false );
         m_localPortalIDField.setMaxStringLength( 32 );
         m_localPortalIDField.setText( encodeOptionalText( m_computer.getPortalID() ) );
 
-        m_destinationPortalIDField = new GuiTextField( fontRendererObj, x + 9, y + 8 + 8,  xSize - 18, 20 );
+        m_destinationPortalIDField = new GuiTextField(2, fontRendererObj, x + 9, y + 8 + 8,  xSize - 18, 20 );
         m_destinationPortalIDField.setFocused( false );
         m_destinationPortalIDField.setMaxStringLength( 32 );
         m_destinationPortalIDField.setText( encodeOptionalText( m_computer.getRemotePortalID() ) );
@@ -97,7 +100,7 @@ public class GuiQuantumComputer extends GuiContainer
         m_removeServerButton =  new GuiButton( BUTTON_REMOVE_SERVER, x + xSize - 8 - 16, y + 8 + 8 + 20 + 6, 16, 20, "-" );
         m_confirmAddServerButton = new GuiButton( BUTTON_CONFIRM_ADD_SERVER, x + xSize - 8 - 35, y + 8 + 8 + 20 + 6, 35, 20, I18n.format( "gui.qcraft:computer.ok" ) );
 
-        m_newServerAddressField = new GuiTextField( fontRendererObj, x + 9, y + 8 + 8 + 20 + 7, xSize - 18 - 35 - 3, 18 );
+        m_newServerAddressField = new GuiTextField(3, fontRendererObj, x + 9, y + 8 + 8 + 20 + 7, xSize - 18 - 35 - 3, 18 );
         m_newServerAddressField.setFocused( false );
         m_newServerAddressField.setMaxStringLength( 64 );
         m_newServerAddressField.setText( encodeOptionalText( m_computer.getRemoteServerAddress() ) );
@@ -278,7 +281,11 @@ public class GuiQuantumComputer extends GuiContainer
             }
             else
             {
-                super.keyTyped( c, k );
+                try {
+                    super.keyTyped( c, k );
+                } catch (IOException ex) {
+                    Logger.getLogger(GuiQuantumComputer.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
         else if( m_localPortalIDField.isFocused() )
@@ -297,14 +304,22 @@ public class GuiQuantumComputer extends GuiContainer
         }
         else
         {
-            super.keyTyped( c, k );
+            try {
+                super.keyTyped( c, k );
+            } catch (IOException ex) {
+                Logger.getLogger(GuiQuantumComputer.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
     @Override
     protected void mouseClicked( int par1, int par2, int par3 )
     {
-        super.mouseClicked( par1, par2, par3 );
+        try {
+            super.mouseClicked( par1, par2, par3 );
+        } catch (IOException ex) {
+            Logger.getLogger(GuiQuantumComputer.class.getName()).log(Level.SEVERE, null, ex);
+        }
         m_localPortalIDField.mouseClicked( par1, par2, par3 );
         m_destinationPortalIDField.mouseClicked( par1, par2, par3 );
         m_newServerAddressField.mouseClicked( par1, par2, par3 );
@@ -313,7 +328,11 @@ public class GuiQuantumComputer extends GuiContainer
     @Override
     protected void actionPerformed( GuiButton button )
     {
-        super.actionPerformed( button );
+        try {
+            super.actionPerformed( button );
+        } catch (IOException ex) {
+            Logger.getLogger(GuiQuantumComputer.class.getName()).log(Level.SEVERE, null, ex);
+        }
         switch( button.id )
         {
             case BUTTON_ENERGIZE:

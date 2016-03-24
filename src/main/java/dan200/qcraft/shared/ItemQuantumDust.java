@@ -48,12 +48,6 @@ public class ItemQuantumDust extends Item
     }
 
     @Override
-    public boolean onItemUse( ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float fx, float fy, float fz )
-    {
-        return false;
-    }
-
-    @Override
     public void registerIcons( IIconRegister iconRegister )
     {
         s_icon = iconRegister.registerIcon( "qcraft:dust" );

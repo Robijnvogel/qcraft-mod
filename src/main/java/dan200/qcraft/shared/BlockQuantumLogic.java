@@ -33,6 +33,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import java.util.Random;
+import net.minecraft.util.BlockPos;
 
 public class BlockQuantumLogic extends BlockDirectional
 {
@@ -249,7 +250,7 @@ public class BlockQuantumLogic extends BlockDirectional
         j += Facing.offsetsYForSide[ dir ];
         k += Facing.offsetsZForSide[ dir ];
         int side = Facing.oppositeSide[ dir ];
-        return QuantumUtil.getRedstoneSignal( world, i, j, k, side );
+        return QuantumUtil.getRedstoneSignal( world, new BlockPos(i, j, k), side );
     }
 
     private void observe( World world, int i, int j, int k, int dir, boolean observe )

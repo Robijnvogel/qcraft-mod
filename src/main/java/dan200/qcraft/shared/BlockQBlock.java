@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import net.minecraft.util.BlockPos;
 
 public class BlockQBlock extends BlockSand
      implements ITileEntityProvider, IQuantumObservable
@@ -206,9 +207,9 @@ public class BlockQBlock extends BlockSand
         return true;
     }
 
-    public int getSubType( IBlockAccess world, int x, int y, int z )
+    public int getSubType( IBlockAccess world, BlockPos blockPos )
     {
-        return world.getBlockMetadata( x, y, z );
+        return world.getBlockState(blockPos).getBlock().getDamageValue((World) world, blockPos); //very sloppy, I know
     }
 
     // IQuantumObservable implementation

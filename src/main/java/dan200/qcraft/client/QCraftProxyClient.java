@@ -17,20 +17,17 @@ limitations under the License.
 
 package dan200.qcraft.client;
 
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
-import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import dan200.QCraft;
 import dan200.qcraft.shared.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiMainMenu;
-import net.minecraft.client.multiplayer.GuiConnecting;
-import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.RenderBlocks;
@@ -116,9 +113,9 @@ public class QCraftProxyClient extends QCraftProxyCommon
     public void spawnQuantumDustFX( World world, double x, double y, double z )
     {
         Minecraft mc = Minecraft.getMinecraft();
-        double dx = mc.renderViewEntity.posX - x;
-        double dy = mc.renderViewEntity.posY - y;
-        double dz = mc.renderViewEntity.posZ - z;
+        double dx = mc.getRenderViewEntity().posX - x;
+        double dy = mc.getRenderViewEntity().posY - y;
+        double dz = mc.getRenderViewEntity().posZ - z;
         if( dx * dx + dy * dy + dz * dz < 16.0 * 16.0 )
         {
             EntityFX fx = new EntityQuantumDustFX( world, x, y, z, 1.0f );
@@ -195,13 +192,13 @@ public class QCraftProxyClient extends QCraftProxyCommon
     }
 
     private class QuantumLogicBlockRenderingHandler implements
-            ISimpleBlockRenderingHandler
+            IRenderFactory
     {
         public QuantumLogicBlockRenderingHandler()
         {
         }
 
-        // ISimpleBlockRenderingHandler implementation
+        // IRenderFactory implementation
 
         @Override
         public boolean shouldRender3DInInventory( int modelID )
@@ -256,7 +253,7 @@ public class QCraftProxyClient extends QCraftProxyCommon
     }
 
     private class QBlockRenderingHandler implements
-            IItemRenderer, ISimpleBlockRenderingHandler
+            IItemRenderer, IRenderFactory
     {
         public QBlockRenderingHandler()
         {
@@ -337,7 +334,7 @@ public class QCraftProxyClient extends QCraftProxyCommon
             }
         }
 
-        // ISimpleBlockRenderingHandler implementation
+        // IRenderFactory implementation
 
         @Override
         public boolean shouldRender3DInInventory( int modelID )
@@ -409,7 +406,7 @@ public class QCraftProxyClient extends QCraftProxyCommon
 
     private void renderInventoryQBlock( RenderBlocks renderblocks, BlockQBlock block, int type, BlockQBlock.Appearance appearance )
     {
-        Tessellator tessellator = Tessellator.instance;
+        Tessellator tessellator = Tessellator.getInstance();
         tessellator.startDrawingQuads();
         bindColor( block.getColorForType( 0, type ) );
         tessellator.setNormal( 0.0F, -1F, 0.0F );
@@ -459,6 +456,7 @@ public class QCraftProxyClient extends QCraftProxyCommon
         renderOverlay( AO_GOGGLE_HUD, width, height );
     }
 
+    @SuppressWarnings("empty-statement")
     private void renderOverlay( ResourceLocation texture, float width, float height )
     {
         Minecraft mc = Minecraft.getMinecraft();
@@ -468,12 +466,16 @@ public class QCraftProxyClient extends QCraftProxyCommon
         GL11.glColor4f( 1.0F, 1.0F, 1.0F, 1.0F );
         GL11.glDisable( GL11.GL_ALPHA_TEST );
         mc.renderEngine.bindTexture( texture );
-        Tessellator tessellator = Tessellator.instance;
+        Tessellator tessellator = Tessellator.getInstance();
         tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV( 0.0D, (double) height, -90.0D, 0.0D, 1.0D );
-        tessellator.addVertexWithUV( (double) width, (double) height, -90.0D, 1.0D, 1.0D );
-        tessellator.addVertexWithUV( (double) width, 0.0D, -90.0D, 1.0D, 0.0D );
-        tessellator.addVertexWithUV( 0.0D, 0.0D, -90.0D, 0.0D, 0.0D );
+        int[] temp = {0, (int) height, -90, 0, 1};
+        tessellator.getWorldRenderer().addVertexData( temp );
+        int[] temp2 = {(int) width, (int) height, -90, 1, 1};
+        tessellator.getWorldRenderer().addVertexData( temp2 );
+        int[] temp3 = {(int) width, 0, -90, 1, 0};
+        tessellator.getWorldRenderer().addVertexData( temp3);
+        int[] temp4 = {0, 0, -90, 0, 0};
+        tessellator.getWorldRenderer().addVertexData( temp4 );
         tessellator.draw();
         GL11.glDepthMask( true );
         GL11.glEnable( GL11.GL_DEPTH_TEST );

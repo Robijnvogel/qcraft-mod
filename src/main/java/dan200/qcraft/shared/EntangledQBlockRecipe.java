@@ -148,4 +148,9 @@ public class EntangledQBlockRecipe implements IRecipe
         // Create item
         return ItemQBlock.create( subType, types, entanglementFrequency, odbsFound );
     }
+
+    @Override
+    public ItemStack[] getRemainingItems(InventoryCrafting inv) {
+        return null; //may be eroneous both here and in EntangledQQuantumComputerRecipe.java
+    }
 }

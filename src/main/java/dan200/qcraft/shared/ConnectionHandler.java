@@ -16,9 +16,9 @@ limitations under the License.
 
 package dan200.qcraft.shared;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent;
-import cpw.mods.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import dan200.QCraft;
 
 import java.lang.reflect.Method;
@@ -33,7 +33,7 @@ public class ConnectionHandler
     {
         if( !event.isLocal )
         {
-            SocketAddress socketAddress = event.manager.getSocketAddress();
+            SocketAddress socketAddress = event.manager.getRemoteAddress();
             if( socketAddress != null && socketAddress instanceof InetSocketAddress )
             {
                 InetSocketAddress internet = (InetSocketAddress)socketAddress;

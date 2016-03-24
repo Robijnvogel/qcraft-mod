@@ -17,7 +17,7 @@ limitations under the License.
 
 package dan200.qcraft.client;
 
-import cpw.mods.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import dan200.qcraft.shared.LostLuggage;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -51,7 +51,7 @@ public class GuiTravelStandby extends GuiScreen
         m_ticks++;
         if( m_ticks == 30 )
         {
-            ServerData serverData = new ServerData( "qCraft Transfer", m_destination.getAddress() );
+            ServerData serverData = new ServerData( "qCraft Transfer", m_destination.getAddress(), false);
             FMLClientHandler.instance().setupServerList();
             FMLClientHandler.instance().connectToServer( new GuiMainMenu(), serverData );
         }

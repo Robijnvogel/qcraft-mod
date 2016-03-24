@@ -19,46 +19,45 @@ package dan200.qcraft.shared;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.Facing;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class QuantumUtil
 {
-    private static Block getBlock( IBlockAccess world, int x, int y, int z )
+    private static Block getBlock( IBlockAccess world, BlockPos blockPos )
     {
-        return world.getBlock( x, y, z );
+        return world.getBlockState(blockPos).getBlock();
     }
 
-    public static boolean getRedstoneSignal( World world, int x, int y, int z, int side )
+    public static boolean getRedstoneSignal( World world, BlockPos blockPos, EnumFacing side )
     {
-        Block block = getBlock( world, x, y, z );
+        Block block = getBlock( world, blockPos );
         if( block != null )
         {
             if( block == Blocks.redstone_wire )
             {
-                int metadata = world.getBlockMetadata( x, y, z );
-                return ( side != 1 && metadata > 0 ) ? true : false;
+                int metadata = block.getDamageValue(world, blockPos);
+                return ( side != EnumFacing.UP && metadata > 0 ) ? true : false;
             }
             else if( block.canProvidePower() )
             {
-                int testSide = Facing.oppositeSide[ side ];
-                int power = block.isProvidingWeakPower( world, x, y, z, testSide );
+                EnumFacing testSide = side.getOpposite();
+                int power = block.getWeakPower(world, blockPos, world.getBlockState(blockPos), testSide);
                 return ( power > 0 ) ? true : false;
             }
-            else if( world.isBlockNormalCubeDefault( x, y, z, false ) )
+            else if( block.isNormalCube() )
             {
-                for( int i = 0; i < 6; ++i )
+                for( EnumFacing facing : EnumFacing.values())
                 {
-                    if( i != side )
+                    if( facing != side )
                     {
-                        int testX = x + Facing.offsetsXForSide[ i ];
-                        int testY = y + Facing.offsetsYForSide[ i ];
-                        int testZ = z + Facing.offsetsZForSide[ i ];
-                        Block neighbour = getBlock( world, testX, testY, testZ );
+                        BlockPos tempBlockPos = blockPos.offset(facing);
+                        Block neighbour = getBlock( world, tempBlockPos );
                         if( neighbour != null && neighbour.canProvidePower() )
                         {
-                            int power = neighbour.isProvidingStrongPower( world, testX, testY, testZ, i );
+                            int power = neighbour.getStrongPower(world, tempBlockPos, neighbour.getDefaultState(), facing);
                             if( power > 0 )
                             {
                                 return true;

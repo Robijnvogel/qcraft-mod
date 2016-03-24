@@ -29,6 +29,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 import java.util.List;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
 public class ItemQBlock extends ItemBlock
 {
@@ -182,11 +185,11 @@ public class ItemQBlock extends ItemBlock
     }
 
     @Override
-    public boolean placeBlockAt( ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata )
-    {
-        if( super.placeBlockAt( stack, player, world, x, y, z, side, hitX, hitY, hitZ, metadata ) )
+    public boolean placeBlockAt( ItemStack stack, EntityPlayer player, World world, BlockPos blockPos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState )
+    {        
+        if( super.placeBlockAt( stack, player, world, blockPos , side, hitX, hitY, hitZ, newState ) )
         {
-            TileEntity entity = world.getTileEntity( x, y, z );
+            TileEntity entity = world.getTileEntity( blockPos );
             if( entity != null && entity instanceof TileEntityQBlock )
             {
                 TileEntityQBlock quantum = (TileEntityQBlock) entity;
