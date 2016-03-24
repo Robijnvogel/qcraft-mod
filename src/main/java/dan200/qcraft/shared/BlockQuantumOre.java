@@ -30,6 +30,11 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import java.util.Random;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
 public class BlockQuantumOre extends Block
 {
@@ -41,7 +46,7 @@ public class BlockQuantumOre extends Block
         super( Material.rock );
         setHardness( 3.0f );
         setResistance( 5.0f );
-        setBlockName( "qcraft:ore" );
+        setRegistryName( "qcraft:ore" );
 
         m_glowing = glowing;
         if( m_glowing )
@@ -59,37 +64,37 @@ public class BlockQuantumOre extends Block
     }
 
     @Override
-    public void onBlockClicked( World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer )
+    public void onBlockClicked( World par1World, BlockPos blockPos, EntityPlayer par5EntityPlayer )
     {
-        this.glow( par1World, par2, par3, par4 );
-        super.onBlockClicked( par1World, par2, par3, par4, par5EntityPlayer );
+        this.glow( par1World, blockPos );
+        super.onBlockClicked( par1World, blockPos, par5EntityPlayer );
     }
 
     @Override
-    public void onEntityWalking( World par1World, int par2, int par3, int par4, Entity par5Entity )
+    public void onEntityCollidedWithBlock( World par1World, BlockPos blockPos, Entity par5Entity )
     {
-        this.glow( par1World, par2, par3, par4 );
-        super.onEntityWalking( par1World, par2, par3, par4, par5Entity );
+        this.glow( par1World, blockPos );
+        super.onEntityCollidedWithBlock( par1World, blockPos, par5Entity );
     }
 
     @Override
-    public boolean onBlockActivated( World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9 )
+    public boolean onBlockActivated( World par1World, BlockPos blockPos, IBlockState blockState, EntityPlayer par5EntityPlayer, EnumFacing side, float hitX, float hitY, float hitZ )
     {
-        this.glow( par1World, par2, par3, par4 );
-        return super.onBlockActivated( par1World, par2, par3, par4, par5EntityPlayer, par6, par7, par8, par9 );
+        this.glow( par1World, blockPos );
+        return super.onBlockActivated( par1World, blockPos, blockState, par5EntityPlayer, side, hitX, hitY, hitZ );
     }
 
     @Override
-    public void updateTick( World world, int i, int j, int k, Random r )
+    public void updateTick( World world, BlockPos blockPos, IBlockState blockState, Random r )
     {
         if( this == QCraft.Blocks.quantumOreGlowing )
         {
-            world.setBlock( i, j, k, QCraft.Blocks.quantumOre );
+            world.setBlockState(blockPos, (IBlockState) new BlockState(QCraft.Blocks.quantumOre, (IProperty[]) world.getBlockState(blockPos).getProperties().keySet().toArray()));
         }
     }
 
     @Override
-    public Item getItemDropped( int i, Random r, int j )
+    public Item getItemDropped( IBlockState blockState, Random r, int j )
     {
         return QCraft.Items.quantumDust;
     }
@@ -107,27 +112,27 @@ public class BlockQuantumOre extends Block
     }
 
     @Override
-    public void dropBlockAsItemWithChance( World par1World, int par2, int par3, int par4, int par5, float par6, int par7 )
+    public void dropBlockAsItemWithChance( World par1World, BlockPos blockPos, IBlockState blockState, float chance, int fortune )
     {
-        super.dropBlockAsItemWithChance( par1World, par2, par3, par4, par5, par6, par7 );
+        super.dropBlockAsItemWithChance( par1World, blockPos, blockState, chance, fortune );
 
-        if( this.getItemDropped( par5, par1World.rand, par7 ) != Item.getItemFromBlock( this ) )
+        if( this.getItemDropped( blockState, par1World.rand, fortune ) != Item.getItemFromBlock( this ) )
         {
             int j1 = 1 + par1World.rand.nextInt( 5 );
-            this.dropXpOnBlockBreak( par1World, par2, par3, par4, j1 );
+            this.dropXpOnBlockBreak( par1World, blockPos, j1 );
         }
     }
 
     @Override
-    public void randomDisplayTick( World par1World, int par2, int par3, int par4, Random par5Random )
+    public void randomDisplayTick( World par1World, BlockPos blockPos, IBlockState blockState, Random par5Random )
     {
         if( m_glowing )
         {
-            this.sparkle( par1World, par2, par3, par4 );
+            this.sparkle( par1World, blockPos );
         }
     }
 
-    private void sparkle( World par1World, int par2, int par3, int par4 )
+    private void sparkle( World par1World, BlockPos blockPos )
     {
         if( !par1World.isRemote )
         {
@@ -136,61 +141,64 @@ public class BlockQuantumOre extends Block
 
         Random random = par1World.rand;
         double d0 = 0.0625D;
+        int x = blockPos.getX();
+        int y = blockPos.getY();
+        int z = blockPos.getZ();
 
         for( int l = 0; l < 6; ++l )
         {
-            double d1 = (double) ( (float) par2 + random.nextFloat() );
-            double d2 = (double) ( (float) par3 + random.nextFloat() );
-            double d3 = (double) ( (float) par4 + random.nextFloat() );
+            double d1 = (double) ( (float) x + random.nextFloat() );
+            double d2 = (double) ( (float) y + random.nextFloat() );
+            double d3 = (double) ( (float) z + random.nextFloat() );
 
-            if( l == 0 && !par1World.getBlock( par2, par3 + 1, par4 ).isOpaqueCube() )
+            if( l == 0 && !par1World.getBlockState( new BlockPos( x, y + 1, z ) ).getBlock().isOpaqueCube() )
             {
-                d2 = (double) ( par3 + 1 ) + d0;
+                d2 = (double) ( y + 1 ) + d0;
             }
 
-            if( l == 1 && !par1World.getBlock( par2, par3 - 1, par4 ).isOpaqueCube() )
+            if( l == 1 && !par1World.getBlockState( new BlockPos( x, y - 1, z ) ).getBlock().isOpaqueCube() )
             {
-                d2 = (double) ( par3 + 0 ) - d0;
+                d2 = (double) ( y + 0 ) - d0;
             }
 
-            if( l == 2 && !par1World.getBlock( par2, par3, par4 + 1 ).isOpaqueCube() )
+            if( l == 2 && !par1World.getBlockState( new BlockPos( x, y, z + 1 ) ).getBlock().isOpaqueCube() )
             {
-                d3 = (double) ( par4 + 1 ) + d0;
+                d3 = (double) ( z + 1 ) + d0;
             }
 
-            if( l == 3 && !par1World.getBlock( par2, par3, par4 - 1 ).isOpaqueCube() )
+            if( l == 3 && !par1World.getBlockState( new BlockPos( x, y, z - 1 ) ).getBlock().isOpaqueCube() )
             {
-                d3 = (double) ( par4 + 0 ) - d0;
+                d3 = (double) ( z + 0 ) - d0;
             }
 
-            if( l == 4 && !par1World.getBlock( par2 + 1, par3, par4 ).isOpaqueCube() )
+            if( l == 4 && !par1World.getBlockState( new BlockPos( x + 1, y, z ) ).getBlock().isOpaqueCube() )
             {
-                d1 = (double) ( par2 + 1 ) + d0;
+                d1 = (double) ( x + 1 ) + d0;
             }
 
-            if( l == 5 && !par1World.getBlock( par2 - 1, par3, par4 ).isOpaqueCube() )
+            if( l == 5 && !par1World.getBlockState( new BlockPos( x - 1, y, z ) ).getBlock().isOpaqueCube() )
             {
-                d1 = (double) ( par2 + 0 ) - d0;
+                d1 = (double) ( x + 0 ) - d0;
             }
 
-            if( d1 < (double) par2 || d1 > (double) ( par2 + 1 ) || d2 < 0.0D || d2 > (double) ( par3 + 1 ) || d3 < (double) par4 || d3 > (double) ( par4 + 1 ) )
+            if( d1 < (double) x || d1 > (double) ( x + 1 ) || d2 < 0.0D || d2 > (double) ( y + 1 ) || d3 < (double) z || d3 > (double) ( z + 1 ) )
             {
-                QCraft.spawnQuantumDustFX( par1World, d1, d2, d3 );
+                QCraft.spawnQuantumDustFX( par1World, new BlockPos(d1, d2, d3) );
             }
         }
     }
 
-    private void glow( World world, int i, int j, int k )
+    private void glow( World world, BlockPos blockPos )
     {
-        this.sparkle( world, i, j, k );
+        this.sparkle( world, blockPos );
         if( this == QCraft.Blocks.quantumOre )
         {
-            world.setBlock( i, j, k, QCraft.Blocks.quantumOreGlowing );
+            world.setBlockState(blockPos, (IBlockState) new BlockState(QCraft.Blocks.quantumOreGlowing, (IProperty[]) world.getBlockState(blockPos).getProperties().keySet().toArray()));
         }
     }
 
     @Override
-    protected ItemStack createStackedBlock( int i )
+    protected ItemStack createStackedBlock( IBlockState blockState )
     {
         return new ItemStack( QCraft.Blocks.quantumOre );
     }
@@ -202,7 +210,7 @@ public class BlockQuantumOre extends Block
     }
 
     @Override
-    public IIcon getIcon( IBlockAccess world, int i, int j, int k, int side )
+    public IIcon getIcon( IBlockAccess world, BlockPos blockPos, int side )
     {
         return s_icon;
     }

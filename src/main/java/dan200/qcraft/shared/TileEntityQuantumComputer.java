@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.util.*;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 
 public class TileEntityQuantumComputer extends TileEntity
@@ -184,9 +185,9 @@ public class TileEntityQuantumComputer extends TileEntity
     private String m_remoteServerAddress;
     private String m_remoteServerName;
     private String m_remotePortalID;
-    private int xCoord;
-    private int yCoord;
-    private int zCoord;
+    private final int xCoord;
+    private final int yCoord;
+    private final int zCoord;
 
     public TileEntityQuantumComputer()
     {
@@ -506,7 +507,7 @@ public class TileEntityQuantumComputer extends TileEntity
 
     private void notifyBlockOfNeighborChange( BlockPos blockPos )
     {
-        worldObj.notifyBlockOfNeighborChange( blockPos, worldObj.getBlockState(blockPos).getBlock() );
+        worldObj.notifyBlockOfStateChange( blockPos, worldObj.getBlockState(blockPos).getBlock() ); //if I implemented this wrongly, this could be disastrous
     }
 
     private void notifyEdgeBlocks( AreaShape shape )
@@ -652,7 +653,7 @@ public class TileEntityQuantumComputer extends TileEntity
                         if( block != null )
                         {
                             int meta = storedData.m_metaData[ index ];
-                            worldObj.setBlockState(new BlockPos(worldX, worldY, worldZ) , new BlockState(block, new IProperty()[])); //getting stuck on this
+                            worldObj.setBlockState(new BlockPos(worldX, worldY, worldZ) , (IBlockState) new BlockState(block, (IProperty[]) block.getStateFromMeta(meta).getProperties().keySet().toArray()), 2); //may not be able to cast this as an IBlockState, but for right now, this compiles and looks sound althoug messy
                         }
                         else
                         {
@@ -1018,11 +1019,11 @@ public class TileEntityQuantumComputer extends TileEntity
             // Check walls
             for( int y = location.m_yOrigin; y < location.m_yOrigin + location.m_yLength; ++y )
             {
-                if( !isGlass( location.m_xOrigin - 1, y, location.m_zOrigin ) )
+                if( !isGlass( new BlockPos(location.m_xOrigin - 1, y, location.m_zOrigin) ) )
                 {
                     return false;
                 }
-                if( !isGlass( location.m_xOrigin + location.m_xLength, y, location.m_zOrigin ) )
+                if( !isGlass( new BlockPos(location.m_xOrigin + location.m_xLength, y, location.m_zOrigin) ) )
                 {
                     return false;
                 }
@@ -1030,29 +1031,29 @@ public class TileEntityQuantumComputer extends TileEntity
             // Check ceiling and floor
             for( int x = location.m_xOrigin; x < location.m_xOrigin + location.m_xLength; ++x )
             {
-                if( !isGlass( x, location.m_yOrigin - 1, location.m_zOrigin ) )
+                if( !isGlass( new BlockPos(x, location.m_yOrigin - 1, location.m_zOrigin )) )
                 {
                     return false;
                 }
-                if( !isGlass( x, location.m_yOrigin + location.m_yLength, location.m_zOrigin ) )
+                if( !isGlass( new BlockPos(x, location.m_yOrigin + location.m_yLength, location.m_zOrigin )) )
                 {
                     return false;
                 }
             }
             // Check corners
-            if( !isPortalCorner( location.m_xOrigin - 1, location.m_yOrigin - 1, location.m_zOrigin, 2 ) )
+            if( !isPortalCorner( new BlockPos(location.m_xOrigin - 1, location.m_yOrigin - 1, location.m_zOrigin), EnumFacing.NORTH ) )
             {
                 return false;
             }
-            if( !isPortalCorner( location.m_xOrigin + location.m_xLength, location.m_yOrigin - 1, location.m_zOrigin, 2 ) )
+            if( !isPortalCorner( new BlockPos(location.m_xOrigin + location.m_xLength, location.m_yOrigin - 1, location.m_zOrigin), EnumFacing.NORTH ) )
             {
                 return false;
             }
-            if( !isPortalCorner( location.m_xOrigin - 1, location.m_yOrigin + location.m_yLength, location.m_zOrigin, 2 ) )
+            if( !isPortalCorner( new BlockPos(location.m_xOrigin - 1, location.m_yOrigin + location.m_yLength, location.m_zOrigin), EnumFacing.NORTH ) )
             {
                 return false;
             }
-            if( !isPortalCorner( location.m_xOrigin + location.m_xLength, location.m_yOrigin + location.m_yLength, location.m_zOrigin, 2 ) )
+            if( !isPortalCorner( new BlockPos(location.m_xOrigin + location.m_xLength, location.m_yOrigin + location.m_yLength, location.m_zOrigin), EnumFacing.NORTH ) )
             {
                 return false;
             }
@@ -1062,11 +1063,11 @@ public class TileEntityQuantumComputer extends TileEntity
             // Check walls
             for( int y = location.m_yOrigin; y < location.m_yOrigin + location.m_yLength; ++y )
             {
-                if( !isGlass( location.m_xOrigin, y, location.m_zOrigin - 1 ) )
+                if( !isGlass( new BlockPos(location.m_xOrigin, y, location.m_zOrigin - 1 )) )
                 {
                     return false;
                 }
-                if( !isGlass( location.m_xOrigin, y, location.m_zOrigin + location.m_zLength ) )
+                if( !isGlass( new BlockPos(location.m_xOrigin, y, location.m_zOrigin + location.m_zLength )) )
                 {
                     return false;
                 }
@@ -1074,29 +1075,29 @@ public class TileEntityQuantumComputer extends TileEntity
             // Check ceiling and floor
             for( int z = location.m_zOrigin; z < location.m_zOrigin + location.m_zLength; ++z )
             {
-                if( !isGlass( location.m_xOrigin, location.m_yOrigin - 1, z ) )
+                if( !isGlass( new BlockPos(location.m_xOrigin, location.m_yOrigin - 1, z) ) )
                 {
                     return false;
                 }
-                if( !isGlass( location.m_xOrigin, location.m_yOrigin + location.m_yLength, z ) )
+                if( !isGlass( new BlockPos(location.m_xOrigin, location.m_yOrigin + location.m_yLength, z) ) )
                 {
                     return false;
                 }
             }
             // Check corners
-            if( !isPortalCorner( location.m_xOrigin, location.m_yOrigin - 1, location.m_zOrigin - 1, 4 ) )
+            if( !isPortalCorner( new BlockPos(location.m_xOrigin, location.m_yOrigin - 1, location.m_zOrigin - 1), EnumFacing.WEST ) )
             {
                 return false;
             }
-            if( !isPortalCorner( location.m_xOrigin, location.m_yOrigin - 1, location.m_zOrigin + location.m_zLength, 4 ) )
+            if( !isPortalCorner( new BlockPos(location.m_xOrigin, location.m_yOrigin - 1, location.m_zOrigin + location.m_zLength), EnumFacing.WEST ) )
             {
                 return false;
             }
-            if( !isPortalCorner( location.m_xOrigin, location.m_yOrigin + location.m_yLength, location.m_zOrigin - 1, 4 ) )
+            if( !isPortalCorner( new BlockPos(location.m_xOrigin, location.m_yOrigin + location.m_yLength, location.m_zOrigin - 1), EnumFacing.WEST ) )
             {
                 return false;
             }
-            if( !isPortalCorner( location.m_xOrigin, location.m_yOrigin + location.m_yLength, location.m_zOrigin + location.m_zLength, 4 ) )
+            if( !isPortalCorner( new BlockPos(location.m_xOrigin, location.m_yOrigin + location.m_yLength, location.m_zOrigin + location.m_zLength), EnumFacing.WEST ) )
             {
                 return false;
             }
@@ -1107,7 +1108,7 @@ public class TileEntityQuantumComputer extends TileEntity
     private PortalLocation getPortalAt( int x, int y, int z, int xlen, int ylen, int zlen )
     {
         PortalLocation result = new PortalLocation();
-        result.m_dimensionID = worldObj.provider.dimensionId;
+        result.m_dimensionID = worldObj.provider.getDimensionId();
         result.m_xOrigin = x;
         result.m_yOrigin = y;
         result.m_zOrigin = z;
@@ -1153,7 +1154,7 @@ public class TileEntityQuantumComputer extends TileEntity
             int x = xCoord + dir.getFrontOffsetX();
             int y = yCoord + dir.getFrontOffsetY();
             int z = zCoord + dir.getFrontOffsetZ();
-            if( !isGlass( x, y, z ) && !isPortalCorner( x, y, z, 2 ) && !isPortalCorner( x, y, z, 4 ) )
+            if( !isGlass( new BlockPos(x, y, z) ) && !isPortalCorner( new BlockPos(x, y, z), EnumFacing.NORTH ) && !isPortalCorner( new BlockPos(x, y, z), EnumFacing.WEST ) )
             {
                 continue;
             }
@@ -1199,14 +1200,14 @@ public class TileEntityQuantumComputer extends TileEntity
         {
             for( int x = portal.m_xOrigin; x < portal.m_xOrigin + portal.m_xLength; ++x )
             {
-                if( !worldObj.isAirBlock( x, y, portal.m_zOrigin ) )
+                if( !worldObj.isAirBlock( new BlockPos(x, y, portal.m_zOrigin )) )
                 {
                     return false;
                 }
             }
             for( int z = portal.m_zOrigin; z < portal.m_zOrigin + portal.m_zLength; ++z )
             {
-                if( !worldObj.isAirBlock( portal.m_xOrigin, y, z ) )
+                if( !worldObj.isAirBlock( new BlockPos(portal.m_xOrigin, y, z )) )
                 {
                     return false;
                 }
@@ -1219,13 +1220,14 @@ public class TileEntityQuantumComputer extends TileEntity
     {
         for( int y = portal.m_yOrigin; y < portal.m_yOrigin + portal.m_yLength; ++y )
         {
+            Block block = QCraft.Blocks.quantumPortal;
             for( int x = portal.m_xOrigin; x < portal.m_xOrigin + portal.m_xLength; ++x )
             {
-                worldObj.setBlock( x, y, portal.m_zOrigin, QCraft.Blocks.quantumPortal, 0, 2 );
+                worldObj.setBlockState(new BlockPos(x, y, portal.m_zOrigin), (IBlockState) new BlockState(block, (IProperty[]) block.getStateFromMeta(0).getProperties().keySet().toArray()), 2 ); //may not be able to cast this as an IBlockState, but for right now, this compiles and looks sound althoug messy
             }
             for( int z = portal.m_zOrigin; z < portal.m_zOrigin + portal.m_zLength; ++z )
             {
-                worldObj.setBlock( portal.m_xOrigin, y, z, QCraft.Blocks.quantumPortal, 0, 2 );
+                worldObj.setBlockState( new BlockPos(portal.m_xOrigin, y, z), (IBlockState) new BlockState(block, (IProperty[]) block.getStateFromMeta(0).getProperties().keySet().toArray()), 2 ); //same as a few lines above
             }
         }
     }
@@ -1236,11 +1238,11 @@ public class TileEntityQuantumComputer extends TileEntity
         {
             for( int x = portal.m_xOrigin; x < portal.m_xOrigin + portal.m_xLength; ++x )
             {
-                worldObj.setBlockToAir( x, y, portal.m_zOrigin );
+                worldObj.setBlockToAir( new BlockPos(x, y, portal.m_zOrigin) );
             }
             for( int z = portal.m_zOrigin; z < portal.m_zOrigin + portal.m_zLength; ++z )
             {
-                worldObj.setBlockToAir( portal.m_xOrigin, y, z );
+                worldObj.setBlockToAir( new BlockPos(portal.m_xOrigin, y, z) );
             }
         }
     }
@@ -1251,14 +1253,14 @@ public class TileEntityQuantumComputer extends TileEntity
         {
             for( int x = portal.m_xOrigin; x < portal.m_xOrigin + portal.m_xLength; ++x )
             {
-                if( worldObj.getBlock( x, y, portal.m_zOrigin ) != QCraft.Blocks.quantumPortal )
+                if( worldObj.getBlockState(new BlockPos(x, y, portal.m_zOrigin)).getBlock() != QCraft.Blocks.quantumPortal )
                 {
                     return false;
                 }
             }
             for( int z = portal.m_zOrigin; z < portal.m_zOrigin + portal.m_zLength; ++z )
             {
-                if( worldObj.getBlock( portal.m_xOrigin, y, z ) != QCraft.Blocks.quantumPortal )
+                if( worldObj.getBlockState(new BlockPos(portal.m_xOrigin, y, z)).getBlock() != QCraft.Blocks.quantumPortal )
                 {
                     return false;
                 }
@@ -1359,11 +1361,11 @@ public class TileEntityQuantumComputer extends TileEntity
 
     // Common
 
-    public void setRedstonePowered( boolean powered )
+    public void setRedstonePowered( EnumFacing powered )
     {
-        if( m_powered != powered )
+        if( m_powered != (powered != null) )
         {
-            m_powered = powered;
+            m_powered = (powered != null);
             if( !worldObj.isRemote )
             {
                 if( m_powered && m_timeSinceEnergize >= 4 )

@@ -18,9 +18,13 @@ limitations under the License.
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class QBlockRecipe implements IRecipe
@@ -38,7 +42,7 @@ public class QBlockRecipe implements IRecipe
     @Override
     public ItemStack getRecipeOutput()
     {
-        return ItemQBlock.create( BlockQBlock.SubType.Standard, new int[ 6 ], -1, 1 );
+        return ItemQBlock.create( BlockQBlock.SubType.Standard, null, -1, 1 );
     }
 
     @Override
@@ -98,7 +102,7 @@ public class QBlockRecipe implements IRecipe
 
         // Find the types of the things around the stone
         int numTypes = 0;
-        int[] types = new int[ 6 ];
+        Map<EnumFacing, Integer> types = new EnumMap<EnumFacing, Integer>(EnumFacing.class);
         for( int y = 0; y < 3; ++y )
         {
             for( int x = 0; x < 3; ++x )
@@ -118,32 +122,32 @@ public class QBlockRecipe implements IRecipe
                     if( lx == 0 && ly == -1 )
                     {
                         // North
-                        types[ 2 ] = type;
+                        types.put(EnumFacing.NORTH, type);
                     }
                     else if( lx == 0 && ly == 1 )
                     {
                         // South
-                        types[ 3 ] = type;
+                        types.put(EnumFacing.SOUTH, type);
                     }
                     else if( lx == -1 && ly == 0 )
                     {
                         // West
-                        types[ 4 ] = type;
+                        types.put(EnumFacing.WEST, type);
                     }
                     else if( lx == 1 && ly == 0 )
                     {
                         // East
-                        types[ 5 ] = type;
+                        types.put(EnumFacing.EAST, type);
                     }
                     else if( lx == -1 && ly == 1 )
                     {
                         // Up
-                        types[ 0 ] = type;
+                        types.put(EnumFacing.UP, type);
                     }
                     else if( lx == -1 && ly == -1 )
                     {
                         // Down
-                        types[ 1 ] = type;
+                        types.put(EnumFacing.DOWN, type);
                     }
                     else if( type != 0 )
                     {

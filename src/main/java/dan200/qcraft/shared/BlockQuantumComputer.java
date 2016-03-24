@@ -28,7 +28,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
@@ -38,6 +37,9 @@ import net.minecraft.world.World;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
 public class BlockQuantumComputer extends BlockDirectional
         implements ITileEntityProvider
@@ -56,7 +58,7 @@ public class BlockQuantumComputer extends BlockDirectional
         setHardness( 5.0f );
         setResistance( 10.0f );
         setStepSound( Block.soundTypeMetal );
-        setBlockName( "qcraft:computer" );
+        setRegistryName( "qcraft:computer" );
     }
 
     @Override
@@ -66,28 +68,28 @@ public class BlockQuantumComputer extends BlockDirectional
     }
 
     @Override
-    public Item getItemDropped( int i, Random random, int j )
+    public Item getItemDropped( IBlockState blockState, Random random, int j )
     {
         return Item.getItemFromBlock( this );
     }
 
     @Override
-    public int damageDropped( int i )
+    public int damageDropped( IBlockState blockState )
     {
         return 0;
     }
 
     @Override
-    public void dropBlockAsItemWithChance( World world, int x, int y, int z, int side, float f, int unknown )
+    public void dropBlockAsItemWithChance( World world, BlockPos blockPos, IBlockState blockState, float chance, int fortune )
     {
         // RemoveBlockByPlayer handles this instead
     }
 
     @Override
-    public ArrayList<ItemStack> getDrops( World world, int x, int y, int z, int metadata, int fortune )
+    public ArrayList<ItemStack> getDrops( IBlockAccess world, BlockPos blockPos, IBlockState blockState, int fortune )
     {
         ArrayList<ItemStack> blocks = new ArrayList<ItemStack>();
-        TileEntity entity = world.getTileEntity( x, y, z );
+        TileEntity entity = world.getTileEntity( blockPos );
         if( entity != null && entity instanceof TileEntityQuantumComputer )
         {
             // Get the computer back
@@ -99,40 +101,40 @@ public class BlockQuantumComputer extends BlockDirectional
         return blocks;
     }
 
-    protected boolean shouldDropItemsInCreative( World world, int x, int y, int z )
+    protected boolean shouldDropItemsInCreative( World world, BlockPos blockPos )
     {
         return false;
     }
 
     @Override
-    public boolean removedByPlayer( World world, EntityPlayer player, int x, int y, int z )
+    public boolean removedByPlayer( World world, BlockPos blockPos, EntityPlayer player, boolean willHarvest )
     {
         if( world.isRemote )
         {
             return false;
         }
 
-        if( !player.capabilities.isCreativeMode || shouldDropItemsInCreative( world, x, y, z ) )
+        if( !player.capabilities.isCreativeMode || shouldDropItemsInCreative( world, blockPos ) )
         {
             // Regular and silk touch block (identical)
-            int metadata = world.getBlockMetadata( x, y, z );
-            ArrayList<ItemStack> items = getDrops( world, x, y, z, metadata, 0 );
+            int metadata = getMetaFromState(world.getBlockState(blockPos));
+            ArrayList<ItemStack> items = getDrops( world, blockPos, world.getBlockState(blockPos), 0 );
             Iterator<ItemStack> it = items.iterator();
             while( it.hasNext() )
             {
                 ItemStack item = it.next();
-                dropBlockAsItem( world, x, y, z, item );
+                dropBlockAsItem( world, blockPos, world.getBlockState(blockPos), 0 );
             }
         }
 
-        return super.removedByPlayer( world, player, x, y, z );
+        return super.removedByPlayer( world, blockPos, player, willHarvest );
     }
 
     @Override
-    public ItemStack getPickBlock( MovingObjectPosition target, World world, int x, int y, int z )
+    public ItemStack getPickBlock( MovingObjectPosition target, World world, BlockPos blockPos )
     {
-        int metadata = world.getBlockMetadata( x, y, z );
-        ArrayList<ItemStack> items = getDrops( world, x, y, z, metadata, 0 );
+        int metadata = getMetaFromState(world.getBlockState(blockPos));
+        ArrayList<ItemStack> items = getDrops( world, blockPos, world.getBlockState(blockPos), 0 );
         if( items.size() > 0 )
         {
             return items.get( 0 );
@@ -141,7 +143,7 @@ public class BlockQuantumComputer extends BlockDirectional
     }
 
     @Override
-    public boolean onBlockActivated( World world, int x, int y, int z, EntityPlayer player, int l, float m, float n, float o )
+    public boolean onBlockActivated( World world, BlockPos blockPos, IBlockState blockState, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ )
     {
         if( player.isSneaking() )
         {
@@ -151,7 +153,7 @@ public class BlockQuantumComputer extends BlockDirectional
         if( !world.isRemote )
         {
             // Show GUI
-            TileEntity entity = world.getTileEntity( x, y, z );
+            TileEntity entity = world.getTileEntity( blockPos );
             if( entity != null && entity instanceof TileEntityQuantumComputer )
             {
                 TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
@@ -162,40 +164,40 @@ public class BlockQuantumComputer extends BlockDirectional
     }
 
     @Override
-    public void breakBlock( World world, int x, int y, int z, Block par5, int par6 )
+    public void breakBlock( World world, BlockPos blockPos, IBlockState blockState )
     {
-        TileEntity entity = world.getTileEntity( x, y, z );
+        TileEntity entity = world.getTileEntity( blockPos );
         if( entity != null && entity instanceof TileEntityQuantumComputer )
         {
             TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
             computer.onDestroy();
         }
-        super.breakBlock( world, x, y, z, par5, par6 );
+        super.breakBlock( world, blockPos, blockState );
     }
 
     @Override
-    public void onBlockPlacedBy( World world, int x, int y, int z, EntityLivingBase player, ItemStack stack )
+    public void onBlockPlacedBy( World world, BlockPos blockPos, IBlockState blockState, EntityLivingBase player, ItemStack stack )
     {
         int direction = ( ( MathHelper.floor_double( (double) ( player.rotationYaw * 4.0F / 360.0F ) + 0.5D ) & 0x3 ) + 2 ) % 4;
         int metadata = ( direction & 0x3 );
-        world.setBlockMetadataWithNotify( x, y, z, metadata, 3 );
+        world.setBlockState(blockPos, blockState, 3); //.setBlockMetadataWithNotify( blockPos, metadata, 3 );
     }
 
     @Override
-    public void onNeighborBlockChange( World world, int x, int y, int z, Block id )
+    public void onNeighborBlockChange( World world, BlockPos blockPos, IBlockState blockState, Block id )
     {
-        super.onNeighborBlockChange( world, x, y, z, id );
+        super.onNeighborBlockChange( world, blockPos, blockState, id );
 
-        TileEntity entity = world.getTileEntity( x, y, z );
+        TileEntity entity = world.getTileEntity( blockPos );
         if( entity != null && entity instanceof TileEntityQuantumComputer )
         {
             TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
-            computer.setRedstonePowered( world.isBlockIndirectlyGettingPowered( x, y, z ) );
+            computer.setRedstonePowered( EnumFacing.getFront(world.isBlockIndirectlyGettingPowered( blockPos ) ) );
         }
     }
 
     @Override
-    public boolean canConnectRedstone( IBlockAccess world, int x, int y, int z, int side )
+    public boolean canConnectRedstone( IBlockAccess world, BlockPos blockPos, EnumFacing side )
     {
         return true;
     }
@@ -209,15 +211,16 @@ public class BlockQuantumComputer extends BlockDirectional
     }
 
     @Override
-    public IIcon getIcon( IBlockAccess world, int i, int j, int k, int side )
+    public IIcon getIcon( IBlockAccess world, BlockPos blockPos, EnumFacing side )
     {
-        if( side == 0 || side == 1 )
+        if( side == EnumFacing.DOWN || side == EnumFacing.UP)
         {
             return Icons.Top;
         }
-
-        int metadata = world.getBlockMetadata( i, j, k );
-        int direction = Direction.directionToFacing[ getDirection( metadata ) ];
+        
+        IBlockState state = world.getBlockState(blockPos);
+        int metadata = getMetaFromState(state);
+        EnumFacing direction = EnumFacing.getFront(metadata); //probably horribly wrong orig: Direction.rotateOpposite[ getDirection( metadata ) ];
         if( side == direction )
         {
             return Icons.Front;
@@ -227,16 +230,16 @@ public class BlockQuantumComputer extends BlockDirectional
     }
 
     @Override
-    public IIcon getIcon( int side, int damage )
+    public IIcon getIcon( EnumFacing side, int damage )
     {
         switch( side )
         {
-            case 0:
-            case 1:
+            case EnumFacing.DOWN:
+            case EnumFacing.UP:
             {
                 return Icons.Top;
             }
-            case 4:
+            case EnumFacing.WEST:
             {
                 return Icons.Front;
             }
@@ -254,8 +257,8 @@ public class BlockQuantumComputer extends BlockDirectional
     }
 
     @Override
-    public TileEntity createTileEntity( World world, int metadata )
+    public TileEntity createTileEntity( World world, IBlockState blockState )
     {
-        return createNewTileEntity( world, metadata );
+        return createNewTileEntity( world, getMetaFromState(blockState));
     }
 }

@@ -863,9 +863,9 @@ public class QCraft
         }
     }
 
-    public static void spawnQuantumDustFX( World world, double x, double y, double z )
+    public static void spawnQuantumDustFX( World world, BlockPos blockPos )
     {
-        proxy.spawnQuantumDustFX( world, new BlockPos(x, y, z) );
+        proxy.spawnQuantumDustFX( world, blockPos );
     }
 
     public static LostLuggage.Address resolveServerAddress( String addressString )

@@ -98,11 +98,11 @@ public class ItemQBlock extends ItemBlock
         return types;
     }
 
-    public static boolean compareTypes( int[] left, int[] right )
+    public static boolean compareTypes( Map<EnumFacing, Integer> left, Map<EnumFacing, Integer> right )
     {
-        for( int i = 0; i < 6; ++i )
+        for( EnumFacing i : EnumFacing.values())
         {
-            if( left[ i ] != right[ i ] )
+            if( left.get(i) != right.get(i) )
             {
                 return false;
             }

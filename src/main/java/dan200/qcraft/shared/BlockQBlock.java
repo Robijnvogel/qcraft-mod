@@ -211,15 +211,15 @@ public class BlockQBlock extends BlockSand
 
     public int getSubType( IBlockAccess world, BlockPos blockPos )
     {
-        return world.getBlockState(blockPos).getBlock().getDamageValue((World) world, blockPos); //very sloppy, I know
+        return getMetaFromState(world.getBlockState(blockPos));
     }
 
     // IQuantumObservable implementation
 
     @Override
-    public boolean isObserved( World world, int x, int y, int z, int side )
+    public boolean isObserved( World world, BlockPos blockPos, EnumFacing side )
     {
-        TileEntity entity = world.getTileEntity( new BlockPos(x, y, z) );
+        TileEntity entity = world.getTileEntity( blockPos );
         if( entity != null && entity instanceof TileEntityQBlock )
         {
             TileEntityQBlock qBlock = (TileEntityQBlock) entity;
@@ -232,24 +232,24 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public void observe( World world, int x, int y, int z, int side )
+    public void observe( World world, BlockPos blockPos, EnumFacing side )
     { 
-        TileEntity entity = world.getTileEntity( new BlockPos(x, y, z) );
+        TileEntity entity = world.getTileEntity( blockPos );
         if( entity != null && entity instanceof TileEntityQBlock )
         {
             TileEntityQBlock qBlock = (TileEntityQBlock) entity;
-            qBlock.setForceObserved( EnumFacing.getFront(side), true );
+            qBlock.setForceObserved( side, true );
         }
     }
 
     @Override
-    public void reset( World world, int x, int y, int z, int side )
+    public void reset( World world, BlockPos blockPos, EnumFacing side )
     { 
-        TileEntity entity = world.getTileEntity( new BlockPos(x, y, z) );
+        TileEntity entity = world.getTileEntity( blockPos );
         if( entity != null && entity instanceof TileEntityQBlock )
         {
             TileEntityQBlock qBlock = (TileEntityQBlock) entity;
-            qBlock.setForceObserved( EnumFacing.getFront(side), false );
+            qBlock.setForceObserved( side, false );
         }
     }
 
@@ -606,9 +606,8 @@ public class BlockQBlock extends BlockSand
     @Override
     public void onBlockPlacedBy( World world, BlockPos blockPos, IBlockState blockState, EntityLivingBase player, ItemStack stack )
     { 
-        int subType = stack.getItemDamage();
-        int metadata = subType;
-        world.getBlockState(blockPos).getBlock().setBlockMetadataWithNotify( blockPos, metadata, 3 );
+        int metadata = stack.getItemDamage();
+        world.setBlockState(blockPos, getStateFromMeta( metadata ), 3 );
     }
 
     @Override
@@ -658,7 +657,7 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public boolean canConnectRedstone( IBlockAccess world, BlockPos blockPos, int side )
+    public boolean canConnectRedstone( IBlockAccess world, BlockPos blockPos, EnumFacing side )
     {
         Block block = getImpostorBlock( world, blockPos );
         if( block != null && block instanceof BlockCompressedPowered )
@@ -669,7 +668,7 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public int isProvidingWeakPower( IBlockAccess world, BlockPos blockPos, int side )
+    public int isProvidingWeakPower( IBlockAccess world, BlockPos blockPos, EnumFacing side )
     {
         Block block = getImpostorBlock( world, blockPos );
         if( block != null && block instanceof BlockCompressedPowered )
@@ -766,7 +765,7 @@ public class BlockQBlock extends BlockSand
     @Override
     public TileEntity createTileEntity( World world, IBlockState blockState )
     {
-        return createNewTileEntity( world, blockState.getBlock().getDamageValue(world, BlockPos.ORIGIN) );
+        return createNewTileEntity( world, getMetaFromState(blockState) );
     }
 
     private Appearance getAppearance( IBlockAccess world, BlockPos blockPos )

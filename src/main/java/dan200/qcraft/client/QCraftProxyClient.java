@@ -25,6 +25,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import dan200.QCraft;
 import dan200.qcraft.shared.*;
+import java.util.Map;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.client.Minecraft;
@@ -38,6 +39,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -353,11 +355,11 @@ public class QCraftProxyClient extends QCraftProxyCommon
         }
 
         @Override
-        public boolean renderWorldBlock( IBlockAccess world, int i, int j, int k, Block block, int modelID, RenderBlocks renderblocks )
+        public boolean renderWorldBlock( IBlockAccess world, BlockPos blockPos, Block block, int modelID, RenderBlocks renderblocks )
         {
             if( modelID == getRenderId() && block == QCraft.Blocks.qBlock )
             {
-                QCraft.Blocks.qBlock.s_forceGrass = ( QCraft.Blocks.qBlock.getImpostorBlock( world, i, j, k ) == Blocks.grass );
+                QCraft.Blocks.qBlock.s_forceGrass = ( QCraft.Blocks.qBlock.getImpostorBlock( world, blockPos ) == Blocks.grass );
                 QCraft.Blocks.qBlock.setBlockBounds( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );
                 renderblocks.setRenderBoundsFromBlock( QCraft.Blocks.qBlock );
                 renderblocks.renderStandardBlock( QCraft.Blocks.qBlock, i, j, k );
@@ -376,7 +378,7 @@ public class QCraftProxyClient extends QCraftProxyCommon
 
     private void renderInventoryQBlock( RenderBlocks renderblocks, BlockQBlock block, ItemStack item )
     {
-        int[] types = ItemQBlock.getTypes( item );
+        Map<EnumFacing, Integer> types = ItemQBlock.getTypes( item );
         int type = cycleType( types );
         if( type < 0 )
         {
@@ -388,14 +390,14 @@ public class QCraftProxyClient extends QCraftProxyCommon
         }
     }
 
-    private int cycleType( int[] types )
+    private int cycleType( Map<EnumFacing, Integer> types )
     {
         int type = -99;
         int cycle = (int) ( m_tickCount % ( 6 * 20 ) );
         int subcycle = ( cycle % 20 );
         if( subcycle > 5 )
         {
-            type = types[ cycle / 20 ];
+            type = types.get(EnumFacing.getFront(cycle / 20));
         }
         return type;
     }

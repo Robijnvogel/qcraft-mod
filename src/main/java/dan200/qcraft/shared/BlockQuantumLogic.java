@@ -25,15 +25,15 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Facing;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import java.util.Random;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
 public class BlockQuantumLogic extends BlockDirectional
 {
@@ -58,14 +58,8 @@ public class BlockQuantumLogic extends BlockDirectional
         setBlockBounds( 0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F );
         setHardness( 0.0F );
         setStepSound( Block.soundTypeWood );
-        setBlockName( "qcraft:automatic_observer" );
+        setRegistryName( "qcraft:automatic_observer" );
         setCreativeTab( QCraft.getCreativeTab() );
-    }
-
-    @Override
-    public boolean renderAsNormalBlock()
-    {
-        return false;
     }
 
     @Override
@@ -81,38 +75,38 @@ public class BlockQuantumLogic extends BlockDirectional
     }
 
     @Override
-    public boolean canPlaceBlockAt( World world, int x, int y, int z )
+    public boolean canPlaceBlockAt( World world, BlockPos blockPos )
     {
-        if( World.doesBlockHaveSolidTopSurface( world, x, y - 1, z ) )
+        if( World.doesBlockHaveSolidTopSurface( world, new BlockPos(blockPos.getX(), blockPos.getY()-1, blockPos.getZ()) ) )
         {
-            return super.canPlaceBlockAt( world, x, y, z );
+            return super.canPlaceBlockAt( world, blockPos );
         }
         return false;
     }
 
     @Override
-    public boolean canBlockStay( World world, int x, int y, int z )
+    public boolean canBlockStay( World world, BlockPos blockPos )
     {
-        if( World.doesBlockHaveSolidTopSurface( world, x, y - 1, z ) )
+        if( World.doesBlockHaveSolidTopSurface( world, new BlockPos(blockPos.getX(), blockPos.getY()-1, blockPos.getZ()) ) )
         {
-            return super.canBlockStay( world, x, y, z );
+            return super.canBlockStay( world, blockPos );
         }
         return false;
     }
 
     @Override
-    public IIcon getIcon( IBlockAccess world, int i, int j, int k, int side )
+    public IIcon getIcon( IBlockAccess world, BlockPos blockPos, EnumFacing side )
     {
-        int metadata = world.getBlockMetadata( i, j, k );
+        int metadata = getMetaFromState( world.getBlockState( blockPos ) );
         int damage = getSubType( metadata );
         return getIcon( side, damage );
     }
 
     @Override
-    public IIcon getIcon( int side, int damage )
+    public IIcon getIcon( EnumFacing side, int damage )
     {
         int subType = damage;
-        if( side == 1 && damage >= 0 && damage < m_icons.length )
+        if( side == EnumFacing.UP && damage >= 0 && damage < m_icons.length )
         {
             return m_icons[ damage ];
         }
@@ -120,22 +114,23 @@ public class BlockQuantumLogic extends BlockDirectional
     }
 
     @Override
-    public int isProvidingStrongPower( IBlockAccess world, int x, int y, int z, int side )
+    public int isProvidingStrongPower( IBlockAccess world, BlockPos blockPos, EnumFacing side )
     {
         return 0;
     }
 
     @Override
-    public int isProvidingWeakPower( IBlockAccess world, int x, int y, int z, int side )
+    public int isProvidingWeakPower( IBlockAccess world, BlockPos blockPos, EnumFacing side )
     {
         return 0;
     }
 
     @Override
-    public boolean canConnectRedstone( IBlockAccess world, int x, int y, int z, int side )
+    public boolean canConnectRedstone( IBlockAccess world, BlockPos blockPos, EnumFacing side )
     {
-        int metadata = world.getBlockMetadata( x, y, z );
-        int direction = Direction.rotateOpposite[ getDirection( metadata ) ];
+        IBlockState blockState = world.getBlockState(blockPos);
+        int metadata = getMetaFromState( blockState );
+        EnumFacing direction = getStateFromMeta( metadata ).getValue(FACING).getOpposite();
         return ( side == direction );
     }
 
@@ -146,26 +141,25 @@ public class BlockQuantumLogic extends BlockDirectional
     }
 
     @Override
-    public void onNeighborBlockChange( World world, int x, int y, int z, Block block )
+    public void onNeighborBlockChange( World world, BlockPos blockPos, IBlockState blockState, Block block )
     {
-        int metadata = world.getBlockMetadata( x, y, z );
-        if( !this.canBlockStay( world, x, y, z ) )
+        if( !this.canBlockStay( world, blockPos ) )
         {
             if( !world.isRemote )
             {
                 // Destroy
-                this.dropBlockAsItem( world, x, y, z, metadata, 0 );
-                world.setBlockToAir( x, y, z );
+                this.dropBlockAsItem( world, blockPos, blockState, 0 );
+                world.setBlockToAir( blockPos );
             }
         }
         else
         {
             // Redetermine subtype
-            updateOutput( world, x, y, z );
+            updateOutput( world, blockPos );
         }
     }
 
-    private void updateOutput( World world, int x, int y, int z )
+    private void updateOutput( World world, BlockPos blockPos )
     {
         if( world.isRemote )
         {
@@ -173,54 +167,55 @@ public class BlockQuantumLogic extends BlockDirectional
         }
 
         // Redetermine subtype
-        int metadata = world.getBlockMetadata( x, y, z );
-        int direction = getDirection( metadata );
+        IBlockState blockState = world.getBlockState(blockPos);
+        int metadata = getMetaFromState( blockState );
+        EnumFacing direction = getStateFromMeta( metadata ).getValue(FACING);
         int subType = getSubType( metadata );
-        int newSubType = evaluateInput( world, x, y, z ) ? SubType.ObserverOn : SubType.ObserverOff;
+        int newSubType = evaluateInput( world, blockPos ) ? SubType.ObserverOn : SubType.ObserverOff;
         if( newSubType != subType )
         {
             // Set new subtype
-            setDirectionAndSubType( world, x, y, z, direction, newSubType );
+            setDirectionAndSubType( world, blockPos, direction, newSubType );
             subType = newSubType;
 
             // Notify
-            world.markBlockForUpdate( x, y, z );
-            world.notifyBlocksOfNeighborChange( x, y, z, this );
+            world.markBlockForUpdate( blockPos );
+            world.notifyNeighborsOfStateChange(blockPos, this );
         }
 
         // Observe
-        int facing = Facing.oppositeSide[ Direction.directionToFacing[ direction ] ];
-        observe( world, x, y, z, facing, subType == SubType.ObserverOn );
+        EnumFacing facing = direction.getOpposite();
+        observe( world, blockPos, facing, subType == SubType.ObserverOn );
     }
 
-    private void setDirectionAndSubType( World world, int x, int y, int z, int direction, int subType )
+    private void setDirectionAndSubType( World world, BlockPos blockPos, EnumFacing direction, int subType )
     {
-        int metadata = ( direction & 0x3 ) + ( ( subType & 0x3 ) << 2 );
-        world.setBlockMetadataWithNotify( x, y, z, metadata, 3 );
+        int metadata = ( direction.getIndex() & 0x3 ) + ( ( subType & 0x3 ) << 2 );
+        world.setBlockState( blockPos, getStateFromMeta(metadata), 3 );
     }
 
     @Override
-    public void onBlockPlacedBy( World world, int x, int y, int z, EntityLivingBase player, ItemStack stack )
+    public void onBlockPlacedBy( World world, BlockPos blockPos, IBlockState blockState, EntityLivingBase player, ItemStack stack )
     {
-        int direction = ( ( MathHelper.floor_double( (double) ( player.rotationYaw * 4.0F / 360.0F ) + 0.5D ) & 3 ) + 2 ) % 4;
+        EnumFacing direction = EnumFacing.getFront((( MathHelper.floor_double( (double) ( player.rotationYaw * 4.0F / 360.0F ) + 0.5D ) & 3 ) + 2 ) % 4);
         int subType = stack.getItemDamage();
-        setDirectionAndSubType( world, x, y, z, direction, subType );
+        setDirectionAndSubType( world, blockPos, direction, subType );
     }
 
     @Override
-    public void onBlockAdded( World world, int x, int y, int z )
+    public void onBlockAdded( World world, BlockPos blockPos, IBlockState blockState )
     {
-        updateOutput( world, x, y, z );
+        updateOutput( world, blockPos );
     }
 
     @Override
-    public void onBlockDestroyedByPlayer( World par1World, int par2, int par3, int par4, int par5 )
+    public void onBlockDestroyedByPlayer( World par1World, BlockPos blockPos, IBlockState blockState )
     {
-        super.onBlockDestroyedByPlayer( par1World, par2, par3, par4, par5 );
+        super.onBlockDestroyedByPlayer( par1World, blockPos, blockState );
     }
 
     @Override
-    public void randomDisplayTick( World world, int i, int j, int k, Random r )
+    public void randomDisplayTick( World world, BlockPos blockPos, IBlockState blockState, Random r )
     {
         if( !world.isRemote )
         {
@@ -236,42 +231,42 @@ public class BlockQuantumLogic extends BlockDirectional
         m_icons[ SubType.ObserverOn ] = iconRegister.registerIcon( "qcraft:automatic_observer_on" );
     }
 
-    private boolean evaluateInput( World world, int i, int j, int k )
+    private boolean evaluateInput( World world, BlockPos blockPos )
     {
-        int metadata = world.getBlockMetadata( i, j, k );
-        int direction = Facing.oppositeSide[ Direction.directionToFacing[ getDirection( metadata ) ] ];
-        int backDir = Facing.oppositeSide[ direction ];
-        return getRedstoneSignal( world, i, j, k, backDir );
+        int metadata = getMetaFromState( world.getBlockState( blockPos ) );
+        EnumFacing direction = getStateFromMeta( metadata ).getValue(FACING).getOpposite();
+        EnumFacing backDir = direction.getOpposite();
+        return getRedstoneSignal( world, blockPos, backDir );
     }
 
-    private boolean getRedstoneSignal( World world, int i, int j, int k, int dir )
-    {
-        i += Facing.offsetsXForSide[ dir ];
-        j += Facing.offsetsYForSide[ dir ];
-        k += Facing.offsetsZForSide[ dir ];
-        int side = Facing.oppositeSide[ dir ];
-        return QuantumUtil.getRedstoneSignal( world, new BlockPos(i, j, k), side );
+    private boolean getRedstoneSignal( World world, BlockPos blockPos, EnumFacing dir )
+    {        
+        int x = blockPos.getX() + dir.getFrontOffsetX();
+        int y = blockPos.getY() + dir.getFrontOffsetY();
+        int z = blockPos.getZ() + dir.getFrontOffsetZ();
+        EnumFacing side = dir.getOpposite();
+        return QuantumUtil.getRedstoneSignal( world, new BlockPos(x, y, z), side );
     }
 
-    private void observe( World world, int i, int j, int k, int dir, boolean observe )
+    private void observe( World world, BlockPos blockPos, EnumFacing dir, boolean observe )
     {
-        i += Facing.offsetsXForSide[ dir ];
-        j += Facing.offsetsYForSide[ dir ];
-        k += Facing.offsetsZForSide[ dir ];
-        Block block = world.getBlock( i, j, k );
+        int x = blockPos.getX() + dir.getFrontOffsetX();
+        int y = blockPos.getY() + dir.getFrontOffsetY();
+        int z = blockPos.getZ() + dir.getFrontOffsetZ();
+        Block block = world.getBlockState(blockPos).getBlock();
         if( block != null && block instanceof IQuantumObservable )
         {
-            int side = Facing.oppositeSide[ dir ];
+            EnumFacing side = dir.getOpposite();
             IQuantumObservable observable = (IQuantumObservable) block;
-            if( observable.isObserved( world, i, j, k, side ) != observe )
+            if( observable.isObserved( world, blockPos, side ) != observe )
             {
                 if( observe )
                 {
-                    observable.observe( world, i, j, k, side );
+                    observable.observe( world, blockPos, side );
                 }
                 else
                 {
-                    observable.reset( world, i, j, k, side );
+                    observable.reset( world, blockPos, side );
                 }
             }
         }

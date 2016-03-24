@@ -30,6 +30,9 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import java.util.Random;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
 public class BlockQuantumPortal extends Block
 {
@@ -42,28 +45,31 @@ public class BlockQuantumPortal extends Block
         setHardness( -1.0f );
         setStepSound( Block.soundTypeGlass );
         setLightLevel( 0.75f );
-        setBlockName( "qcraft:portal" );
+        setRegistryName( "qcraft:portal" );
     }
 
     @Override
-    public void updateTick( World par1World, int par2, int par3, int par4, Random par5Random )
+    public void updateTick( World par1World, BlockPos blockPos, IBlockState blockState, Random par5Random )
     {
-        super.updateTick( par1World, par2, par3, par4, par5Random );
+        super.updateTick(par1World, blockPos, blockState, par5Random);
     }
 
     @Override
-    public AxisAlignedBB getCollisionBoundingBoxFromPool( World par1World, int par2, int par3, int par4 )
+    public AxisAlignedBB getCollisionBoundingBox( World par1World, BlockPos blockPos, IBlockState blockState )
     {
         return null;
     }
 
     @Override
-    public void setBlockBoundsBasedOnState( IBlockAccess world, int x, int y, int z )
+    public void setBlockBoundsBasedOnState( IBlockAccess world, BlockPos blockPos )
     {
         float f;
         float f1;
+        int x = blockPos.getX();
+        int y = blockPos.getY();
+        int z = blockPos.getZ();        
 
-        if( world.getBlock( x - 1, y, z ) != this && world.getBlock( x + 1, y, z ) != this )
+        if( world.getBlockState( new BlockPos(x - 1, y, z) ).getBlock() != this && world.getBlockState( new BlockPos(x + 1, y, z) ).getBlock() != this )
         {
             f = 0.125F;
             f1 = 0.5F;
@@ -84,81 +90,88 @@ public class BlockQuantumPortal extends Block
     }
 
     @Override
-    public boolean renderAsNormalBlock()
+    public boolean isBlockNormalCube()
     {
         return false;
     }
 
     @Override
-    public void onNeighborBlockChange( World world, int x, int y, int z, Block id )
+    public void onNeighborBlockChange( World world, BlockPos blockPos, IBlockState blockState, Block id )
     {
         byte b0 = 0;
         byte b1 = 1;
+        int x = blockPos.getX();
+        int y = blockPos.getY();
+        int z = blockPos.getZ();
 
-        if( world.getBlock( x - 1, y, z ) == this || world.getBlock( x + 1, y, z ) == this )
+        if( world.getBlockState( new BlockPos(x - 1, y, z) ).getBlock() == this || world.getBlockState( new BlockPos(x + 1, y, z) ).getBlock() == this )
         {
             b0 = 1;
             b1 = 0;
         }
 
         int yOrigin = y;
-        while( world.getBlock( x, yOrigin - 1, z ) == this )
+        while( world.getBlockState( new BlockPos(x, yOrigin - 1, z )).getBlock() == this )
         {
             --yOrigin;
         }
 
-        if( world.getBlock( x, yOrigin - 1, z ) != Blocks.glass )
+        if( world.getBlockState( new BlockPos(x, yOrigin - 1, z )).getBlock() != Blocks.glass )
         {
-            world.setBlockToAir( x, y, z );
+            world.setBlockToAir( blockPos );
         }
         else
         {
             int h = 1;
-            while( h < 4 && world.getBlock( x, yOrigin + h, z ) == this )
+            while( h < 4 && world.getBlockState( new BlockPos(x, yOrigin + h, z) ).getBlock() == this )
             {
                 ++h;
             }
 
-            if( h == 3 && world.getBlock( x, yOrigin + h, z ) == Blocks.glass )
+            if( h == 3 && world.getBlockState( new BlockPos( x, yOrigin + h, z ) ).getBlock() == Blocks.glass )
             {
-                boolean flag = world.getBlock( x - 1, y, z ) == this || world.getBlock( x + 1, y, z ) == this;
-                boolean flag1 = world.getBlock( x, y, z - 1 ) == this || world.getBlock( x, y, z + 1 ) == this;
+                boolean flag = world.getBlockState( new BlockPos( x - 1, y, z ) ).getBlock() == this || world.getBlockState( new BlockPos( x + 1, y, z ) ).getBlock() == this;
+                boolean flag1 = world.getBlockState( new BlockPos( x, y, z - 1 ) ).getBlock() == this || world.getBlockState( new BlockPos( x, y, z + 1 ) ).getBlock() == this;
 
                 if( flag && flag1 )
                 {
-                    world.setBlockToAir( x, y, z );
+                    world.setBlockToAir( blockPos );
                 }
                 else
                 {
-                    if( ( world.getBlock( x + b0, y, z + b1 ) != Blocks.glass || world.getBlock( x - b0, y, z - b1 ) != this ) && ( world.getBlock( x - b0, y, z - b1 ) != Blocks.glass || world.getBlock( x + b0, y, z + b1 ) != this ) )
+                    if( ( world.getBlockState( new BlockPos( x + b0, y, z + b1 ) ).getBlock() != Blocks.glass || world.getBlockState( new BlockPos( x - b0, y, z - b1 ) ).getBlock() != this ) && ( world.getBlockState( new BlockPos( x - b0, y, z - b1 ) ).getBlock() != Blocks.glass || world.getBlockState( new BlockPos( x + b0, y, z + b1 ) ).getBlock() != this ) )
                     {
-                        world.setBlockToAir( x, y, z );
+                        world.setBlockToAir( blockPos );
                     }
                 }
             }
             else
             {
-                world.setBlockToAir( x, y, z );
+                world.setBlockToAir( blockPos );
             }
         }
     }
 
     @Override
-    public boolean shouldSideBeRendered( IBlockAccess par1IBlockAccess, int par2, int par3, int par4, int par5 )
+    public boolean shouldSideBeRendered( IBlockAccess par1IBlockAccess, BlockPos blockPos, EnumFacing side )
     {
-        if( par1IBlockAccess.getBlock( par2, par3, par4 ) == this )
+        if( par1IBlockAccess.getBlockState( blockPos ).getBlock() == this )
         {
             return false;
         }
         else
         {
-            boolean flag = par1IBlockAccess.getBlock( par2 - 1, par3, par4 ) == this && par1IBlockAccess.getBlock( par2 - 2, par3, par4 ) != this;
-            boolean flag1 = par1IBlockAccess.getBlock( par2 + 1, par3, par4 ) == this && par1IBlockAccess.getBlock( par2 + 2, par3, par4 ) != this;
-            boolean flag2 = par1IBlockAccess.getBlock( par2, par3, par4 - 1 ) == this && par1IBlockAccess.getBlock( par2, par3, par4 - 2 ) != this;
-            boolean flag3 = par1IBlockAccess.getBlock( par2, par3, par4 + 1 ) == this && par1IBlockAccess.getBlock( par2, par3, par4 + 2 ) != this;
+            int x = blockPos.getX();
+            int y = blockPos.getY();
+            int z = blockPos.getZ();
+        
+            boolean flag = par1IBlockAccess.getBlockState( new BlockPos( x - 1, y, z ) ).getBlock() == this && par1IBlockAccess.getBlockState( new BlockPos( x - 2, y, z ) ).getBlock() != this;
+            boolean flag1 = par1IBlockAccess.getBlockState( new BlockPos( x + 1, y, z ) ).getBlock() == this && par1IBlockAccess.getBlockState( new BlockPos( x + 2, y, z ) ).getBlock() != this;
+            boolean flag2 = par1IBlockAccess.getBlockState( new BlockPos( x, y, z - 1 ) ).getBlock() == this && par1IBlockAccess.getBlockState( new BlockPos( x, y, z - 2 ) ).getBlock() != this;
+            boolean flag3 = par1IBlockAccess.getBlockState( new BlockPos( x, y, z + 1 ) ).getBlock() == this && par1IBlockAccess.getBlockState( new BlockPos( x, y, z + 2 ) ).getBlock() != this;
             boolean flag4 = flag || flag1;
             boolean flag5 = flag2 || flag3;
-            return flag4 && par5 == 4 ? true : ( flag4 && par5 == 5 ? true : ( flag5 && par5 == 2 ? true : flag5 && par5 == 3 ) );
+            return flag4 && side == EnumFacing.WEST ? true : ( flag4 && side == EnumFacing.EAST ? true : ( flag5 && side == EnumFacing.NORTH ? true : flag5 && side == EnumFacing.SOUTH ) );
         }
     }
 
@@ -169,7 +182,7 @@ public class BlockQuantumPortal extends Block
     }
 
     @Override
-    public void onEntityCollidedWithBlock( World world, int x, int y, int z, Entity entity )
+    public void onEntityCollidedWithBlock( World world, BlockPos blockPos, Entity entity )
     {
     }
 
@@ -180,30 +193,33 @@ public class BlockQuantumPortal extends Block
     }
 
     @Override
-    public void randomDisplayTick( World par1World, int par2, int par3, int par4, Random par5Random )
+    public void randomDisplayTick( World par1World, BlockPos blockPos, IBlockState blockState, Random par5Random )
     {
+        int x = blockPos.getX();
+        int y = blockPos.getY();
+        int z = blockPos.getZ();
         for( int l = 0; l < 4; ++l )
         {
-            double d0 = (double) ( (float) par2 + par5Random.nextFloat() );
-            double d1 = (double) ( (float) par3 + par5Random.nextFloat() );
-            double d2 = (double) ( (float) par4 + par5Random.nextFloat() );
+            double d0 = (double) ( (float) x + par5Random.nextFloat() );
+            double d1 = (double) ( (float) y + par5Random.nextFloat() );
+            double d2 = (double) ( (float) z + par5Random.nextFloat() );
             int i1 = par5Random.nextInt( 2 ) * 2 - 1;
 
-            if( par1World.getBlock( par2 - 1, par3, par4 ) != this && par1World.getBlock( par2 + 1, par3, par4 ) != this )
+            if( par1World.getBlockState( new BlockPos( x - 1, y, z ) ).getBlock() != this && par1World.getBlockState( new BlockPos( x + 1, y, z ) ).getBlock() != this )
             {
-                d0 = (double) par2 + 0.5D + 0.25D * (double) i1;
+                d0 = (double) x + 0.5D + 0.25D * (double) i1;
             }
             else
             {
-                d2 = (double) par4 + 0.5D + 0.25D * (double) i1;
+                d2 = (double) z + 0.5D + 0.25D * (double) i1;
             }
 
-            QCraft.spawnQuantumDustFX( par1World, d0, d1, d2 );
+            QCraft.spawnQuantumDustFX( par1World, blockPos);
         }
     }
 
     @Override
-    public Item getItem( World par1World, int par2, int par3, int par4 )
+    public Item getItem( World par1World, BlockPos blockPos )
     {
         return null;
     }
@@ -215,13 +231,13 @@ public class BlockQuantumPortal extends Block
     }
 
     @Override
-    public IIcon getIcon( IBlockAccess world, int i, int j, int k, int side )
+    public IIcon getIcon( IBlockAccess world, BlockPos blockPos, EnumFacing side )
     {
         return s_icon;
     }
 
     @Override
-    public IIcon getIcon( int side, int damage )
+    public IIcon getIcon( EnumFacing side, int damage )
     {
         return s_icon;
     }

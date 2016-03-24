@@ -172,9 +172,9 @@ public class TileEntityQBlock extends TileEntity
         worldObj.notifyNeighborsOfStateChange(pos, QCraft.Blocks.qBlock );
     }
 
-    public boolean isForceObserved( int side )
+    public boolean isForceObserved( EnumFacing side )
     {
-        return (m_forceObserved[ side ] == true);
+        return (m_forceObserved[ side.getIndex() ] == true);
     }
 
     public void setForceObserved( EnumFacing side, boolean enable )
@@ -622,7 +622,7 @@ public class TileEntityQBlock extends TileEntity
                         if( twin != this )
                         {
                             //[/copied]
-                            setDisplayedSide(false, twin.isForceObserved(1), twin.m_currentlyForcedSide );
+                            setDisplayedSide(false, twin.isForceObserved(EnumFacing.UP), twin.m_currentlyForcedSide );
                             break;
                         }
                     }

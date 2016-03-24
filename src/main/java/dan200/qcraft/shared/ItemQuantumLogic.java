@@ -47,7 +47,7 @@ public class ItemQuantumLogic extends ItemBlock
     @Override
     public IIcon getIconFromDamage( int damage )
     {
-        return field_150939_a.getIcon( 1, damage );
+        return block.getIcon( 1, damage );
     }
 
     @Override
