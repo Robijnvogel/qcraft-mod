@@ -177,14 +177,14 @@ public class TileEntityQBlock extends TileEntity
         return (m_forceObserved[ side ] == true);
     }
 
-    public void setForceObserved( int side, boolean enable )
+    public void setForceObserved( EnumFacing side, boolean enable )
     {
         if( worldObj.isRemote )
         {
             return;
         }
 
-        m_forceObserved[ side ] = enable;
+        m_forceObserved[ side.getIndex() ] = enable;
     }
 
     private void setDisplayedSide( boolean observed, boolean forced, EnumFacing side )

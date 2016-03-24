@@ -19,6 +19,7 @@ package dan200.qcraft.shared;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public interface IQCraftProxy
@@ -32,7 +33,7 @@ public interface IQCraftProxy
 
     public void travelToServer( LostLuggage.Address address );
 
-    public void spawnQuantumDustFX( World world, double x, double y, double z );
+    public void spawnQuantumDustFX( World world, BlockPos blockPos );
 
     public EntityPlayer getLocalPlayer();
 

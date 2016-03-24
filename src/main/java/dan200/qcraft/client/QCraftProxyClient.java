@@ -37,6 +37,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -110,9 +111,12 @@ public class QCraftProxyClient extends QCraftProxyCommon
     }
 
     @Override
-    public void spawnQuantumDustFX( World world, double x, double y, double z )
+    public void spawnQuantumDustFX( World world, BlockPos blockPos )
     {
         Minecraft mc = Minecraft.getMinecraft();
+        int x = blockPos.getX();
+        int y = blockPos.getY();
+        int z = blockPos.getZ();
         double dx = mc.getRenderViewEntity().posX - x;
         double dy = mc.getRenderViewEntity().posY - y;
         double dz = mc.getRenderViewEntity().posZ - z;

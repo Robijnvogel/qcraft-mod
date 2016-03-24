@@ -121,7 +121,7 @@ public abstract class QCraftProxyCommon implements IQCraftProxy
     public abstract void renderAOGogglesOverlay( float width, float height );
 
     @Override
-    public abstract void spawnQuantumDustFX( World world, double x, double y, double z );
+    public abstract void spawnQuantumDustFX( World world, BlockPos blockpos );
 
     private void registerItems()
     {

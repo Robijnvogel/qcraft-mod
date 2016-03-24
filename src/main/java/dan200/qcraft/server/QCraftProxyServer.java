@@ -22,6 +22,7 @@ import dan200.qcraft.shared.QCraftProxyCommon;
 import dan200.qcraft.shared.TileEntityQuantumComputer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class QCraftProxyServer extends QCraftProxyCommon
@@ -62,7 +63,7 @@ public class QCraftProxyServer extends QCraftProxyCommon
     }
 
     @Override
-    public void spawnQuantumDustFX( World world, double x, double y, double z )
+    public void spawnQuantumDustFX( World world, BlockPos blockPos )
     {
     }
 

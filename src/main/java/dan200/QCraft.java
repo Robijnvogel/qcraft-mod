@@ -47,6 +47,8 @@ import net.minecraftforge.common.config.Property;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.util.*;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.BlockPos;
 
 ///////////////
 // UNIVERSAL //
@@ -207,21 +209,21 @@ public class QCraft
 
     public static void openQuantumComputerGUI( EntityPlayer player, TileEntityQuantumComputer computer )
     {
-        player.openGui(QCraft.instance, QCraft.quantumComputerGUIID, player.worldObj, computer.xCoord, computer.yCoord, computer.zCoord);
+        player.openGui(QCraft.instance, QCraft.quantumComputerGUIID, player.worldObj, computer.getPos().getX(), computer.getPos().getY(), computer.getPos().getZ());
     }
 
     private static FMLProxyPacket encode( QCraftPacket packet )
     {
-        ByteBuf buffer = Unpooled.buffer();
+        ByteBuf buffer = new PacketBuffer(Unpooled.buffer());
         packet.toBytes( buffer );
-        return new FMLProxyPacket( buffer, "qCraft" );
+        return new FMLProxyPacket((PacketBuffer) buffer, "qCraft" );
     }
 
     public static void requestEnergize( TileEntityQuantumComputer computer )
     {
         QCraftPacket packet = new QCraftPacket();
         packet.packetType = QCraftPacket.EnergizeComputer;
-        packet.dataInt = new int[]{ computer.xCoord, computer.yCoord, computer.zCoord };
+        packet.dataInt = new int[]{ computer.getPos().getX(), computer.getPos().getY(), computer.getPos().getZ() };
         networkEventChannel.sendToServer( encode( packet ) );
     }
 
@@ -229,7 +231,7 @@ public class QCraft
     {
         QCraftPacket packet = new QCraftPacket();
         packet.packetType = QCraftPacket.CycleServerAddress;
-        packet.dataInt = new int[]{ computer.xCoord, computer.yCoord, computer.zCoord };
+        packet.dataInt = new int[]{ computer.getPos().getX(), computer.getPos().getY(), computer.getPos().getZ() };
         packet.dataString = new String[]{ computer.getRemoteServerAddress() };
         networkEventChannel.sendToServer( encode( packet ) );
     }
@@ -238,7 +240,7 @@ public class QCraft
     {
         QCraftPacket packet = new QCraftPacket();
         packet.packetType = QCraftPacket.SetNewServerAddress;
-        packet.dataInt = new int[]{ computer.xCoord, computer.yCoord, computer.zCoord };
+        packet.dataInt = new int[]{ computer.getPos().getX(), computer.getPos().getY(), computer.getPos().getZ() };
         packet.dataString = new String[]{ name, address };
         networkEventChannel.sendToServer( encode( packet ) );
     }
@@ -247,7 +249,7 @@ public class QCraft
     {
         QCraftPacket packet = new QCraftPacket();
         packet.packetType = QCraftPacket.RemoveServerAddress;
-        packet.dataInt = new int[]{ computer.xCoord, computer.yCoord, computer.zCoord };
+        packet.dataInt = new int[]{ computer.getPos().getX(), computer.getPos().getY(), computer.getPos().getZ() };
         packet.dataString = new String[]{ computer.getRemoteServerAddress() };
         networkEventChannel.sendToServer( encode( packet ) );
     }
@@ -256,7 +258,7 @@ public class QCraft
     {
         QCraftPacket packet = new QCraftPacket();
         packet.packetType = QCraftPacket.SetComputerRemotePortalID;
-        packet.dataInt = new int[]{ computer.xCoord, computer.yCoord, computer.zCoord };
+        packet.dataInt = new int[]{ computer.getPos().getX(), computer.getPos().getY(), computer.getPos().getZ() };
         packet.dataString = new String[]{ remotePortalID };
         networkEventChannel.sendToServer( encode( packet ) );
     }
@@ -265,7 +267,7 @@ public class QCraft
     {
         QCraftPacket packet = new QCraftPacket();
         packet.packetType = QCraftPacket.SetComputerPortalID;
-        packet.dataInt = new int[]{ computer.xCoord, computer.yCoord, computer.zCoord };
+        packet.dataInt = new int[]{ computer.getPos().getX(), computer.getPos().getY(), computer.getPos().getZ() };
         packet.dataString = new String[]{ portalID };
         networkEventChannel.sendToServer( encode( packet ) );
     }
@@ -274,7 +276,7 @@ public class QCraft
     {
         QCraftPacket packet = new QCraftPacket();
         packet.packetType = QCraftPacket.QueryGoToServer;
-        packet.dataInt = new int[]{ computer.xCoord, computer.yCoord, computer.zCoord };
+        packet.dataInt = new int[]{ computer.getPos().getX(), computer.getPos().getY(), computer.getPos().getZ() };
         networkEventChannel.sendTo( encode( packet ), (EntityPlayerMP) player );
     }
 
@@ -282,7 +284,7 @@ public class QCraft
     {
         QCraftPacket packet = new QCraftPacket();
         packet.packetType = QCraftPacket.ConfirmGoToServer;
-        packet.dataInt = new int[]{ computer.xCoord, computer.yCoord, computer.zCoord, takeItems ? 1 : 0 };
+        packet.dataInt = new int[]{ computer.getPos().getX(), computer.getPos().getY(), computer.getPos().getZ(), takeItems ? 1 : 0 };
         packet.dataString = new String[]{ destinationServer };
         networkEventChannel.sendToServer( encode( packet ) );
     }
@@ -345,7 +347,7 @@ public class QCraft
     {
         if( !player.worldObj.isRemote )
         {
-            return MinecraftServer.getServer().getConfigurationManager().func_152596_g(player.getGameProfile());
+            return MinecraftServer.getServer().getConfigurationManager().canSendCommands(player.getGameProfile());
         }
         else
         {
@@ -428,7 +430,7 @@ public class QCraft
                 int x = packet.dataInt[ 0 ];
                 int y = packet.dataInt[ 1 ];
                 int z = packet.dataInt[ 2 ];
-                TileEntity entity = world.getTileEntity( x, y, z );
+                TileEntity entity = world.getTileEntity( new BlockPos(x, y, z) );
                 if( entity != null && entity instanceof TileEntityQuantumComputer )
                 {
                     TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
@@ -442,14 +444,14 @@ public class QCraft
                 int x = packet.dataInt[ 0 ];
                 int y = packet.dataInt[ 1 ];
                 int z = packet.dataInt[ 2 ];
-                TileEntity entity = world.getTileEntity( x, y, z );
+                TileEntity entity = world.getTileEntity( new BlockPos(x, y, z) );
                 if( entity != null && entity instanceof TileEntityQuantumComputer )
                 {
                     TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
                     if( QCraft.canPlayerCreatePortals( entityPlayer ) && !computer.isTeleporterEnergized() )
                     {
                         computer.setPortalID( packet.dataString[ 0 ] );
-                        world.markBlockForUpdate( x, y, z );
+                        world.markBlockForUpdate( new BlockPos(x, y, z) );
                     }
                 }
                 break;
@@ -460,14 +462,14 @@ public class QCraft
                 int x = packet.dataInt[ 0 ];
                 int y = packet.dataInt[ 1 ];
                 int z = packet.dataInt[ 2 ];
-                TileEntity entity = world.getTileEntity( x, y, z );
+                TileEntity entity = world.getTileEntity( new BlockPos(x, y, z) );
                 if( entity != null && entity instanceof TileEntityQuantumComputer )
                 {
                     TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
                     if( QCraft.canPlayerCreatePortals( entityPlayer ) && !computer.isTeleporterEnergized() )
                     {
                         computer.setRemotePortalID( packet.dataString[ 0 ] );
-                        world.markBlockForUpdate( x, y, z );
+                        world.markBlockForUpdate( new BlockPos(x, y, z) );
                     }
                 }
                 break;
@@ -478,14 +480,14 @@ public class QCraft
                 int x = packet.dataInt[ 0 ];
                 int y = packet.dataInt[ 1 ];
                 int z = packet.dataInt[ 2 ];
-                TileEntity entity = world.getTileEntity( x, y, z );
+                TileEntity entity = world.getTileEntity( new BlockPos(x, y, z) );
                 if( entity != null && entity instanceof TileEntityQuantumComputer )
                 {
                     TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
                     if( QCraft.canPlayerCreatePortals( entityPlayer ) && !computer.isTeleporterEnergized() )
                     {
                         computer.cycleRemoteServerAddress( packet.dataString[ 0 ] );
-                        world.markBlockForUpdate( x, y, z );
+                        world.markBlockForUpdate( new BlockPos(x, y, z) );
                     }
                 }
                 break;
@@ -496,7 +498,7 @@ public class QCraft
                 int x = packet.dataInt[ 0 ];
                 int y = packet.dataInt[ 1 ];
                 int z = packet.dataInt[ 2 ];
-                TileEntity entity = world.getTileEntity( x, y, z );
+                TileEntity entity = world.getTileEntity( new BlockPos(x, y, z) );
                 if( entity != null && entity instanceof TileEntityQuantumComputer )
                 {
                     String name = packet.dataString[ 0 ];
@@ -512,7 +514,7 @@ public class QCraft
                     if( QCraft.canPlayerCreatePortals( entityPlayer ) && !computer.isTeleporterEnergized() )
                     {
                         computer.setRemoteServerAddress( address );
-                        world.markBlockForUpdate( x, y, z );
+                        world.markBlockForUpdate( new BlockPos(x, y, z) );
                     }
                 }
                 break;
@@ -523,7 +525,7 @@ public class QCraft
                 int x = packet.dataInt[ 0 ];
                 int y = packet.dataInt[ 1 ];
                 int z = packet.dataInt[ 2 ];
-                TileEntity entity = world.getTileEntity( x, y, z );
+                TileEntity entity = world.getTileEntity( new BlockPos(x, y, z) );
                 if( entity != null && entity instanceof TileEntityQuantumComputer )
                 {
                     String address = packet.dataString[ 0 ];
@@ -538,7 +540,7 @@ public class QCraft
                     if( QCraft.canPlayerCreatePortals( entityPlayer ) && !computer.isTeleporterEnergized() )
                     {
                         computer.setRemoteServerAddress( null );
-                        world.markBlockForUpdate( x, y, z );
+                        world.markBlockForUpdate( new BlockPos(x, y, z) );
                     }
                 }
                 break;
@@ -549,7 +551,7 @@ public class QCraft
                 int x = packet.dataInt[ 0 ];
                 int y = packet.dataInt[ 1 ];
                 int z = packet.dataInt[ 2 ];
-                TileEntity entity = world.getTileEntity( x, y, z );
+                TileEntity entity = world.getTileEntity( new BlockPos(x, y, z) );
                 if( entity != null && entity instanceof TileEntityQuantumComputer )
                 {
                     boolean takeItems = (packet.dataInt[ 3 ] > 0);
@@ -589,7 +591,7 @@ public class QCraft
                 int x = packet.dataInt[ 0 ];
                 int y = packet.dataInt[ 1 ];
                 int z = packet.dataInt[ 2 ];
-                TileEntity entity = world.getTileEntity( x, y, z );
+                TileEntity entity = world.getTileEntity( new BlockPos(x, y, z) );
                 if( entity != null && entity instanceof TileEntityQuantumComputer )
                 {
                     TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
@@ -657,9 +659,9 @@ public class QCraft
 
     private static LuggageVerificationResult verifyIncomingLuggage( EntityPlayer instigator, EntityPlayer entityPlayer, byte[] signedLuggageData, boolean forceVerify ) throws IOException
     {
-        NBTTagCompound signedLuggage = CompressedStreamTools.func_152457_a( signedLuggageData , NBTSizeTracker.field_152451_a);
+        NBTTagCompound signedLuggage = CompressedStreamTools.readCompressed( signedLuggageData , NBTSizeTracker.INFINITE);
         byte[] luggageData = signedLuggage.getByteArray("luggage");
-        NBTTagCompound luggage = CompressedStreamTools.func_152457_a(luggageData, NBTSizeTracker.field_152451_a);
+        NBTTagCompound luggage = CompressedStreamTools.readCompressed(luggageData, NBTSizeTracker.INFINITE);
 
         if( signedLuggage.hasKey( "key" ) )
         {
@@ -800,9 +802,9 @@ public class QCraft
             if( verificationResult != LuggageVerificationResult.UNTRUSTED )
             {
                 // Decompress the luggage
-                NBTTagCompound signedLuggage = CompressedStreamTools.func_152457_a(signedLuggageData, NBTSizeTracker.field_152451_a);
+                NBTTagCompound signedLuggage = CompressedStreamTools.readCompressed(signedLuggageData, NBTSizeTracker.INFINITE);
                 byte[] luggageData = signedLuggage.getByteArray( "luggage" );
-                NBTTagCompound luggage = CompressedStreamTools.func_152457_a(luggageData, NBTSizeTracker.field_152451_a);
+                NBTTagCompound luggage = CompressedStreamTools.readCompressed(luggageData, NBTSizeTracker.INFINITE);
 
                 // Unpack items
                 if( luggage.hasKey( "items" ) )
@@ -863,13 +865,13 @@ public class QCraft
 
     public static void spawnQuantumDustFX( World world, double x, double y, double z )
     {
-        proxy.spawnQuantumDustFX( world, x, y, z );
+        proxy.spawnQuantumDustFX( world, new BlockPos(x, y, z) );
     }
 
     public static LostLuggage.Address resolveServerAddress( String addressString )
     {
         // TODO: Proxy me
-        ServerAddress address = ServerAddress.func_78860_a( addressString );
+        ServerAddress address = ServerAddress.fromString( addressString );
         if( address != null )
         {
             return new LostLuggage.Address( address.getIP() + ":" + address.getPort() );
@@ -900,7 +902,7 @@ public class QCraft
 
     public static void addUnverifiedLuggage( EntityPlayer player, byte[] luggage )
     {
-        String username = player.getCommandSenderName();
+        String username = player.getCommandSenderEntity().getName();
         if( !s_unverifiedLuggage.containsKey( username ) )
         {
             s_unverifiedLuggage.put( username, new HashSet<byte[]>() );
@@ -915,7 +917,7 @@ public class QCraft
 
     public static void clearUnverifiedLuggage( EntityPlayer player )
     {
-        String username = player.getCommandSenderName();
+        String username = player.getCommandSenderEntity().getName();
         if( s_unverifiedLuggage.containsKey( username ) )
         {
             s_unverifiedLuggage.remove( username );
@@ -924,7 +926,7 @@ public class QCraft
 
     public static void verifyUnverifiedLuggage( EntityPlayer instigator, EntityPlayer player )
     {
-        String username = player.getCommandSenderName();
+        String username = player.getCommandSenderEntity().getName();
         if( s_unverifiedLuggage.containsKey( username ) )
         {
             Set<byte[]> luggageSet = s_unverifiedLuggage.remove( username );

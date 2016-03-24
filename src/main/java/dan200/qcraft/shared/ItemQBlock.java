@@ -18,6 +18,8 @@ limitations under the License.
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
+import java.util.EnumMap;
+import java.util.HashMap;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,6 +31,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 import java.util.List;
+import java.util.Map;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -44,7 +47,7 @@ public class ItemQBlock extends ItemBlock
         setCreativeTab( QCraft.getCreativeTab() );
     }
 
-    public static ItemStack create( int subType, int[] types, int entanglementFrequency, int quantity )
+    public static ItemStack create( int subType, Map<EnumFacing, Integer> types, int entanglementFrequency, int quantity )
     {
         ItemStack result = new ItemStack( QCraft.Blocks.qBlock, quantity, subType );
         setTypes( result, types );
@@ -57,7 +60,7 @@ public class ItemQBlock extends ItemBlock
         return stack.getItemDamage();
     }
 
-    public static void setTypes( ItemStack stack, int[] types )
+    public static void setTypes( ItemStack stack, Map<EnumFacing, Integer> types )
     {
         // Ensure the nbt
         if( !stack.hasTagCompound() )
@@ -67,28 +70,28 @@ public class ItemQBlock extends ItemBlock
 
         // Set the tags
         NBTTagCompound nbt = stack.getTagCompound();
-        for( int i = 0; i < types.length; ++i )
+        for( EnumFacing i : EnumFacing.values() )
         {
-            nbt.setInteger( "s" + i, types[ i ] );
+            nbt.setInteger( "s" + i.getIndex(), types.get(i) );
         }
     }
 
-    public static int[] getTypes( ItemStack stack )
+    public static Map<EnumFacing, Integer> getTypes( ItemStack stack )
     {
         // Get the tags
-        int[] types = new int[ 6 ];
+        Map<EnumFacing, Integer> types = new EnumMap<EnumFacing, Integer>(EnumFacing.class);
         if( stack.hasTagCompound() )
         {
             NBTTagCompound nbt = stack.getTagCompound();
-            for( int i = 0; i < types.length; ++i )
+            for( EnumFacing i : EnumFacing.values() )
             {
-                if( nbt.hasKey( "s" + i ) )
+                if( nbt.hasKey( "s" + i.getIndex() ) )
                 {
-                    types[ i ] = nbt.getInteger( "s" + i );
+                    types.put(i, nbt.getInteger( "s" + i.getIndex() ));
                 }
                 else
                 {
-                    types[ i ] = 0;
+                    types.put(i, 0);
                 }
             }
         }
