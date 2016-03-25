@@ -15,25 +15,24 @@ limitations under the License.
 */
 
 
-package dan200.qcraft.shared;
+package dan200.qcraft.shared.blocks;
 
+import dan200.qcraft.shared.items.ItemQuantumComputer;
 import dan200.QCraft;
+import dan200.qcraft.shared.TileEntityQuantumComputer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
@@ -44,12 +43,6 @@ import net.minecraft.util.EnumFacing;
 public class BlockQuantumComputer extends BlockDirectional
         implements ITileEntityProvider
 {
-    private static class Icons
-    {
-        public static IIcon Front;
-        public static IIcon Top;
-        public static IIcon Side;
-    }
 
     public BlockQuantumComputer()
     {
@@ -200,54 +193,6 @@ public class BlockQuantumComputer extends BlockDirectional
     public boolean canConnectRedstone( IBlockAccess world, BlockPos blockPos, EnumFacing side )
     {
         return true;
-    }
-
-    @Override
-    public void registerBlockIcons( IIconRegister iconRegister )
-    {
-        Icons.Front = iconRegister.registerIcon( "qcraft:computer" );
-        Icons.Top = iconRegister.registerIcon( "qcraft:computer_top" );
-        Icons.Side = iconRegister.registerIcon( "qcraft:computer_side" );
-    }
-
-    @Override
-    public IIcon getIcon( IBlockAccess world, BlockPos blockPos, EnumFacing side )
-    {
-        if( side == EnumFacing.DOWN || side == EnumFacing.UP)
-        {
-            return Icons.Top;
-        }
-        
-        IBlockState state = world.getBlockState(blockPos);
-        int metadata = getMetaFromState(state);
-        EnumFacing direction = EnumFacing.getFront(metadata); //probably horribly wrong orig: Direction.rotateOpposite[ getDirection( metadata ) ];
-        if( side == direction )
-        {
-            return Icons.Front;
-        }
-
-        return Icons.Side;
-    }
-
-    @Override
-    public IIcon getIcon( EnumFacing side, int damage )
-    {
-        switch( side )
-        {
-            case EnumFacing.DOWN:
-            case EnumFacing.UP:
-            {
-                return Icons.Top;
-            }
-            case EnumFacing.WEST:
-            {
-                return Icons.Front;
-            }
-            default:
-            {
-                return Icons.Side;
-            }
-        }
     }
 
     @Override

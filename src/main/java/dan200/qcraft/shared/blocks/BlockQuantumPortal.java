@@ -15,17 +15,15 @@ limitations under the License.
 */
 
 
-package dan200.qcraft.shared;
+package dan200.qcraft.shared.blocks;
 
 import dan200.QCraft;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -36,7 +34,6 @@ import net.minecraft.util.EnumFacing;
 
 public class BlockQuantumPortal extends Block
 {
-    private static IIcon s_icon;
 
     public BlockQuantumPortal()
     {
@@ -187,12 +184,6 @@ public class BlockQuantumPortal extends Block
     }
 
     @Override
-    public int getRenderBlockPass()
-    {
-        return 1;
-    }
-
-    @Override
     public void randomDisplayTick( World par1World, BlockPos blockPos, IBlockState blockState, Random par5Random )
     {
         int x = blockPos.getX();
@@ -222,24 +213,6 @@ public class BlockQuantumPortal extends Block
     public Item getItem( World par1World, BlockPos blockPos )
     {
         return null;
-    }
-
-    @Override
-    public void registerBlockIcons( IIconRegister iconRegister )
-    {
-        s_icon = iconRegister.registerIcon( "qcraft:portal" );
-    }
-
-    @Override
-    public IIcon getIcon( IBlockAccess world, BlockPos blockPos, EnumFacing side )
-    {
-        return s_icon;
-    }
-
-    @Override
-    public IIcon getIcon( EnumFacing side, int damage )
-    {
-        return s_icon;
     }
 }
 

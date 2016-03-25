@@ -17,6 +17,12 @@ limitations under the License.
 
 package dan200.qcraft.client;
 
+import dan200.qcraft.shared.blocks.BlockQuantumLogic;
+import dan200.qcraft.shared.blocks.BlockQBlock;
+import dan200.qcraft.client.items.QItemRenderRegister;
+import dan200.qcraft.client.blocks.QBlockRenderRegister;
+import dan200.qcraft.shared.items.ItemQuantumGoggles;
+import dan200.qcraft.shared.items.ItemQBlock;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -25,13 +31,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import dan200.QCraft;
 import dan200.qcraft.shared.*;
+import dan200.qcraft.shared.blocks.QBlocks;
 import java.util.Map;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.particle.EntityFX;
-import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -43,9 +49,9 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.event.*;
 import org.lwjgl.opengl.GL11;
 
 public class QCraftProxyClient extends QCraftProxyCommon
@@ -64,18 +70,21 @@ public class QCraftProxyClient extends QCraftProxyCommon
     // IQCraftProxy implementation
 
     @Override
-    public void load()
+    public void init(FMLInitializationEvent e)
     {
+        super.init(e);
+        QItemRenderRegister.registerItemRenderer();
+        QBlockRenderRegister.registerBlockRenderer();
+        
+        
         ItemQuantumGoggles.s_renderIndex = RenderingRegistry.addNewArmourRendererPrefix( "qcraft:goggles" );
-
-        super.load();
 
         // Setup renderers
         int gateID = RenderingRegistry.getNextAvailableRenderId();
-        QCraft.Blocks.quantumLogic.blockRenderID = gateID;
+        QBlocks.quantumLogic.blockRenderID = gateID;
 
         m_renderBlocks = new RenderBlocks();
-        QCraft.Blocks.qBlock.blockRenderID = RenderingRegistry.getNextAvailableRenderId();
+        QBlocks.qBlock.blockRenderID = RenderingRegistry.getNextAvailableRenderId();
 
         // Setup client forge handlers
         registerForgeHandlers();
@@ -357,13 +366,13 @@ public class QCraftProxyClient extends QCraftProxyCommon
         @Override
         public boolean renderWorldBlock( IBlockAccess world, BlockPos blockPos, Block block, int modelID, RenderBlocks renderblocks )
         {
-            if( modelID == getRenderId() && block == QCraft.Blocks.qBlock )
+            if( modelID == getRenderId() && block == QBlocks.qBlock )
             {
-                QCraft.Blocks.qBlock.s_forceGrass = ( QCraft.Blocks.qBlock.getImpostorBlock( world, blockPos ) == Blocks.grass );
-                QCraft.Blocks.qBlock.setBlockBounds( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );
-                renderblocks.setRenderBoundsFromBlock( QCraft.Blocks.qBlock );
-                renderblocks.renderStandardBlock( QCraft.Blocks.qBlock, i, j, k );
-                QCraft.Blocks.qBlock.s_forceGrass = false;
+                QBlocks.qBlock.s_forceGrass = ( QBlocks.qBlock.getImpostorBlock( world, blockPos ) == Blocks.grass );
+                QBlocks.qBlock.setBlockBounds( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );
+                renderblocks.setRenderBoundsFromBlock( QBlocks.qBlock );
+                renderblocks.renderStandardBlock( QBlocks.qBlock, i, j, k );
+                QBlocks.qBlock.s_forceGrass = false;
                 return true;
             }
             return false;

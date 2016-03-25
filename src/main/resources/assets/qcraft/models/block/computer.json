@@ -1,0 +1,8 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "top": "qcraft:blocks/computer_top.png",
+        "bottom": "qcraft:blocks/computer.png",
+        "side": "qcraft:blocks/computer_side.png"
+    }
+}

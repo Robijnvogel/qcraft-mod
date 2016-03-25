@@ -17,8 +17,11 @@ limitations under the License.
 
 package dan200.qcraft.shared;
 
+import dan200.qcraft.shared.items.ItemQuantumComputer;
+import dan200.qcraft.shared.items.ItemQBlock;
 import com.google.common.base.CaseFormat;
 import dan200.QCraft;
+import dan200.qcraft.shared.blocks.QBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPane;
 import net.minecraft.block.material.Material;
@@ -1220,7 +1223,7 @@ public class TileEntityQuantumComputer extends TileEntity
     {
         for( int y = portal.m_yOrigin; y < portal.m_yOrigin + portal.m_yLength; ++y )
         {
-            Block block = QCraft.Blocks.quantumPortal;
+            Block block = QBlocks.quantumPortal;
             for( int x = portal.m_xOrigin; x < portal.m_xOrigin + portal.m_xLength; ++x )
             {
                 worldObj.setBlockState(new BlockPos(x, y, portal.m_zOrigin), (IBlockState) new BlockState(block, (IProperty[]) block.getStateFromMeta(0).getProperties().keySet().toArray()), 2 ); //may not be able to cast this as an IBlockState, but for right now, this compiles and looks sound althoug messy
@@ -1253,14 +1256,14 @@ public class TileEntityQuantumComputer extends TileEntity
         {
             for( int x = portal.m_xOrigin; x < portal.m_xOrigin + portal.m_xLength; ++x )
             {
-                if( worldObj.getBlockState(new BlockPos(x, y, portal.m_zOrigin)).getBlock() != QCraft.Blocks.quantumPortal )
+                if( worldObj.getBlockState(new BlockPos(x, y, portal.m_zOrigin)).getBlock() != QBlocks.quantumPortal )
                 {
                     return false;
                 }
             }
             for( int z = portal.m_zOrigin; z < portal.m_zOrigin + portal.m_zLength; ++z )
             {
-                if( worldObj.getBlockState(new BlockPos(portal.m_xOrigin, y, z)).getBlock() != QCraft.Blocks.quantumPortal )
+                if( worldObj.getBlockState(new BlockPos(portal.m_xOrigin, y, z)).getBlock() != QBlocks.quantumPortal )
                 {
                     return false;
                 }

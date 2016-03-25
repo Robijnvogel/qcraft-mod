@@ -1,0 +1,8 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "all": "qcraft:blocks/transparent.png",
+        "fuzz": "qcraft:blocks/qblock_fuzz.png",
+        "swirl": "qcraft:blocks/qblock_swirl.png"        
+    }
+}

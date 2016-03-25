@@ -7,27 +7,29 @@ buildscript {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
+		maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
     }
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'forge'
 
-version = "1.2"
+version = "1.2-veryUnstable0.0.0"
 group = "dan200.qcraft"
 archivesBaseName = "qCraft"
 
-/*
-// for people who want stable - not yet functional for MC 1.8.8 - we require the forgegradle 2.1 snapshot
-plugins {
-    id "net.minecraftforge.gradle.forge" version "2.0.2"
+
+sourceSets {
+    main {
+        java { srcDirs = ["$projectDir/src/java"] }
+        resources { srcDirs = ["$projectDir/src/resources"] }
+    }
 }
-*/
-version = "1.0"
-group= "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "modid"
 
 minecraft {
     version = "1.8.9-11.15.1.1794"

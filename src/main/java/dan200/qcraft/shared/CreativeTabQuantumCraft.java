@@ -18,6 +18,7 @@ limitations under the License.
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
+import dan200.qcraft.shared.items.QItems;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 
@@ -31,7 +32,7 @@ public class CreativeTabQuantumCraft extends CreativeTabs
     @Override
     public Item getTabIconItem()
     {
-        return QCraft.Items.quantumDust;
+        return QItems.quantumDust;
     }
 
     @Override

@@ -15,20 +15,17 @@ limitations under the License.
 */
 
 
-package dan200.qcraft.shared;
+package dan200.qcraft.shared.blocks;
 
 import dan200.QCraft;
+import dan200.qcraft.shared.items.QItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-
 import java.util.Random;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockState;
@@ -38,7 +35,6 @@ import net.minecraft.util.EnumFacing;
 
 public class BlockQuantumOre extends Block
 {
-    private static IIcon s_icon;
     private boolean m_glowing;
 
     public BlockQuantumOre( boolean glowing )
@@ -87,16 +83,16 @@ public class BlockQuantumOre extends Block
     @Override
     public void updateTick( World world, BlockPos blockPos, IBlockState blockState, Random r )
     {
-        if( this == QCraft.Blocks.quantumOreGlowing )
+        if( this == QBlocks.quantumOreGlowing )
         {
-            world.setBlockState(blockPos, (IBlockState) new BlockState(QCraft.Blocks.quantumOre, (IProperty[]) world.getBlockState(blockPos).getProperties().keySet().toArray()));
+            world.setBlockState(blockPos, (IBlockState) new BlockState(QBlocks.quantumOre, (IProperty[]) world.getBlockState(blockPos).getProperties().keySet().toArray()));
         }
     }
 
     @Override
     public Item getItemDropped( IBlockState blockState, Random r, int j )
     {
-        return QCraft.Items.quantumDust;
+        return QItems.quantumDust;
     }
 
     @Override
@@ -191,33 +187,15 @@ public class BlockQuantumOre extends Block
     private void glow( World world, BlockPos blockPos )
     {
         this.sparkle( world, blockPos );
-        if( this == QCraft.Blocks.quantumOre )
+        if( this == QBlocks.quantumOre )
         {
-            world.setBlockState(blockPos, (IBlockState) new BlockState(QCraft.Blocks.quantumOreGlowing, (IProperty[]) world.getBlockState(blockPos).getProperties().keySet().toArray()));
+            world.setBlockState(blockPos, (IBlockState) new BlockState(QBlocks.quantumOreGlowing, (IProperty[]) world.getBlockState(blockPos).getProperties().keySet().toArray()));
         }
     }
 
     @Override
     protected ItemStack createStackedBlock( IBlockState blockState )
     {
-        return new ItemStack( QCraft.Blocks.quantumOre );
-    }
-
-    @Override
-    public void registerBlockIcons( IIconRegister iconRegister )
-    {
-        s_icon = iconRegister.registerIcon( "qcraft:ore" );
-    }
-
-    @Override
-    public IIcon getIcon( IBlockAccess world, BlockPos blockPos, int side )
-    {
-        return s_icon;
-    }
-
-    @Override
-    public IIcon getIcon( int side, int damage )
-    {
-        return s_icon;
-    }
+        return new ItemStack( QBlocks.quantumOre );
+    }    
 }

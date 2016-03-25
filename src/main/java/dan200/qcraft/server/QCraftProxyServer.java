@@ -24,6 +24,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.event.*;
 
 public class QCraftProxyServer extends QCraftProxyCommon
 {
@@ -34,9 +35,9 @@ public class QCraftProxyServer extends QCraftProxyCommon
     // IQCraftProxy implementation
 
     @Override
-    public void load()
+    public void init(FMLInitializationEvent e)
     {
-        super.load();
+        super.init(e);
         registerForgeHandlers();
     }
 

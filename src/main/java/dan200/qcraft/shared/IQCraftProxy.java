@@ -21,12 +21,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.event.*;
 
 public interface IQCraftProxy
 {
     public boolean isClient();
-    public void preLoad();
-    public void load();
+    public void preLInit(FMLPreInitializationEvent e);
+    public void init(FMLInitializationEvent e);
+    public void postInit(FMLPostInitializationEvent e);
+    
 
     public Object getQuantumComputerGUI( InventoryPlayer inventory, TileEntityQuantumComputer computer );
     public void showItemTransferGUI( EntityPlayer player, TileEntityQuantumComputer computer );

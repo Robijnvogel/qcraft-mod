@@ -15,27 +15,26 @@ limitations under the License.
 */
 
 
-package dan200.qcraft.shared;
+package dan200.qcraft.shared.blocks;
 
+import dan200.qcraft.shared.items.ItemQBlock;
 import dan200.QCraft;
+import dan200.qcraft.shared.IQuantumObservable;
+import dan200.qcraft.shared.TileEntityQBlock;
 import net.minecraft.block.*;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,9 +48,6 @@ public class BlockQBlock extends BlockSand
      implements ITileEntityProvider, IQuantumObservable
 {
     public int blockRenderID;
-    private static IIcon s_transparentIcon;
-    private static IIcon s_swirlIcon;
-    private static IIcon s_fuzzIcon;
     private static ItemStack[] s_impostorBlocks;
 
     public static enum Appearance
@@ -196,11 +192,12 @@ public class BlockQBlock extends BlockSand
 
     public BlockQBlock()
     {
+        super();
+        setUnlocalizedName("qcraft:qblock");
         setCreativeTab( QCraft.getCreativeTab() );
         setHardness( 5.0f );
         setResistance( 10.0f );
         setStepSound( Block.soundTypeMetal );
-        setRegistryName("qcraft:qblock");
     }
 
     @Override
@@ -618,10 +615,11 @@ public class BlockQBlock extends BlockSand
         {
             super.updateTick( world, blockPos, blockState, r );
         }
+        setStepSound( block.stepSound ); //@todo check if this works
     }
 
     @Override
-    protected void onStartFalling( EntityFallingBlock entityFallingSand ) // onStartFalling
+    protected void onStartFalling( EntityFallingBlock entityFallingSand )
     { 
         // Setup NBT for block to place
         World world = entityFallingSand.worldObj;
@@ -641,7 +639,7 @@ public class BlockQBlock extends BlockSand
     }
     
     @Override
-    public void onEndFalling(World world, BlockPos blockPos) // onStopFalling
+    public void onEndFalling(World world, BlockPos blockPos)
     {        
         TileEntity entity = world.getTileEntity(blockPos);        
         if (entity != null && entity instanceof TileEntityQBlock) {
@@ -697,65 +695,7 @@ public class BlockQBlock extends BlockSand
         }
         return 0xffffff;
     }
-
-    public IIcon getIconForType( int side, int type, Appearance appearance )
-    {
-        if( appearance == Appearance.Swirl )
-        {
-            return s_swirlIcon;
-        }
-        else if( appearance == Appearance.Fuzz )
-        {
-            return s_fuzzIcon;
-        }
-        else //if( appearance == Appearance.Block )
-        {
-            ItemStack[] blockList = getImpostorBlockList();
-            if( type >= 0 && type < blockList.length )
-            {
-                ItemStack item = blockList[ type ];
-                if( item != null )
-                {
-                    Block block = ((ItemBlock)item.getItem()).block;
-                    int damage = item.getItemDamage();
-                    return block.getIcon( side, damage );
-                }
-            }
-            return s_transparentIcon;
-        }
-    }
-
-    @Override
-    public IIcon getIcon( IBlockAccess world, BlockPos blockPos, int side )
-    {
-        int type = getImpostorType( world, blockPos );
-        Appearance appearance = getAppearance( world, blockPos );
-        return getIconForType( side, type, appearance );
-    }
-
-    public static boolean s_forceGrass = false;
-
-    @Override
-    public IIcon getIcon( int side, int damage )
-    {
-        if( s_forceGrass )
-        {
-            return Blocks.grass.getIcon( side, damage );
-        }
-        else
-        {
-            return s_swirlIcon;
-        }
-    }
-
-    @Override
-    public void registerBlockIcons( IIconRegister iconRegister )
-    {
-        s_transparentIcon = iconRegister.registerIcon( "qcraft:transparent" );
-        s_swirlIcon = iconRegister.registerIcon( "qcraft:qblock_swirl" );
-        s_fuzzIcon = iconRegister.registerIcon( "qcraft:qblock_fuzz" );
-    }
-
+    
     @Override
     public TileEntity createNewTileEntity( World world, int metadata )
     {

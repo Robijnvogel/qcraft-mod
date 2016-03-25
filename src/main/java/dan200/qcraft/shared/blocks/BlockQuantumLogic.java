@@ -15,21 +15,20 @@ limitations under the License.
 */
 
 
-package dan200.qcraft.shared;
+package dan200.qcraft.shared.blocks;
 
 import dan200.QCraft;
+import dan200.qcraft.shared.IQuantumObservable;
+import dan200.qcraft.shared.QuantumUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-
 import java.util.Random;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
@@ -38,7 +37,6 @@ import net.minecraft.util.EnumFacing;
 public class BlockQuantumLogic extends BlockDirectional
 {
     public int blockRenderID;
-    private IIcon[] m_icons;
 
     public class SubType
     {
@@ -92,25 +90,6 @@ public class BlockQuantumLogic extends BlockDirectional
             return super.canBlockStay( world, blockPos );
         }
         return false;
-    }
-
-    @Override
-    public IIcon getIcon( IBlockAccess world, BlockPos blockPos, EnumFacing side )
-    {
-        int metadata = getMetaFromState( world.getBlockState( blockPos ) );
-        int damage = getSubType( metadata );
-        return getIcon( side, damage );
-    }
-
-    @Override
-    public IIcon getIcon( EnumFacing side, int damage )
-    {
-        int subType = damage;
-        if( side == EnumFacing.UP && damage >= 0 && damage < m_icons.length )
-        {
-            return m_icons[ damage ];
-        }
-        return Blocks.double_stone_slab.getBlockTextureFromSide( side );
     }
 
     @Override
@@ -221,14 +200,6 @@ public class BlockQuantumLogic extends BlockDirectional
         {
             return;
         }
-    }
-
-    @Override
-    public void registerBlockIcons( IIconRegister iconRegister )
-    {
-        m_icons = new IIcon[ SubType.Count ];
-        m_icons[ SubType.ObserverOff ] = iconRegister.registerIcon( "qcraft:automatic_observer" );
-        m_icons[ SubType.ObserverOn ] = iconRegister.registerIcon( "qcraft:automatic_observer_on" );
     }
 
     private boolean evaluateInput( World world, BlockPos blockPos )

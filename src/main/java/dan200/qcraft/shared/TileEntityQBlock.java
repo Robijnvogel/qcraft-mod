@@ -17,7 +17,9 @@ limitations under the License.
 
 package dan200.qcraft.shared;
 
+import dan200.qcraft.shared.blocks.BlockQBlock;
 import dan200.QCraft;
+import dan200.qcraft.shared.blocks.QBlocks;
 import java.util.EnumMap;
 import java.util.HashMap;
 import net.minecraft.block.Block;
@@ -162,14 +164,14 @@ public class TileEntityQBlock extends TileEntity
 
     public int getSubType()
     {
-        return QCraft.Blocks.qBlock.getSubType( worldObj, pos );
+        return QBlocks.qBlock.getSubType( worldObj, pos );
     }
 
     private void blockUpdate()
     {
         worldObj.markBlockForUpdate( pos );
-        worldObj.scheduleBlockUpdate( pos, QCraft.Blocks.qBlock, QCraft.Blocks.qBlock.tickRate( worldObj ), 0 );
-        worldObj.notifyNeighborsOfStateChange(pos, QCraft.Blocks.qBlock );
+        worldObj.scheduleBlockUpdate( pos, QBlocks.qBlock, QBlocks.qBlock.tickRate( worldObj ), 0 );
+        worldObj.notifyNeighborsOfStateChange(pos, QBlocks.qBlock );
     }
 
     public boolean isForceObserved( EnumFacing side )

@@ -15,53 +15,29 @@ limitations under the License.
 */
 
 
-package dan200.qcraft.shared;
+package dan200.qcraft.shared.items;
 
 import dan200.QCraft;
-import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
-
 import java.util.List;
 
-public class ItemQuantumLogic extends ItemBlock
+public class ItemQuantumDust extends Item
 {
-    public ItemQuantumLogic( Block block )
+
+    public ItemQuantumDust()
     {
-        super( block );
+        super();
         setMaxStackSize( 64 );
-        setHasSubtypes( true );
-        setUnlocalizedName( "qcraft:automatic_observer" );
+        setHasSubtypes( false );
+        setUnlocalizedName( "qcraft:dust" );
         setCreativeTab( QCraft.getCreativeTab() );
     }
 
     @Override
     public void getSubItems( Item item, CreativeTabs tabs, List list )
     {
-        list.add( new ItemStack( item, 1, BlockQuantumLogic.SubType.ObserverOff ) );
-    }
-
-    @Override
-    public IIcon getIconFromDamage( int damage )
-    {
-        return block.getIcon( 1, damage );
-    }
-
-    @Override
-    public String getUnlocalizedName( ItemStack itemstack )
-    {
-        int damage = itemstack.getItemDamage();
-        int subType = damage;
-        switch( subType )
-        {
-            case BlockQuantumLogic.SubType.ObserverOff:
-            default:
-            {
-                return "tile.qcraft:automatic_observer";
-            }
-        }
+        list.add( new ItemStack( QItems.quantumDust, 1, 0 ) );
     }
 }

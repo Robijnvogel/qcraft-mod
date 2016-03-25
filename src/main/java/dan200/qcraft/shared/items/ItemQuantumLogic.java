@@ -15,47 +15,46 @@ limitations under the License.
 */
 
 
-package dan200.qcraft.shared;
+package dan200.qcraft.shared.items;
 
 import dan200.QCraft;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import dan200.qcraft.shared.blocks.BlockQuantumLogic;
+import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
-import net.minecraft.world.World;
-
 import java.util.List;
 
-public class ItemQuantumDust extends Item
+public class ItemQuantumLogic extends ItemBlock
 {
-    private static IIcon s_icon;
-
-    public ItemQuantumDust()
+    public ItemQuantumLogic( Block block )
     {
-        super();
+        super( block );
         setMaxStackSize( 64 );
-        setHasSubtypes( false );
-        setUnlocalizedName( "qcraft:dust" );
+        setHasSubtypes( true );
+        setUnlocalizedName( "qcraft:automatic_observer" );
         setCreativeTab( QCraft.getCreativeTab() );
     }
 
     @Override
     public void getSubItems( Item item, CreativeTabs tabs, List list )
     {
-        list.add( new ItemStack( QCraft.Items.quantumDust, 1, 0 ) );
+        list.add( new ItemStack( item, 1, BlockQuantumLogic.SubType.ObserverOff ) );
     }
 
     @Override
-    public void registerIcons( IIconRegister iconRegister )
+    public String getUnlocalizedName( ItemStack itemstack )
     {
-        s_icon = iconRegister.registerIcon( "qcraft:dust" );
-    }
-
-    @Override
-    public IIcon getIconFromDamage( int damage )
-    {
-        return s_icon;
+        int damage = itemstack.getItemDamage();
+        int subType = damage;
+        switch( subType )
+        {
+            case BlockQuantumLogic.SubType.ObserverOff:
+            default:
+            {
+                return "tile.qcraft:automatic_observer";
+            }
+        }
     }
 }

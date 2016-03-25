@@ -15,9 +15,13 @@ limitations under the License.
 */
 
 
-package dan200.qcraft.shared;
+package dan200.qcraft.shared.items;
 
+import dan200.qcraft.shared.items.ItemQBlock;
 import dan200.QCraft;
+import dan200.qcraft.shared.TileEntityQBlock;
+import dan200.qcraft.shared.TileEntityQuantumComputer;
+import dan200.qcraft.shared.blocks.QBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -27,7 +31,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
-
 import java.util.List;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
@@ -46,7 +49,7 @@ public class ItemQuantumComputer extends ItemBlock
 
     public static ItemStack create( int entanglementFrequency, int quantity )
     {
-        ItemStack result = new ItemStack( QCraft.Blocks.quantumComputer, quantity, 0 );
+        ItemStack result = new ItemStack( QBlocks.quantumComputer, quantity, 0 );
         setEntanglementFrequency( result, entanglementFrequency );
         return result;
     }

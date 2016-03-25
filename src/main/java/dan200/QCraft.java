@@ -17,11 +17,17 @@ limitations under the License.
 
 package dan200;
 
+import dan200.qcraft.shared.blocks.BlockQuantumPortal;
+import dan200.qcraft.shared.blocks.BlockQuantumLogic;
+import dan200.qcraft.shared.blocks.BlockQBlock;
+import dan200.qcraft.shared.blocks.BlockQuantumComputer;
+import dan200.qcraft.shared.blocks.BlockQuantumOre;
+import dan200.qcraft.shared.items.ItemQuantumGoggles;
+import dan200.qcraft.shared.items.ItemQuantumDust;
+import dan200.qcraft.shared.items.ItemEOS;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
@@ -45,6 +51,7 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.PublicKey;
 import java.util.*;
 import net.minecraft.network.PacketBuffer;
@@ -76,24 +83,6 @@ public class QCraft
     public static boolean letAdminsVerifyPortalServers = true;
     public static boolean letPlayersVerifyPortalServers = false;
 
-    // Blocks and Items
-    public static class Blocks
-    {
-        public static BlockQuantumOre quantumOre;
-        public static BlockQuantumOre quantumOreGlowing;
-        public static BlockQuantumLogic quantumLogic;
-        public static BlockQBlock qBlock;
-        public static BlockQuantumComputer quantumComputer;
-        public static BlockQuantumPortal quantumPortal;
-    }
-
-    public static class Items
-    {
-        public static ItemQuantumDust quantumDust;
-        public static ItemEOS eos;
-        public static ItemQuantumGoggles quantumGoggles;
-    }
-
     // Networking
     public static FMLEventChannel networkEventChannel;
     public static LostLuggage.Address travelNextTick;
@@ -115,7 +104,7 @@ public class QCraft
 
     // Implementation
     @Mod.Instance( value = "qCraft" )
-    public static QCraft instance;
+    public static QCraft instance = new QCraft();
 
     @SidedProxy(
         clientSide = "dan200.qcraft.client.QCraftProxyClient",
@@ -182,13 +171,19 @@ public class QCraft
         networkEventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel( "qCraft" );
         networkEventChannel.register( new PacketHandler() );
 
-        proxy.preLoad();
+        proxy.preLInit(event);
     }
 
     @Mod.EventHandler
     public void init( FMLInitializationEvent event )
     {
-        proxy.load();
+        proxy.init(event);
+    }
+    
+    @Mod.EventHandler
+    public void postInit (FMLPostInitializationEvent event)
+    {
+        proxy.postInit(event);
     }
 
     @Mod.EventHandler
@@ -568,7 +563,7 @@ public class QCraft
             case QCraftPacket.UnpackLuggage:
             {
                 // Connected from another server, took luggage with them
-                byte[] signedLuggageData = packet.dataByte[0];
+                InputStream signedLuggageData = packet.dataByte[0];
                 boolean isDestination = (packet.dataInt[0] > 0);
                 boolean teleported = false;
                 unpackLuggage( entityPlayer, entityPlayer, signedLuggageData, isDestination, teleported, false );
@@ -657,11 +652,10 @@ public class QCraft
         }
     }
 
-    private static LuggageVerificationResult verifyIncomingLuggage( EntityPlayer instigator, EntityPlayer entityPlayer, byte[] signedLuggageData, boolean forceVerify ) throws IOException
+    private static LuggageVerificationResult verifyIncomingLuggage( EntityPlayer instigator, EntityPlayer entityPlayer, InputStream signedLuggageData, boolean forceVerify ) throws IOException
     {
-        NBTTagCompound signedLuggage = CompressedStreamTools.readCompressed( signedLuggageData , NBTSizeTracker.INFINITE);
-        byte[] luggageData = signedLuggage.getByteArray("luggage");
-        NBTTagCompound luggage = CompressedStreamTools.readCompressed(luggageData, NBTSizeTracker.INFINITE);
+        NBTTagCompound signedLuggage = CompressedStreamTools.readCompressed(signedLuggageData);
+        NBTTagCompound luggage = signedLuggage.getCompoundTag("luggage");
 
         if( signedLuggage.hasKey( "key" ) )
         {
@@ -793,18 +787,17 @@ public class QCraft
         }
     }
 
-    private static boolean unpackLuggage( EntityPlayer instigator, EntityPlayer entityPlayer, byte[] signedLuggageData, boolean isDestination, boolean alreadyTeleported, boolean forceVerify )
+    private static boolean unpackLuggage( EntityPlayer instigator, EntityPlayer entityPlayer, InputStream input, boolean isDestination, boolean alreadyTeleported, boolean forceVerify )
     {
         try
         {
             // Verify the luggage
-            LuggageVerificationResult verificationResult = verifyIncomingLuggage( instigator, entityPlayer, signedLuggageData, forceVerify );
+            LuggageVerificationResult verificationResult = verifyIncomingLuggage( instigator, entityPlayer, input, forceVerify );
             if( verificationResult != LuggageVerificationResult.UNTRUSTED )
             {
                 // Decompress the luggage
-                NBTTagCompound signedLuggage = CompressedStreamTools.readCompressed(signedLuggageData, NBTSizeTracker.INFINITE);
-                byte[] luggageData = signedLuggage.getByteArray( "luggage" );
-                NBTTagCompound luggage = CompressedStreamTools.readCompressed(luggageData, NBTSizeTracker.INFINITE);
+                NBTTagCompound signedLuggage = CompressedStreamTools.readCompressed(input);
+                NBTTagCompound luggage = signedLuggage.getCompoundTag("luggage");
 
                 // Unpack items
                 if( luggage.hasKey( "items" ) )
@@ -898,17 +891,17 @@ public class QCraft
         return s_currentServer;
     }
 
-    private static Map<String, Set<byte[]>> s_unverifiedLuggage = new HashMap<String, Set<byte[]>>();
+    private static Map<String, Set<NBTTagCompound>> s_unverifiedLuggage = new HashMap<String, Set<NBTTagCompound>>();
 
-    public static void addUnverifiedLuggage( EntityPlayer player, byte[] luggage )
+    public static void addUnverifiedLuggage( EntityPlayer player, NBTTagCompound luggage )
     {
         String username = player.getCommandSenderEntity().getName();
         if( !s_unverifiedLuggage.containsKey( username ) )
         {
-            s_unverifiedLuggage.put( username, new HashSet<byte[]>() );
+            s_unverifiedLuggage.put( username, new HashSet<NBTTagCompound>() );
         }
 
-        Set<byte[]> luggageSet = s_unverifiedLuggage.get( username );
+        Set<NBTTagCompound> luggageSet = s_unverifiedLuggage.get( username );
         if( !luggageSet.contains( luggage ) )
         {
             luggageSet.add( luggage );
@@ -929,13 +922,13 @@ public class QCraft
         String username = player.getCommandSenderEntity().getName();
         if( s_unverifiedLuggage.containsKey( username ) )
         {
-            Set<byte[]> luggageSet = s_unverifiedLuggage.remove( username );
+            Set<NBTTagCompound> luggageSet = s_unverifiedLuggage.remove( username );
 
             boolean teleported = false;
-            Iterator<byte[]> it = luggageSet.iterator();
+            Iterator<NBTTagCompound> it = luggageSet.iterator();
             while( it.hasNext() )
             {
-                byte[] signedLuggageData = it.next();
+                byte[] signedLuggageData = it.next().getByteArray();
                 if( unpackLuggage( instigator, player, signedLuggageData, true, teleported, true ) )
                 {
                     teleported = true;
