@@ -35,6 +35,7 @@ import dan200.qcraft.shared.blocks.QBlocks;
 import java.util.Map;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.particle.EntityFX;
@@ -224,16 +225,17 @@ public class QCraftProxyClient extends QCraftProxyCommon
         @Override
         public int getRenderId()
         {
-            return QCraft.Blocks.quantumLogic.blockRenderID;
+            return QBlocks.quantumLogic.blockRenderID;
         }
 
         @Override
-        public boolean renderWorldBlock( IBlockAccess world, int i, int j, int k, Block block, int modelID, RenderBlocks renderblocks )
+        public boolean renderWorldBlock( IBlockAccess world, BlockPos blockpos, Block block, int modelID, RenderBlocks renderblocks )
         {
-            if( modelID == QCraft.Blocks.quantumLogic.blockRenderID )
+            IBlockState blockState = world.getBlockState(blockpos);
+            if( modelID == QBlocks.quantumLogic.blockRenderID )
             {
-                int metadata = world.getBlockMetadata( i, j, k );
-                int direction = BlockDirectional.getDirection( metadata );
+                int metadata = block.getMetaFromState(blockState);
+                int direction = blockState.getValue("Direction");
                 int subType = ( (BlockQuantumLogic) block ).getSubType( metadata );
 
                 // Draw Base
@@ -326,9 +328,9 @@ public class QCraftProxyClient extends QCraftProxyCommon
                 {
                     GL11.glPushMatrix();
                     GL11.glTranslatef( -0.5f, -0.5f, -0.5f );
-                    QCraft.Blocks.qBlock.setBlockBounds( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );
-                    m_renderBlocks.setRenderBoundsFromBlock( QCraft.Blocks.qBlock );
-                    renderInventoryQBlock( m_renderBlocks, QCraft.Blocks.qBlock, item );
+                    QBlocks.qBlock.setBlockBounds( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );
+                    m_renderBlocks.setRenderBoundsFromBlock( QBlocks.qBlock );
+                    renderInventoryQBlock( m_renderBlocks, QBlocks.qBlock, item );
                     GL11.glPopMatrix();
                     break;
                 }
@@ -336,9 +338,9 @@ public class QCraftProxyClient extends QCraftProxyCommon
                 case EQUIPPED:
                 {
                     GL11.glPushMatrix();
-                    QCraft.Blocks.qBlock.setBlockBounds( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );
-                    m_renderBlocks.setRenderBoundsFromBlock( QCraft.Blocks.qBlock );
-                    renderInventoryQBlock( m_renderBlocks, QCraft.Blocks.qBlock, item );
+                    QBlocks.qBlock.setBlockBounds( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );
+                    m_renderBlocks.setRenderBoundsFromBlock( QBlocks.qBlock );
+                    renderInventoryQBlock( m_renderBlocks, QBlocks.qBlock, item );
                     GL11.glPopMatrix();
                     break;
                 }
@@ -360,7 +362,7 @@ public class QCraftProxyClient extends QCraftProxyCommon
         @Override
         public int getRenderId()
         {
-            return QCraft.Blocks.qBlock.blockRenderID;
+            return QBlocks.qBlock.blockRenderID;
         }
 
         @Override
@@ -371,7 +373,7 @@ public class QCraftProxyClient extends QCraftProxyCommon
                 QBlocks.qBlock.s_forceGrass = ( QBlocks.qBlock.getImpostorBlock( world, blockPos ) == Blocks.grass );
                 QBlocks.qBlock.setBlockBounds( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );
                 renderblocks.setRenderBoundsFromBlock( QBlocks.qBlock );
-                renderblocks.renderStandardBlock( QBlocks.qBlock, i, j, k );
+                renderblocks.renderStandardBlock( QBlocks.qBlock, blockPos );
                 QBlocks.qBlock.s_forceGrass = false;
                 return true;
             }

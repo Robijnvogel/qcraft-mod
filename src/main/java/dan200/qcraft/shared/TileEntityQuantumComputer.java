@@ -22,6 +22,8 @@ import dan200.qcraft.shared.items.ItemQBlock;
 import com.google.common.base.CaseFormat;
 import dan200.QCraft;
 import dan200.qcraft.shared.blocks.QBlocks;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPane;
 import net.minecraft.block.material.Material;
@@ -49,6 +51,7 @@ import net.minecraftforge.common.util.Constants;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
@@ -1564,11 +1567,11 @@ public class TileEntityQuantumComputer extends TileEntity
                 if( stack != null && stack.stackSize > 0 )
                 {
                     // Ignore entangled items
-                    if( stack.getItem() == Item.getItemFromBlock( QCraft.Blocks.quantumComputer ) && ItemQuantumComputer.getEntanglementFrequency( stack ) >= 0 )
+                    if( stack.getItem() == Item.getItemFromBlock( QBlocks.quantumComputer ) && ItemQuantumComputer.getEntanglementFrequency( stack ) >= 0 )
                     {
                         continue;
                     }
-                    if( stack.getItem() == Item.getItemFromBlock( QCraft.Blocks.qBlock ) && ItemQBlock.getEntanglementFrequency( stack ) >= 0 )
+                    if( stack.getItem() == Item.getItemFromBlock( QBlocks.qBlock ) && ItemQBlock.getEntanglementFrequency( stack ) >= 0 )
                     {
                         continue;
                     }
@@ -1601,7 +1604,7 @@ public class TileEntityQuantumComputer extends TileEntity
         {
             // Cryptographically sign the luggage
             luggage.setString( "uuid", UUID.randomUUID().toString() );
-            byte[] luggageData = CompressedStreamTools.compress( luggage );
+            byte[] luggageData = QCraft.compressNBTToByteArray( luggage );
             byte[] luggageSignature = EncryptionRegistry.Instance.signData( luggageData );
             NBTTagCompound signedLuggage = new NBTTagCompound();
             signedLuggage.setByteArray( "key", EncryptionRegistry.Instance.encodePublicKey( EncryptionRegistry.Instance.getLocalKeyPair().getPublic() ) );
@@ -1609,7 +1612,7 @@ public class TileEntityQuantumComputer extends TileEntity
             signedLuggage.setByteArray( "signature", luggageSignature );
 
             // Send the player to the remote server with the luggage
-            byte[] signedLuggageData = CompressedStreamTools.compress( signedLuggage );
+            byte[] signedLuggageData = QCraft.compressNBTToByteArray( signedLuggage );
             QCraft.requestGoToServer( player, remoteServerAddress, signedLuggageData );
         }
         catch( IOException e )

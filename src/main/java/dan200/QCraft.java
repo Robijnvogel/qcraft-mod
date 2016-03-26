@@ -34,6 +34,11 @@ import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import dan200.qcraft.shared.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import net.minecraft.client.multiplayer.ServerAddress;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -54,6 +59,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.PublicKey;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.BlockPos;
 
@@ -563,7 +570,7 @@ public class QCraft
             case QCraftPacket.UnpackLuggage:
             {
                 // Connected from another server, took luggage with them
-                InputStream signedLuggageData = packet.dataByte[0];
+                byte[] signedLuggageData = packet.dataByte[0];
                 boolean isDestination = (packet.dataInt[0] > 0);
                 boolean teleported = false;
                 unpackLuggage( entityPlayer, entityPlayer, signedLuggageData, isDestination, teleported, false );
@@ -652,10 +659,11 @@ public class QCraft
         }
     }
 
-    private static LuggageVerificationResult verifyIncomingLuggage( EntityPlayer instigator, EntityPlayer entityPlayer, InputStream signedLuggageData, boolean forceVerify ) throws IOException
+    private static LuggageVerificationResult verifyIncomingLuggage( EntityPlayer instigator, EntityPlayer entityPlayer, byte[] signedLuggageData, boolean forceVerify ) throws IOException
     {
-        NBTTagCompound signedLuggage = CompressedStreamTools.readCompressed(signedLuggageData);
-        NBTTagCompound luggage = signedLuggage.getCompoundTag("luggage");
+        NBTTagCompound signedLuggage = decompressByteArrayToNBT( signedLuggageData , NBTSizeTracker.INFINITE);
+        byte[] luggageData = signedLuggage.getByteArray("luggage");
+        NBTTagCompound luggage = decompressByteArrayToNBT( luggageData , NBTSizeTracker.INFINITE);
 
         if( signedLuggage.hasKey( "key" ) )
         {
@@ -787,17 +795,18 @@ public class QCraft
         }
     }
 
-    private static boolean unpackLuggage( EntityPlayer instigator, EntityPlayer entityPlayer, InputStream input, boolean isDestination, boolean alreadyTeleported, boolean forceVerify )
+    private static boolean unpackLuggage( EntityPlayer instigator, EntityPlayer entityPlayer, byte[] signedLuggageData, boolean isDestination, boolean alreadyTeleported, boolean forceVerify )
     {
         try
         {
             // Verify the luggage
-            LuggageVerificationResult verificationResult = verifyIncomingLuggage( instigator, entityPlayer, input, forceVerify );
+            LuggageVerificationResult verificationResult = verifyIncomingLuggage( instigator, entityPlayer, signedLuggageData, forceVerify );
             if( verificationResult != LuggageVerificationResult.UNTRUSTED )
             {
                 // Decompress the luggage
-                NBTTagCompound signedLuggage = CompressedStreamTools.readCompressed(input);
-                NBTTagCompound luggage = signedLuggage.getCompoundTag("luggage");
+                NBTTagCompound signedLuggage = decompressByteArrayToNBT( signedLuggageData , NBTSizeTracker.INFINITE);
+                byte[] luggageData = signedLuggage.getByteArray( "luggage" );
+                NBTTagCompound luggage = decompressByteArrayToNBT( luggageData , NBTSizeTracker.INFINITE);
 
                 // Unpack items
                 if( luggage.hasKey( "items" ) )
@@ -891,17 +900,17 @@ public class QCraft
         return s_currentServer;
     }
 
-    private static Map<String, Set<NBTTagCompound>> s_unverifiedLuggage = new HashMap<String, Set<NBTTagCompound>>();
+    private static Map<String, Set<byte[]>> s_unverifiedLuggage = new HashMap<String, Set<byte[]>>();
 
-    public static void addUnverifiedLuggage( EntityPlayer player, NBTTagCompound luggage )
+    public static void addUnverifiedLuggage( EntityPlayer player, byte[] luggage )
     {
         String username = player.getCommandSenderEntity().getName();
         if( !s_unverifiedLuggage.containsKey( username ) )
         {
-            s_unverifiedLuggage.put( username, new HashSet<NBTTagCompound>() );
+            s_unverifiedLuggage.put( username, new HashSet<byte[]>() );
         }
 
-        Set<NBTTagCompound> luggageSet = s_unverifiedLuggage.get( username );
+        Set<byte[]> luggageSet = s_unverifiedLuggage.get( username );
         if( !luggageSet.contains( luggage ) )
         {
             luggageSet.add( luggage );
@@ -922,13 +931,13 @@ public class QCraft
         String username = player.getCommandSenderEntity().getName();
         if( s_unverifiedLuggage.containsKey( username ) )
         {
-            Set<NBTTagCompound> luggageSet = s_unverifiedLuggage.remove( username );
+            Set<byte[]> luggageSet = s_unverifiedLuggage.remove( username );
 
             boolean teleported = false;
-            Iterator<NBTTagCompound> it = luggageSet.iterator();
+            Iterator<byte[]> it = luggageSet.iterator();
             while( it.hasNext() )
             {
-                byte[] signedLuggageData = it.next().getByteArray();
+                byte[] signedLuggageData = it.next();
                 if( unpackLuggage( instigator, player, signedLuggageData, true, teleported, true ) )
                 {
                     teleported = true;
@@ -948,5 +957,39 @@ public class QCraft
         {
             System.out.println( "[qCraft] " + text );
         }
+    }
+    
+    public static byte[] compressNBTToByteArray(NBTTagCompound p_74798_0_) throws IOException //copied from the 1.7.10 CompressedStreamTools class
+    {
+        ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
+        DataOutputStream dataoutputstream = new DataOutputStream(new GZIPOutputStream(bytearrayoutputstream));
+
+        try
+        {
+            CompressedStreamTools.write(p_74798_0_, dataoutputstream);
+        }
+        finally
+        {
+            dataoutputstream.close();
+        }
+
+        return bytearrayoutputstream.toByteArray();
+    }
+    
+    public static NBTTagCompound decompressByteArrayToNBT(byte[] p_152457_0_, NBTSizeTracker p_152457_1_) throws IOException //copied from the 1.7.10 CompressedStreamTools class
+    {
+        DataInputStream datainputstream = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new ByteArrayInputStream(p_152457_0_))));
+        NBTTagCompound nbttagcompound;
+
+        try
+        {
+            nbttagcompound = CompressedStreamTools.read(datainputstream, p_152457_1_);
+        }
+        finally
+        {
+            datainputstream.close();
+        }
+
+        return nbttagcompound;
     }
 }
