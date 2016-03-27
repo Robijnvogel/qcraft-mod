@@ -52,6 +52,7 @@ public class BlockQuantumComputer extends BlockDirectional
         setResistance( 10.0f );
         setStepSound( Block.soundTypeMetal );
         setRegistryName( "qcraft:computer" );
+        this.isBlockContainer = true;
     }
 
     @Override
@@ -205,5 +206,12 @@ public class BlockQuantumComputer extends BlockDirectional
     public TileEntity createTileEntity( World world, IBlockState blockState )
     {
         return createNewTileEntity( world, getMetaFromState(blockState));
+    }
+    
+    @Override
+    public boolean onBlockEventReceived(World worldIn, BlockPos pos, IBlockState state, int eventID, int eventParam) {
+        super.onBlockEventReceived(worldIn, pos, state, eventID, eventParam);
+        TileEntity tileentity = worldIn.getTileEntity(pos);
+        return tileentity == null ? false : tileentity.receiveClientEvent(eventID, eventParam);
     }
 }

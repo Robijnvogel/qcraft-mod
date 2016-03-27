@@ -44,7 +44,7 @@ public class RecipeEntangledQBlock implements IRecipe
     @Override
     public ItemStack getRecipeOutput()
     {
-        return ItemQBlock.create( BlockQBlock.SubType.Standard, null, 0, 2 );
+        return ItemQBlock.create(BlockQBlock.SubType.STANDARD, null, 0, 2 );
     }
 
     @Override

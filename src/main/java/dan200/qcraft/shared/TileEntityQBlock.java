@@ -21,7 +21,6 @@ import dan200.qcraft.shared.blocks.BlockQBlock;
 import dan200.QCraft;
 import dan200.qcraft.shared.blocks.QBlocks;
 import java.util.EnumMap;
-import java.util.HashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,7 +37,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -395,7 +393,7 @@ public class TileEntityQBlock extends TileEntity
                         // Vote for this axis
                         if( majoraxis != null )
                         {
-                            if( getSubType() == BlockQBlock.SubType.FiftyFifty )
+                            if( getSubType() == BlockQBlock.SubType.FIFTYFIFTY )
                             {
                                 boolean flip = s_random.nextBoolean();
                                 if( flip )

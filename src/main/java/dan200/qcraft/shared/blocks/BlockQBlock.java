@@ -185,9 +185,9 @@ public class BlockQBlock extends BlockSand
 
     public static class SubType
     {
-        public static final int Standard = 0;
-        public static final int FiftyFifty = 1;
-        public static final int Count = 2;
+        public static final int STANDARD = 0;
+        public static final int FIFTYFIFTY = 1;
+        public static final int COUNT = 2;
     }
 
     public BlockQBlock()
@@ -198,6 +198,7 @@ public class BlockQBlock extends BlockSand
         setHardness( 5.0f );
         setResistance( 10.0f );
         setStepSound( Block.soundTypeMetal );
+        this.isBlockContainer = true;
     }
 
     @Override
@@ -265,7 +266,7 @@ public class BlockQBlock extends BlockSand
     @Override
     public int getRenderType()
     {
-        return blockRenderID;
+        return -1;
     }
 
     @Override
@@ -706,6 +707,13 @@ public class BlockQBlock extends BlockSand
     public TileEntity createTileEntity( World world, IBlockState blockState )
     {
         return createNewTileEntity( world, getMetaFromState(blockState) );
+    }
+    
+    @Override
+    public boolean onBlockEventReceived(World worldIn, BlockPos pos, IBlockState state, int eventID, int eventParam) {
+        super.onBlockEventReceived(worldIn, pos, state, eventID, eventParam);
+        TileEntity tileentity = worldIn.getTileEntity(pos);
+        return tileentity == null ? false : tileentity.receiveClientEvent(eventID, eventParam);
     }
 
     private Appearance getAppearance( IBlockAccess world, BlockPos blockPos )

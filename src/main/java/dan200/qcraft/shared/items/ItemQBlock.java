@@ -211,12 +211,12 @@ public class ItemQBlock extends ItemBlock
         boolean entangled = ( getEntanglementFrequency( stack ) >= 0 );
         switch( getSubType( stack ) )
         {
-            case BlockQBlock.SubType.Standard:
+            case BlockQBlock.SubType.STANDARD:
             default:
             {
                 return entangled ? "tile.qcraft:odb_entangled" : "tile.qcraft:odb";
             }
-            case BlockQBlock.SubType.FiftyFifty:
+            case BlockQBlock.SubType.FIFTYFIFTY:
             {
                 return entangled ? "tile.qcraft:qb_entangled" : "tile.qcraft:qb";
             }

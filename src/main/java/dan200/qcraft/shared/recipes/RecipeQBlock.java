@@ -46,7 +46,7 @@ public class RecipeQBlock implements IRecipe
     @Override
     public ItemStack getRecipeOutput()
     {
-        return ItemQBlock.create( BlockQBlock.SubType.Standard, null, -1, 1 );
+        return ItemQBlock.create(BlockQBlock.SubType.STANDARD, null, -1, 1 );
     }
 
     @Override
@@ -171,11 +171,11 @@ public class RecipeQBlock implements IRecipe
             // Create the item
             if( stoneType == ItemEOS.SubType.OBSERVATION )
             {
-                return ItemQBlock.create( BlockQBlock.SubType.Standard, types, -1, 1 );
+                return ItemQBlock.create(BlockQBlock.SubType.STANDARD, types, -1, 1 );
             }
             else if( stoneType == ItemEOS.SubType.SUPERPOSITION )
             {
-                return ItemQBlock.create( BlockQBlock.SubType.FiftyFifty, types, -1, 1 );
+                return ItemQBlock.create(BlockQBlock.SubType.FIFTYFIFTY, types, -1, 1 );
             }
         }
         return null;

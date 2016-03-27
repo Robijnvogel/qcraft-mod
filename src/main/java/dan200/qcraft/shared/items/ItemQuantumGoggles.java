@@ -88,5 +88,24 @@ public class ItemQuantumGoggles extends ItemArmor
                 return "item.qcraft:ao_goggles";
             }
         }
-    }    
+    }
+    
+    @Override
+    public void renderHelmetOverlay( ItemStack stack, EntityPlayer player, ScaledResolution resolution, float partialTicks )
+    {
+        switch( stack.getItemDamage() )
+        {
+            case SubTypes.QUANTUM:
+            default:
+            {
+                QCraft.renderQuantumGogglesOverlay( resolution.getScaledWidth(), resolution.getScaledHeight() );
+                break;
+            }
+            case SubTypes.ANTIOBSERVATION:
+            {
+                QCraft.renderAOGogglesOverlay( resolution.getScaledWidth(), resolution.getScaledHeight() );
+                break;
+            }
+        }
+    }
 }

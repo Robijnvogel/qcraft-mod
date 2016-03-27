@@ -69,7 +69,7 @@ public class BlockQuantumLogic extends BlockDirectional
     @Override
     public int getRenderType()
     {
-        return blockRenderID;
+        return -1;
     }
 
     @Override
@@ -107,8 +107,7 @@ public class BlockQuantumLogic extends BlockDirectional
     @Override
     public boolean canConnectRedstone( IBlockAccess world, BlockPos blockPos, EnumFacing side )
     {
-        IBlockState blockState = world.getBlockState(blockPos);
-        int metadata = getMetaFromState( blockState );
+        int metadata = getMetaFromState( world.getBlockState(blockPos) );
         EnumFacing direction = getStateFromMeta( metadata ).getValue(FACING).getOpposite();
         return ( side == direction );
     }

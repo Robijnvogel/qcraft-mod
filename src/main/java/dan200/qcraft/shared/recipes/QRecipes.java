@@ -31,7 +31,7 @@ import static net.minecraftforge.oredict.RecipeSorter.Category.SHAPED;
 
 /**
  *
- * @author Mathijs Riezebos <0766426>
+ * @author Robijnvogel 2016-03-25
  */
 public class QRecipes {
 
