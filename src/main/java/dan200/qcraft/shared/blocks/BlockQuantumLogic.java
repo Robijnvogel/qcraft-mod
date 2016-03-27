@@ -82,26 +82,9 @@ public class BlockQuantumLogic extends BlockDirectional
         return false;
     }
 
-    @Override
     public boolean canBlockStay( World world, BlockPos blockPos )
     {
-        if( World.doesBlockHaveSolidTopSurface( world, new BlockPos(blockPos.getX(), blockPos.getY()-1, blockPos.getZ()) ) )
-        {
-            return super.canBlockStay( world, blockPos );
-        }
-        return false;
-    }
-
-    @Override
-    public int isProvidingStrongPower( IBlockAccess world, BlockPos blockPos, EnumFacing side )
-    {
-        return 0;
-    }
-
-    @Override
-    public int isProvidingWeakPower( IBlockAccess world, BlockPos blockPos, EnumFacing side )
-    {
-        return 0;
+         return World.doesBlockHaveSolidTopSurface( world, blockPos.down() );        
     }
 
     @Override

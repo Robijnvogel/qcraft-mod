@@ -1,6 +1,6 @@
 {
     "parent": "builtin/generated",
     "textures": {
-        "layer0": "qcraft:items/eoe"
+        "layer0": "qcraft:blocks/portal"
     }
 }

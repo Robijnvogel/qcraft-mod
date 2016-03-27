@@ -1,5 +1,5 @@
 {
-    "parent":"qcraft:block/qblock",
+    "parent":"qcraft:block/ore",
     "display": {
         "thirdperson": {
             "rotation": [ 10, -45, 170 ],

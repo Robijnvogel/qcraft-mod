@@ -1,0 +1,6 @@
+{
+    "variants": {
+        "on": { "model": "qcraft:qlogic_on" },
+        "off": { "model": "qcraft:qlogic_off" }
+    }
+}

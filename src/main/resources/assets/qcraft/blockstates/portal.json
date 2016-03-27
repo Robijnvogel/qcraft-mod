@@ -1,0 +1,6 @@
+{
+    "variants": {
+        "axis=z": { "model": "qcraft:portal_ew" },
+        "axis=x": { "model": "qcraft:portal_ns" }
+    }
+}

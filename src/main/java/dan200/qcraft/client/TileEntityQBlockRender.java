@@ -5,12 +5,14 @@
  */
 package dan200.qcraft.client;
 
+import dan200.qcraft.shared.TileEntityQBlock;
 import dan200.qcraft.shared.blocks.QBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -28,16 +30,23 @@ public class TileEntityQBlockRender extends TileEntitySpecialRenderer {
 
     @Override
     public void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(x, y, z);
-        GlStateManager.enableBlend();
-        
-        //Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("modid:path/to/image.png"));
-        WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
-        wr.begin(destroyStage, format);
-        //Your rendering code goes here
-        GlStateManager.disableBlend();
-        GlStateManager.popMatrix();
+
+        if (te != null && te instanceof TileEntityQBlock) {
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(x, y, z);
+            GlStateManager.enableBlend();
+            
+            TileEntityQBlock teq = (TileEntityQBlock) te;
+            ResourceLocation resLoc = teq.getQStateTextureLocation();
+            Minecraft.getMinecraft().getTextureManager().bindTexture(resLoc);
+            
+            WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+            wr.begin(glMode, format);
+            //@todo actually render the TileEntity
+            //Your rendering code goes here
+            GlStateManager.disableBlend();
+            GlStateManager.popMatrix();
+        }
     }
 
     // IItemRenderer implementation

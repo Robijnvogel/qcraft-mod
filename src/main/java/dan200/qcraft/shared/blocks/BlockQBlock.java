@@ -667,17 +667,6 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public int isProvidingWeakPower( IBlockAccess world, BlockPos blockPos, EnumFacing side )
-    {
-        Block block = getImpostorBlock( world, blockPos );
-        if( block != null && block instanceof BlockCompressedPowered )
-        {
-            return 15;
-        }
-        return 0;
-    }
-
-    @Override
     public int getLightValue( IBlockAccess world, BlockPos blockPos )
     {
         Block block = getImpostorBlock( world, blockPos );
