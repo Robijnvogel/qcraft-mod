@@ -71,7 +71,7 @@ public class QCraftProxyClient extends QCraftProxyCommon {
         QItemRenderRegister.registerItemRenderer();
         QBlockRenderRegister.registerBlockRenderer(); //register block and tile-entity renderers       
 
-        ItemQuantumGoggles.s_renderIndex = RenderingRegistry.addNewArmourRendererPrefix("qcraft:goggles");
+        //ItemQuantumGoggles.s_renderIndex = RenderingRegistry.addNewArmourRendererPrefix("qcraft:goggles");
     }
 
     @Override
@@ -157,7 +157,7 @@ public class QCraftProxyClient extends QCraftProxyCommon {
         }
     }
     
-    private void renderInventoryQBlock(RenderBlocks renderblocks, BlockQBlock block, ItemStack item) {
+    private void renderInventoryQBlock(int renderblocks, BlockQBlock block, ItemStack item) {
         Map<EnumFacing, Integer> types = ItemQBlock.getTypes(item);
         int type = cycleType(types);
         if (type < 0) {
@@ -184,42 +184,42 @@ public class QCraftProxyClient extends QCraftProxyCommon {
         GL11.glColor4f(r, g, b, 1.0f);
     }
 
-    private void renderInventoryQBlock(RenderBlocks renderblocks, BlockQBlock block, int type, BlockQBlock.Appearance appearance) {
+    private void renderInventoryQBlock(int renderblocks, BlockQBlock block, int type, BlockQBlock.Appearance appearance) {
         Tessellator tessellator = Tessellator.getInstance();
-        tessellator.startDrawingQuads();
+        //tessellator.startDrawingQuads();
         bindColor(block.getColorForType(EnumFacing.DOWN, type));
-        tessellator.setNormal(0.0F, -1F, 0.0F);
-        renderblocks.renderFaceYNeg(block, 0.0D, 0.0D, 0.0D, block.getIconForType(0, type, appearance));
+        //tessellator.setNormal(0.0F, -1F, 0.0F);
+        //renderblocks.renderFaceYNeg(block, 0.0D, 0.0D, 0.0D, block.getIconForType(0, type, appearance));
         tessellator.draw();
 
-        tessellator.startDrawingQuads();
+        //tessellator.startDrawingQuads();
         bindColor(block.getColorForType(EnumFacing.UP, type));
-        tessellator.setNormal(0.0F, 1.0F, 0.0F);
-        renderblocks.renderFaceYPos(block, 0.0D, 0.0D, 0.0D, block.getIconForType(1, type, appearance));
+        //tessellator.setNormal(0.0F, 1.0F, 0.0F);
+        //renderblocks.renderFaceYPos(block, 0.0D, 0.0D, 0.0D, block.getIconForType(1, type, appearance));
         tessellator.draw();
 
-        tessellator.startDrawingQuads();
+        //tessellator.startDrawingQuads();
         bindColor(block.getColorForType(EnumFacing.NORTH, type));
-        tessellator.setNormal(0.0F, 0.0F, -1F);
-        renderblocks.renderFaceZNeg(block, 0.0D, 0.0D, 0.0D, block.getIconForType(2, type, appearance));
+        //tessellator.setNormal(0.0F, 0.0F, -1F);
+        //renderblocks.renderFaceZNeg(block, 0.0D, 0.0D, 0.0D, block.getIconForType(2, type, appearance));
         tessellator.draw();
 
-        tessellator.startDrawingQuads();
+        //tessellator.startDrawingQuads();
         bindColor(block.getColorForType(EnumFacing.SOUTH, type));
-        tessellator.setNormal(0.0F, 0.0F, 1.0F);
-        renderblocks.renderFaceZPos(block, 0.0D, 0.0D, 0.0D, block.getIconForType(3, type, appearance));
+        //tessellator.setNormal(0.0F, 0.0F, 1.0F);
+        //renderblocks.renderFaceZPos(block, 0.0D, 0.0D, 0.0D, block.getIconForType(3, type, appearance));
         tessellator.draw();
 
-        tessellator.startDrawingQuads();
+        //tessellator.startDrawingQuads();
         bindColor(block.getColorForType(EnumFacing.WEST, type));
-        tessellator.setNormal(-1F, 0.0F, 0.0F);
-        renderblocks.renderFaceXNeg(block, 0.0D, 0.0D, 0.0D, block.getIconForType(4, type, appearance));
+        //tessellator.setNormal(-1F, 0.0F, 0.0F);
+        //renderblocks.renderFaceXNeg(block, 0.0D, 0.0D, 0.0D, block.getIconForType(4, type, appearance));
         tessellator.draw();
 
-        tessellator.startDrawingQuads();
+        //tessellator.startDrawingQuads();
         bindColor(block.getColorForType(EnumFacing.EAST, type));
-        tessellator.setNormal(1.0F, 0.0F, 0.0F);
-        renderblocks.renderFaceXPos(block, 0.0D, 0.0D, 0.0D, block.getIconForType(5, type, appearance));
+        //tessellator.setNormal(1.0F, 0.0F, 0.0F);
+        //renderblocks.renderFaceXPos(block, 0.0D, 0.0D, 0.0D, block.getIconForType(5, type, appearance));
         tessellator.draw();
     }
 
@@ -243,7 +243,7 @@ public class QCraftProxyClient extends QCraftProxyCommon {
         GL11.glDisable(GL11.GL_ALPHA_TEST);
         mc.renderEngine.bindTexture(texture);
         Tessellator tessellator = Tessellator.getInstance();
-        tessellator.startDrawingQuads();
+        //tessellator.startDrawingQuads();
         int[] temp = {0, (int) height, -90, 0, 1};
         tessellator.getWorldRenderer().addVertexData(temp);
         int[] temp2 = {(int) width, (int) height, -90, 1, 1};

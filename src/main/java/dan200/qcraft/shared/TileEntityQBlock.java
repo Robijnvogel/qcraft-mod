@@ -570,7 +570,7 @@ public class TileEntityQBlock extends TileEntity {
         Block renderedBlock = Block.getBlockById(m_sideBlockTypes.get(m_currentDisplayedSide));
         
         
-        ResourceLocation resLoc = new ResourceLocation ((String) renderedBlock.getBlockState().getResourceLocation();
+        ResourceLocation resLoc = new ResourceLocation ("");
         return resLoc;
     }
 }

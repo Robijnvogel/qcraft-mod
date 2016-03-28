@@ -41,102 +41,11 @@ public class TileEntityQBlockRender extends TileEntitySpecialRenderer {
             Minecraft.getMinecraft().getTextureManager().bindTexture(resLoc);
             
             WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
-            wr.begin(glMode, format);
+            //wr.begin(glMode, format);
             //@todo actually render the TileEntity
             //Your rendering code goes here
             GlStateManager.disableBlend();
             GlStateManager.popMatrix();
         }
     }
-
-    // IItemRenderer implementation
-    @Override
-    public boolean handleRenderType(ItemStack item, IItemRenderer.ItemRenderType type) {
-        switch (type) {
-        case ENTITY:
-        case EQUIPPED:
-        case EQUIPPED_FIRST_PERSON:
-        case INVENTORY: {
-            return true;
-        }
-        case FIRST_PERSON_MAP:
-        default: {
-            return false;
-        }
-        }
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(IItemRenderer.ItemRenderType type, ItemStack item, IItemRenderer.ItemRendererHelper helper) {
-        switch (helper) {
-        case ENTITY_ROTATION:
-        case ENTITY_BOBBING:
-        case EQUIPPED_BLOCK:
-        case BLOCK_3D:
-        case INVENTORY_BLOCK: {
-            return true;
-        }
-        default: {
-            return false;
-        }
-        }
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object[] data) {
-        switch (type) {
-        case INVENTORY:
-        case ENTITY: {
-            GL11.glPushMatrix();
-            GL11.glTranslatef(-0.5f, -0.5f, -0.5f);
-            QBlocks.qBlock.setBlockBounds(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-            m_renderBlocks.setRenderBoundsFromBlock(QBlocks.qBlock);
-            renderInventoryQBlock(m_renderBlocks, QBlocks.qBlock, item);
-            GL11.glPopMatrix();
-            break;
-        }
-        case EQUIPPED_FIRST_PERSON:
-        case EQUIPPED: {
-            GL11.glPushMatrix();
-            QBlocks.qBlock.setBlockBounds(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-            m_renderBlocks.setRenderBoundsFromBlock(QBlocks.qBlock);
-            renderInventoryQBlock(m_renderBlocks, QBlocks.qBlock, item);
-            GL11.glPopMatrix();
-            break;
-        }
-        default: {
-            break;
-        }
-        }
-    }
-
-    // IRenderFactory implementation
-    @Override
-    public boolean shouldRender3DInInventory(int modelID) {
-        return true;
-    }
-
-    @Override
-    public int getRenderId() {
-        return QBlocks.qBlock.blockRenderID;
-    }
-
-    @Override
-    public boolean renderWorldBlock(IBlockAccess world, BlockPos blockPos, Block block, int modelID, RenderBlocks renderblocks) {
-        if (modelID == getRenderId() && block == QBlocks.qBlock) {
-            QBlocks.qBlock.s_forceGrass = (QBlocks.qBlock.getImpostorBlock(world, blockPos) == Blocks.grass);
-            QBlocks.qBlock.setBlockBounds(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-            renderblocks.setRenderBoundsFromBlock(QBlocks.qBlock);
-            renderblocks.renderStandardBlock(QBlocks.qBlock, blockPos);
-            QBlocks.qBlock.s_forceGrass = false;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void renderInventoryBlock(Block block, int metadata, int modelID, RenderBlocks renderblocks) {
-        // IItemRenderer handles this
-    }
-
 }
