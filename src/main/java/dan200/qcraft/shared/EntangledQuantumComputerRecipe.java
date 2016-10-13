@@ -12,9 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
-
-
+ */
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
@@ -23,45 +21,37 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
 
-public class EntangledQuantumComputerRecipe implements IRecipe
-{
-    public EntangledQuantumComputerRecipe()
-    {
+public class EntangledQuantumComputerRecipe implements IRecipe {
+
+    public EntangledQuantumComputerRecipe() {
     }
 
     @Override
-    public int getRecipeSize()
-    {
+    public int getRecipeSize() {
         return 9;
     }
 
     @Override
-    public ItemStack getRecipeOutput()
-    {
-        return ItemQuantumComputer.create( 0, 2 );
+    public ItemStack getRecipeOutput() {
+        return ItemQuantumComputer.create(0, 2);
     }
 
     @Override
-    public boolean matches( InventoryCrafting _inventory, World world )
-    {
-        return ( getCraftingResult( _inventory ) != null );
+    public boolean matches(InventoryCrafting _inventory, World world) {
+        return (getCraftingResult(_inventory) != null);
     }
 
     @Override
-    public ItemStack getCraftingResult( InventoryCrafting inventory )
-    {
+    public ItemStack getCraftingResult(InventoryCrafting inventory) {
         // Find the eos
         int eosPosX = -1;
         int eosPosY = -1;
-        for( int y = 0; y < 3; ++y )
-        {
-            for( int x = 0; x < 3; ++x )
-            {
-                ItemStack item = inventory.getStackInRowAndColumn( x, y );
-                if( item != null &&
-                        item.getItem() == QCraft.Items.eos &&
-                        item.getItemDamage() == ItemEOS.SubType.Entanglement )
-                {
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 3; ++x) {
+                ItemStack item = inventory.getStackInRowAndColumn(x, y);
+                if (item != null
+                        && item.getItem() == QCraft.Items.eos
+                        && item.getItemDamage() == ItemEOS.SubType.ENTANGLEMENT) {
                     eosPosX = x;
                     eosPosY = y;
                     break;
@@ -70,51 +60,36 @@ public class EntangledQuantumComputerRecipe implements IRecipe
         }
 
         // Fail if no eos found:
-        if( eosPosX < 0 || eosPosX < 0 )
-        {
+        if (eosPosX < 0 || eosPosX < 0) {
             return null;
         }
 
         // Find computer
         int computersFound = 0;
-        for( int x = 0; x < 3; ++x )
-        {
-            for( int y = 0; y < 3; ++y )
-            {
-                if( !( x == eosPosX && y == eosPosY ) )
-                {
-                    if( ( x == eosPosX - 1 || x == eosPosX + 1 ) && y == eosPosY )
-                    {
+        for (int x = 0; x < 3; ++x) {
+            for (int y = 0; y < 3; ++y) {
+                if (!(x == eosPosX && y == eosPosY)) {
+                    if ((x == eosPosX - 1 || x == eosPosX + 1) && y == eosPosY) {
                         // Find computer (must be unentangled)
-                        ItemStack odb = inventory.getStackInRowAndColumn( x, y );
-                        if( odb != null && odb.getItem() instanceof ItemQuantumComputer )
-                        {
-                            if( ItemQuantumComputer.getEntanglementFrequency( odb ) >= 0 )
-                            {
+                        ItemStack odb = inventory.getStackInRowAndColumn(x, y);
+                        if (odb != null && odb.getItem() instanceof ItemQuantumComputer) {
+                            if (ItemQuantumComputer.getEntanglementFrequency(odb) >= 0) {
                                 return null;
                             }
                             computersFound++;
-                        }
-                        else
-                        {
+                        } else {
                             return null;
                         }
-                    }
-                    else
-                    {
-                        // Ensure empty
-                        if( inventory.getStackInRowAndColumn( x, y ) != null )
-                        {
-                            return null;
-                        }
+                    } else // Ensure empty
+                    if (inventory.getStackInRowAndColumn(x, y) != null) {
+                        return null;
                     }
                 }
             }
         }
 
         // Check computer is found
-        if( computersFound != 2 )
-        {
+        if (computersFound != 2) {
             return null;
         }
 
@@ -122,6 +97,6 @@ public class EntangledQuantumComputerRecipe implements IRecipe
         int entanglementFrequency = 0; // Will be filled in after crafting
 
         // Create item
-        return ItemQuantumComputer.create( entanglementFrequency, computersFound );
+        return ItemQuantumComputer.create(entanglementFrequency, computersFound);
     }
 }

@@ -12,18 +12,16 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
-
-
+ */
 package dan200.qcraft.shared;
 
 import net.minecraft.world.World;
 
-public interface IQuantumObservable
-{
-    public boolean isObserved( World world, int x, int y, int z, int side );
+public interface IQuantumObservable {
 
-    public void observe( World world, int x, int y, int z, int side );
+    public boolean isObserved(World world, int x, int y, int z, int side);
 
-    public void reset( World world, int x, int y, int z, int side );
+    public void observe(World world, int x, int y, int z, int side);
+
+    public void reset(World world, int x, int y, int z, int side);
 }

@@ -3,7 +3,6 @@ package dan200.qcraft.shared;
 import dan200.QCraft;
 import static dan200.qcraft.shared.QCraftProxyCommon.saveNBTToPath;
 import java.io.File;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapStorage;

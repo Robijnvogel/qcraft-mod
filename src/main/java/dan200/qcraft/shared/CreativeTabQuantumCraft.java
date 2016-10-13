@@ -12,31 +12,26 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
-
-
+ */
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 
-public class CreativeTabQuantumCraft extends CreativeTabs
-{
-    public CreativeTabQuantumCraft( int p1, String p2 )
-    {
-        super( p1, p2 );
+public class CreativeTabQuantumCraft extends CreativeTabs {
+
+    public CreativeTabQuantumCraft(int p1, String p2) {
+        super(p1, p2);
     }
 
     @Override
-    public Item getTabIconItem()
-    {
+    public Item getTabIconItem() {
         return QCraft.Items.quantumDust;
     }
 
     @Override
-    public String getTranslatedTabLabel()
-    {
+    public String getTranslatedTabLabel() {
         return getTabLabel();
     }
 }

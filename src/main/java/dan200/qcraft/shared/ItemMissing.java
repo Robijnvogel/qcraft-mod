@@ -12,8 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
-
+ */
 package dan200.qcraft.shared;
 
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -24,25 +23,22 @@ import net.minecraft.util.IIcon;
  *
  * @author Mathijs Riezebos
  */
-public class ItemMissing extends Item 
-{    
+public class ItemMissing extends Item {
+
     private static IIcon s_icon;
-    
-    public ItemMissing() 
-    {
+
+    public ItemMissing() {
         super();
-        setUnlocalizedName( "qcraft:itemMissing" );
-    }
-    
-    @Override
-    public void registerIcons( IIconRegister iconRegister )
-    {
-        s_icon = iconRegister.registerIcon( "qcraft:missing" );
+        setUnlocalizedName("qcraft:itemMissing");
     }
 
     @Override
-    public IIcon getIconFromDamage( int damage )
-    {
+    public void registerIcons(IIconRegister iconRegister) {
+        s_icon = iconRegister.registerIcon("qcraft:missing");
+    }
+
+    @Override
+    public IIcon getIconFromDamage(int damage) {
         return s_icon;
     }
 }
