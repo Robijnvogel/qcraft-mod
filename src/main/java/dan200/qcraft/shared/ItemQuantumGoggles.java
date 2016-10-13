@@ -12,9 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
-
-
+ */
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
@@ -31,105 +29,87 @@ import net.minecraftforge.common.util.EnumHelper;
 
 import java.util.List;
 
-public class ItemQuantumGoggles extends ItemArmor
-{
+public class ItemQuantumGoggles extends ItemArmor {
+
     public static int s_renderIndex;
     private static IIcon[] s_icons;
 
-    public static class SubTypes
-    {
-        public static final int Quantum = 0;
-        public static final int AntiObservation = 1;
-        public static final int Count = 2;
+    public static class SubTypes {
+
+        public static final int QUANTUM = 0;
+        public static final int ANTIOBSERVATION = 1;
+        public static final int COUNT = 2;
     }
 
-    public ItemQuantumGoggles()
-    {
+    public ItemQuantumGoggles() {
         super(
-            EnumHelper.addArmorMaterial( "qgoggles", 0, new int[]{ 0, 0, 0, 0 }, 0 ),
-            s_renderIndex,
-            0
+                EnumHelper.addArmorMaterial("qgoggles", 0, new int[]{0, 0, 0, 0}, 0),
+                s_renderIndex,
+                0
         );
-        setUnlocalizedName( "qcraft:goggles" );
-        setCreativeTab( QCraft.getCreativeTab() );
-        setHasSubtypes( true );
+        setUnlocalizedName("qcraft:goggles");
+        setCreativeTab(QCraft.getCreativeTab());
+        setHasSubtypes(true);
     }
 
     @Override
-    public void getSubItems( Item itemID, CreativeTabs tabs, List list )
-    {
-        for( int i = 0; i < SubTypes.Count; ++i )
-        {
-            list.add( new ItemStack( QCraft.Items.quantumGoggles, 1, i ) );
+    public void getSubItems(Item itemID, CreativeTabs tabs, List list) {
+        for (int i = 0; i < SubTypes.COUNT; ++i) {
+            list.add(new ItemStack(QCraft.Items.quantumGoggles, 1, i));
         }
     }
 
     @Override
-    public String getArmorTexture( ItemStack stack, Entity entity, int slot, String type )
-    {
-        switch( stack.getItemDamage() )
-        {
-            case SubTypes.Quantum:
-            default:
-            {
+    public String getArmorTexture(ItemStack stack, Entity entity, int slot, String type) {
+        switch (stack.getItemDamage()) {
+            case SubTypes.QUANTUM:
+            default: {
                 return "qcraft:textures/armor/goggles.png";
             }
-            case SubTypes.AntiObservation:
-            {
+            case SubTypes.ANTIOBSERVATION: {
                 return "qcraft:textures/armor/ao_goggles.png";
             }
         }
     }
 
     @Override
-    public void registerIcons( IIconRegister iconRegister )
-    {
-        s_icons = new IIcon[ SubTypes.Count ];
-        s_icons[ SubTypes.Quantum ] = iconRegister.registerIcon( "qcraft:goggles" );
-        s_icons[ SubTypes.AntiObservation ] = iconRegister.registerIcon( "qcraft:ao_goggles" );
+    public void registerIcons(IIconRegister iconRegister) {
+        s_icons = new IIcon[SubTypes.COUNT];
+        s_icons[SubTypes.QUANTUM] = iconRegister.registerIcon("qcraft:goggles");
+        s_icons[SubTypes.ANTIOBSERVATION] = iconRegister.registerIcon("qcraft:ao_goggles");
     }
 
     @Override
-    public IIcon getIconFromDamage( int damage )
-    {
-        if( damage >= 0 && damage < SubTypes.Count )
-        {
-            return s_icons[ damage ];
+    public IIcon getIconFromDamage(int damage) {
+        if (damage >= 0 && damage < SubTypes.COUNT) {
+            return s_icons[damage];
         }
-        return s_icons[ SubTypes.Quantum ];
+        return s_icons[SubTypes.QUANTUM];
     }
 
     @Override
-    public String getUnlocalizedName( ItemStack stack )
-    {
-        switch( stack.getItemDamage() )
-        {
-            case SubTypes.Quantum:
-            default:
-            {
+    public String getUnlocalizedName(ItemStack stack) {
+        switch (stack.getItemDamage()) {
+            case SubTypes.QUANTUM:
+            default: {
                 return "item.qcraft:goggles";
             }
-            case SubTypes.AntiObservation:
-            {
+            case SubTypes.ANTIOBSERVATION: {
                 return "item.qcraft:ao_goggles";
             }
         }
     }
 
     @Override
-    public void renderHelmetOverlay( ItemStack stack, EntityPlayer player, ScaledResolution resolution, float partialTicks, boolean hasScreen, int mouseX, int mouseY )
-    {
-        switch( stack.getItemDamage() )
-        {
-            case SubTypes.Quantum:
-            default:
-            {
-                QCraft.renderQuantumGogglesOverlay( resolution.getScaledWidth(), resolution.getScaledHeight() );
+    public void renderHelmetOverlay(ItemStack stack, EntityPlayer player, ScaledResolution resolution, float partialTicks, boolean hasScreen, int mouseX, int mouseY) {
+        switch (stack.getItemDamage()) {
+            case SubTypes.QUANTUM:
+            default: {
+                QCraft.renderQuantumGogglesOverlay(resolution.getScaledWidth(), resolution.getScaledHeight());
                 break;
             }
-            case SubTypes.AntiObservation:
-            {
-                QCraft.renderAOGogglesOverlay( resolution.getScaledWidth(), resolution.getScaledHeight() );
+            case SubTypes.ANTIOBSERVATION: {
+                QCraft.renderAOGogglesOverlay(resolution.getScaledWidth(), resolution.getScaledHeight());
                 break;
             }
         }

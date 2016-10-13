@@ -12,9 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
-
-
+ */
 package dan200.qcraft.shared;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -42,23 +40,19 @@ import java.io.*;
 
 import static net.minecraftforge.oredict.RecipeSorter.Category.SHAPED;
 
-public abstract class QCraftProxyCommon implements IQCraftProxy
-{
-    public QCraftProxyCommon()
-    {
+public abstract class QCraftProxyCommon implements IQCraftProxy {
+
+    public QCraftProxyCommon() {
     }
 
     // IQCraftProxy implementation
-
     @Override
-    public void preLoad()
-    {
+    public void preLoad() {
         registerItems();
     }
 
     @Override
-    public void load()
-    {
+    public void load() {
         registerTileEntities();
         registerForgeHandlers();
     }
@@ -67,37 +61,27 @@ public abstract class QCraftProxyCommon implements IQCraftProxy
     public abstract boolean isClient();
 
     @Override
-    public abstract Object getQuantumComputerGUI( InventoryPlayer inventory, TileEntityQuantumComputer computer );
+    public abstract Object getQuantumComputerGUI(InventoryPlayer inventory, TileEntityQuantumComputer computer);
 
     @Override
-    public abstract void showItemTransferGUI( EntityPlayer entityPlayer, TileEntityQuantumComputer computer );
+    public abstract void showItemTransferGUI(EntityPlayer entityPlayer, TileEntityQuantumComputer computer);
 
     @Override
-    public abstract void travelToServer( LostLuggage.Address address );
+    public abstract void travelToServer(LostLuggage.Address address);
 
     @Override
-    public boolean isPlayerWearingGoggles( EntityPlayer player )
-    {
-        ItemStack headGear = player.inventory.armorItemInSlot( 3 );
-        if( headGear != null &&
-                headGear.getItem() == QCraft.Items.quantumGoggles )
-        {
-            return true;
-        }
-        return false;
+    public boolean isPlayerWearingGoggles(EntityPlayer player) {
+        ItemStack headGear = player.inventory.armorItemInSlot(3);
+        return headGear != null
+                && headGear.getItem() == QCraft.Items.quantumGoggles;
     }
 
     @Override
-    public boolean isPlayerWearingQuantumGoggles( EntityPlayer player )
-    {
-        ItemStack headGear = player.inventory.armorItemInSlot( 3 );
-        if( headGear != null &&
-                headGear.getItem() == QCraft.Items.quantumGoggles &&
-                headGear.getItemDamage() == ItemQuantumGoggles.SubTypes.Quantum )
-        {
-            return true;
-        }
-        return false;
+    public boolean isPlayerWearingQuantumGoggles(EntityPlayer player) {
+        ItemStack headGear = player.inventory.armorItemInSlot(3);
+        return headGear != null
+                && headGear.getItem() == QCraft.Items.quantumGoggles
+                && headGear.getItemDamage() == ItemQuantumGoggles.SubTypes.QUANTUM;
     }
 
     @Override
@@ -107,187 +91,151 @@ public abstract class QCraftProxyCommon implements IQCraftProxy
     public abstract boolean isLocalPlayerWearingQuantumGoggles();
 
     @Override
-    public abstract void renderQuantumGogglesOverlay( float width, float height );
+    public abstract void renderQuantumGogglesOverlay(float width, float height);
 
     @Override
-    public abstract void renderAOGogglesOverlay( float width, float height );
+    public abstract void renderAOGogglesOverlay(float width, float height);
 
     @Override
-    public abstract void spawnQuantumDustFX( World world, double x, double y, double z );
+    public abstract void spawnQuantumDustFX(World world, double x, double y, double z);
 
-    private void registerItems()
-    {
+    private void registerItems() {
         // Register our own creative tab
-        QCraft.creativeTab = new CreativeTabQuantumCraft( CreativeTabs.getNextID(), "qCraft" );
+        QCraft.creativeTab = new CreativeTabQuantumCraft(CreativeTabs.getNextID(), "qCraft");
 
         // BLOCKS
-
         // Quantum ore blocks
-        QCraft.Blocks.quantumOre = new BlockQuantumOre( false );
-        GameRegistry.registerBlock( QCraft.Blocks.quantumOre, "quantumore" );
+        QCraft.Blocks.quantumOre = new BlockQuantumOre(false);
+        GameRegistry.registerBlock(QCraft.Blocks.quantumOre, "quantumore");
 
-        QCraft.Blocks.quantumOreGlowing = new BlockQuantumOre( true );
-        GameRegistry.registerBlock( QCraft.Blocks.quantumOreGlowing, "quantumoreglowing" );
+        QCraft.Blocks.quantumOreGlowing = new BlockQuantumOre(true);
+        GameRegistry.registerBlock(QCraft.Blocks.quantumOreGlowing, "quantumoreglowing");
 
         // Quantum logic block
         QCraft.Blocks.quantumLogic = new BlockQuantumLogic();
-        GameRegistry.registerBlock( QCraft.Blocks.quantumLogic, ItemQuantumLogic.class, "quantumlogic" );
+        GameRegistry.registerBlock(QCraft.Blocks.quantumLogic, ItemQuantumLogic.class, "quantumlogic");
 
         // qBlock block
         QCraft.Blocks.qBlock = new BlockQBlock();
-        GameRegistry.registerBlock( QCraft.Blocks.qBlock, ItemQBlock.class, "qblock" );
+        GameRegistry.registerBlock(QCraft.Blocks.qBlock, ItemQBlock.class, "qblock");
 
         // Quantum Computer block
         QCraft.Blocks.quantumComputer = new BlockQuantumComputer();
-        GameRegistry.registerBlock( QCraft.Blocks.quantumComputer, ItemQuantumComputer.class, "quantumcomputer" );
+        GameRegistry.registerBlock(QCraft.Blocks.quantumComputer, ItemQuantumComputer.class, "quantumcomputer");
 
         // Quantum Portal block
         QCraft.Blocks.quantumPortal = new BlockQuantumPortal();
-        GameRegistry.registerBlock( QCraft.Blocks.quantumPortal, "quantumportal" );
+        GameRegistry.registerBlock(QCraft.Blocks.quantumPortal, "quantumportal");
 
         // ITEMS
-
         // Quantum Dust item
         QCraft.Items.quantumDust = new ItemQuantumDust();
-        GameRegistry.registerItem( QCraft.Items.quantumDust, "dust" );
+        GameRegistry.registerItem(QCraft.Items.quantumDust, "dust");
 
         // EOS item
         QCraft.Items.eos = new ItemEOS();
-        GameRegistry.registerItem( QCraft.Items.eos, "essence" );
+        GameRegistry.registerItem(QCraft.Items.eos, "essence");
 
         // Quantum Goggles item
         QCraft.Items.quantumGoggles = new ItemQuantumGoggles();
-        GameRegistry.registerItem( QCraft.Items.quantumGoggles, "goggles" );
-        
+        GameRegistry.registerItem(QCraft.Items.quantumGoggles, "goggles");
+
         // Dummy item to contain (modded) items that were sent to this server, but don't exist here
         QCraft.Items.missingItem = new ItemMissing();
-        GameRegistry.registerItem( QCraft.Items.missingItem, "missing" );
+        GameRegistry.registerItem(QCraft.Items.missingItem, "missing");
 
         // RECIPES
-
         // Automated Observer recipe
-        ItemStack observer = new ItemStack( QCraft.Blocks.quantumLogic, 1, BlockQuantumLogic.SubType.ObserverOff );
-        GameRegistry.addRecipe( observer, new Object[]{
-            "XXX", "XYX", "XZX",
-            Character.valueOf( 'X' ), Blocks.stone,
-            Character.valueOf( 'Y' ), new ItemStack( QCraft.Items.eos, 1, ItemEOS.SubType.Observation ),
-            Character.valueOf( 'Z' ), Items.redstone
-        } );
+        ItemStack observer = new ItemStack(QCraft.Blocks.quantumLogic, 1, BlockQuantumLogic.SubType.OBSERVEROFF);
+        GameRegistry.addRecipe(observer, new Object[]{
+            "XXX", "XYX", "XZX", 'X', Blocks.stone, 'Y', new ItemStack(QCraft.Items.eos, 1, ItemEOS.SubType.OBSERVATION), 'Z', Items.redstone
+        });
 
         // EOS recipe
-        ItemStack eos = new ItemStack( QCraft.Items.eos, 1, ItemEOS.SubType.Superposition );
-        GameRegistry.addRecipe( eos, new Object[]{
-            "XX", "XX",
-            Character.valueOf( 'X' ), QCraft.Items.quantumDust,
-        } );
+        ItemStack eos = new ItemStack(QCraft.Items.eos, 1, ItemEOS.SubType.SUPERPOSITION);
+        GameRegistry.addRecipe(eos, new Object[]{
+            "XX", "XX", 'X', QCraft.Items.quantumDust,});
 
         // EOO recipe
-        ItemStack eoo = new ItemStack( QCraft.Items.eos, 1, ItemEOS.SubType.Observation );
-        GameRegistry.addRecipe( eoo, new Object[]{
-            " X ", "X X", " X ",
-            Character.valueOf( 'X' ), QCraft.Items.quantumDust,
-        } );
+        ItemStack eoo = new ItemStack(QCraft.Items.eos, 1, ItemEOS.SubType.OBSERVATION);
+        GameRegistry.addRecipe(eoo, new Object[]{
+            " X ", "X X", " X ", 'X', QCraft.Items.quantumDust,});
 
         // EOE recipe
-        ItemStack eoe = new ItemStack( QCraft.Items.eos, 1, ItemEOS.SubType.Entanglement );
-        GameRegistry.addRecipe( eoe, new Object[]{
-            "X X", " Y ", "X X",
-            Character.valueOf( 'X' ), QCraft.Items.quantumDust,
-            Character.valueOf( 'Y' ), eos,
-        } );
+        ItemStack eoe = new ItemStack(QCraft.Items.eos, 1, ItemEOS.SubType.ENTANGLEMENT);
+        GameRegistry.addRecipe(eoe, new Object[]{
+            "X X", " Y ", "X X", 'X', QCraft.Items.quantumDust, 'Y', eos,});
 
         // qBlock recipes
-        GameRegistry.addRecipe( new QBlockRecipe() );
-        RecipeSorter.register( "qCraft:qBlock", QBlockRecipe.class, SHAPED, "after:minecraft:shapeless" );
+        GameRegistry.addRecipe(new QBlockRecipe());
+        RecipeSorter.register("qCraft:qBlock", QBlockRecipe.class, SHAPED, "after:minecraft:shapeless");
 
-        GameRegistry.addRecipe( new EntangledQBlockRecipe() );
-        RecipeSorter.register( "qCraft:entangled_qBlock", EntangledQBlockRecipe.class, SHAPED, "after:minecraft:shapeless" );
+        GameRegistry.addRecipe(new EntangledQBlockRecipe());
+        RecipeSorter.register("qCraft:entangled_qBlock", EntangledQBlockRecipe.class, SHAPED, "after:minecraft:shapeless");
 
         // Quantum Computer recipe
-        ItemStack regularQuantumComputer = ItemQuantumComputer.create( -1, 1 );
-        GameRegistry.addRecipe( regularQuantumComputer, new Object[] {
-            "XXX", "XYX", "XZX",
-            Character.valueOf( 'X' ), Items.iron_ingot,
-            Character.valueOf( 'Y' ), QCraft.Items.quantumDust,
-            Character.valueOf( 'Z' ), Blocks.glass_pane,
-        } );
+        ItemStack regularQuantumComputer = ItemQuantumComputer.create(-1, 1);
+        GameRegistry.addRecipe(regularQuantumComputer, new Object[]{
+            "XXX", "XYX", "XZX", 'X', Items.iron_ingot, 'Y', QCraft.Items.quantumDust, 'Z', Blocks.glass_pane,});
 
         // Entangled Quantum Computer
-        ItemStack entangledQuantumComputer = ItemQuantumComputer.create( 0, 1 );
-        GameRegistry.addRecipe( new EntangledQuantumComputerRecipe() );
-        RecipeSorter.register( "qCraft:entangled_computer", EntangledQuantumComputerRecipe.class, SHAPED, "after:minecraft:shapeless" );
+        ItemStack entangledQuantumComputer = ItemQuantumComputer.create(0, 1);
+        GameRegistry.addRecipe(new EntangledQuantumComputerRecipe());
+        RecipeSorter.register("qCraft:entangled_computer", EntangledQuantumComputerRecipe.class, SHAPED, "after:minecraft:shapeless");
 
         // Quantum Goggles recipe
-        ItemStack quantumGoggles = new ItemStack( QCraft.Items.quantumGoggles, 1, ItemQuantumGoggles.SubTypes.Quantum );
-        GameRegistry.addRecipe( quantumGoggles, new Object[] {
-            "XYX",
-            Character.valueOf( 'X' ), Blocks.glass_pane,
-            Character.valueOf( 'Y' ), QCraft.Items.quantumDust,
-        } );
+        ItemStack quantumGoggles = new ItemStack(QCraft.Items.quantumGoggles, 1, ItemQuantumGoggles.SubTypes.QUANTUM);
+        GameRegistry.addRecipe(quantumGoggles, new Object[]{
+            "XYX", 'X', Blocks.glass_pane, 'Y', QCraft.Items.quantumDust,});
 
         // Anti-observation goggles recipe
-        ItemStack aoGoggles = new ItemStack( QCraft.Items.quantumGoggles, 1, ItemQuantumGoggles.SubTypes.AntiObservation );
-        GameRegistry.addRecipe( aoGoggles, new Object[] {
-            "XYX",
-            Character.valueOf( 'X' ), Blocks.glass_pane,
-            Character.valueOf( 'Y' ), new ItemStack( QCraft.Items.eos, 1, ItemEOS.SubType.Observation ),
-        } );
+        ItemStack aoGoggles = new ItemStack(QCraft.Items.quantumGoggles, 1, ItemQuantumGoggles.SubTypes.ANTIOBSERVATION);
+        GameRegistry.addRecipe(aoGoggles, new Object[]{
+            "XYX", 'X', Blocks.glass_pane, 'Y', new ItemStack(QCraft.Items.eos, 1, ItemEOS.SubType.OBSERVATION),});
 
-        if( QCraft.enableWorldGenReplacementRecipes )
-        {
+        if (QCraft.enableWorldGenReplacementRecipes) {
             // Quantum dust recipe
-            GameRegistry.addRecipe( new ItemStack( QCraft.Items.quantumDust, 2 ), new Object[] {
-                "XY",
-                Character.valueOf( 'X' ), Items.redstone,
-                Character.valueOf( 'Y' ), new ItemStack( Items.dye, 1, 10 ) // Lime green
-            } );
+            GameRegistry.addRecipe(new ItemStack(QCraft.Items.quantumDust, 2), new Object[]{
+                "XY", 'X', Items.redstone, 'Y', new ItemStack(Items.dye, 1, 10) // Lime green
+            });
         }
     }
 
-    private void registerTileEntities()
-    {
+    private void registerTileEntities() {
         // Tile Entities
-        GameRegistry.registerTileEntity( TileEntityQBlock.class, "qblock" );
-        GameRegistry.registerTileEntity( TileEntityQuantumComputer.class, "qcomputer" );
+        GameRegistry.registerTileEntity(TileEntityQBlock.class, "qblock");
+        GameRegistry.registerTileEntity(TileEntityQuantumComputer.class, "qcomputer");
     }
 
-    private void registerForgeHandlers()
-    {
+    private void registerForgeHandlers() {
         ForgeHandlers handlers = new ForgeHandlers();
-        MinecraftForge.EVENT_BUS.register( handlers );
-        FMLCommonHandler.instance().bus().register( handlers );
-        if( QCraft.enableWorldGen )
-        {
-            GameRegistry.registerWorldGenerator( new QuantumOreGenerator(), 1 );
+        MinecraftForge.EVENT_BUS.register(handlers);
+        FMLCommonHandler.instance().bus().register(handlers);
+        if (QCraft.enableWorldGen) {
+            GameRegistry.registerWorldGenerator(new QuantumOreGenerator(), 1);
         }
-        NetworkRegistry.INSTANCE.registerGuiHandler( QCraft.instance, handlers );
+        NetworkRegistry.INSTANCE.registerGuiHandler(QCraft.instance, handlers);
 
         ConnectionHandler connectionHandler = new ConnectionHandler();
-        MinecraftForge.EVENT_BUS.register( connectionHandler );
-        FMLCommonHandler.instance().bus().register( connectionHandler );
+        MinecraftForge.EVENT_BUS.register(connectionHandler);
+        FMLCommonHandler.instance().bus().register(connectionHandler);
     }
 
     public class ForgeHandlers implements
-        IGuiHandler
-    {
-        private ForgeHandlers()
-        {
+            IGuiHandler {
+
+        private ForgeHandlers() {
         }
 
         // IGuiHandler implementation
-
         @Override
-        public Object getServerGuiElement( int id, EntityPlayer player, World world, int x, int y, int z )
-        {
-            TileEntity tile = world.getTileEntity( x, y, z );
-            switch( id )
-            {
-                case QCraft.quantumComputerGUIID:
-                {
-                    if( tile != null && tile instanceof TileEntityQuantumComputer )
-                    {
+        public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
+            TileEntity tile = world.getTileEntity(x, y, z);
+            switch (id) {
+                case QCraft.QUANTUMCOMPUTERGUIID: {
+                    if (tile != null && tile instanceof TileEntityQuantumComputer) {
                         TileEntityQuantumComputer computer = (TileEntityQuantumComputer) tile;
-                        return new ContainerQuantumComputer( player.inventory, computer );
+                        return new ContainerQuantumComputer(player.inventory, computer);
                     }
                     break;
                 }
@@ -296,17 +244,13 @@ public abstract class QCraftProxyCommon implements IQCraftProxy
         }
 
         @Override
-        public Object getClientGuiElement( int id, EntityPlayer player, World world, int x, int y, int z )
-        {
-            TileEntity tile = world.getTileEntity( x, y, z );
-            switch( id )
-            {
-                case QCraft.quantumComputerGUIID:
-                {
-                    if( tile != null && tile instanceof TileEntityQuantumComputer )
-                    {
+        public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
+            TileEntity tile = world.getTileEntity(x, y, z);
+            switch (id) {
+                case QCraft.QUANTUMCOMPUTERGUIID: {
+                    if (tile != null && tile instanceof TileEntityQuantumComputer) {
                         TileEntityQuantumComputer drive = (TileEntityQuantumComputer) tile;
-                        return getQuantumComputerGUI( player.inventory, drive );
+                        return getQuantumComputerGUI(player.inventory, drive);
                     }
                     break;
                 }
@@ -315,74 +259,53 @@ public abstract class QCraftProxyCommon implements IQCraftProxy
         }
 
         // Forge event responses
-
         @SubscribeEvent
-        public void onPlayerLogin( PlayerEvent.PlayerLoggedInEvent event )
-        {
+        public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
             EntityPlayer player = event.player;
-            if( FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER )
-            {
-                QCraft.clearUnverifiedLuggage( player ); // Shouldn't be necessary, but can't hurt
-                QCraft.requestLuggage( player );
+            if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) {
+                QCraft.clearUnverifiedLuggage(player); // Shouldn't be necessary, but can't hurt
+                QCraft.requestLuggage(player);
             }
         }
 
         @SubscribeEvent
-        public void onPlayerLogout( PlayerEvent.PlayerLoggedOutEvent event )
-        {
+        public void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
             EntityPlayer player = event.player;
-            if( FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER )
-            {
-                QCraft.clearUnverifiedLuggage( player );
+            if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) {
+                QCraft.clearUnverifiedLuggage(player);
             }
         }
     }
 
-    public static NBTTagCompound loadNBTFromPath( File file )
-    {
-        try
-        {
-            if( file != null && file.exists() )
-            {
-                InputStream input = new BufferedInputStream( new FileInputStream( file ) );
-                try
-                {
-                    return CompressedStreamTools.readCompressed( input );
-                }
-                finally
-                {
+    public static NBTTagCompound loadNBTFromPath(File file) {
+        try {
+            if (file != null && file.exists()) {
+                InputStream input = new BufferedInputStream(new FileInputStream(file));
+                try {
+                    return CompressedStreamTools.readCompressed(input);
+                } finally {
                     input.close();
                 }
             }
-        }
-        catch( IOException e )
-        {
-            QCraft.log( "Warning: failed to load QCraft entanglement info" );
+        } catch (IOException e) {
+            QCraft.log("Warning: failed to load QCraft entanglement info");
         }
         return null;
     }
 
-    public static void saveNBTToPath( File file, NBTTagCompound nbt )
-    {
-        try
-        {
-            if( file != null )
-            {
+    public static void saveNBTToPath(File file, NBTTagCompound nbt) {
+        try {
+            if (file != null) {
                 file.getParentFile().mkdirs();
-                OutputStream output = new BufferedOutputStream( new FileOutputStream( file ) );
-                try
-                {
-                    CompressedStreamTools.writeCompressed( nbt, output );
-                }
-                finally
-                {
+                OutputStream output = new BufferedOutputStream(new FileOutputStream(file));
+                try {
+                    CompressedStreamTools.writeCompressed(nbt, output);
+                } finally {
                     output.close();
                 }
             }
-        }
-        catch( IOException e )
-        {
-            QCraft.log( "Warning: failed to save QCraft entanglement info" );
+        } catch (IOException e) {
+            QCraft.log("Warning: failed to save QCraft entanglement info");
         }
     }
 }

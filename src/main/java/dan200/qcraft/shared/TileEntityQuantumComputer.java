@@ -12,9 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
-
-
+ */
 package dan200.qcraft.shared;
 
 import com.google.common.base.CaseFormat;
@@ -48,26 +46,22 @@ import net.minecraftforge.common.util.Constants;
 import java.io.IOException;
 import java.util.*;
 
-public class TileEntityQuantumComputer extends TileEntity
-{
+public class TileEntityQuantumComputer extends TileEntity {
+
     public static final EntanglementRegistry<TileEntityQuantumComputer> ComputerRegistry = new EntanglementRegistry<TileEntityQuantumComputer>();
     public static final EntanglementRegistry<TileEntityQuantumComputer> ClientComputerRegistry = new EntanglementRegistry<TileEntityQuantumComputer>();
     private static boolean tooManyPossiblePortals = false;
 
-    public static EntanglementRegistry<TileEntityQuantumComputer> getEntanglementRegistry( World world )
-    {
-        if( !world.isRemote )
-        {
+    public static EntanglementRegistry<TileEntityQuantumComputer> getEntanglementRegistry(World world) {
+        if (!world.isRemote) {
             return ComputerRegistry;
-        }
-        else
-        {
+        } else {
             return ClientComputerRegistry;
         }
     }
 
-    public static class AreaShape
-    {
+    public static class AreaShape {
+
         public int m_xMin;
         public int m_xMax;
         public int m_yMin;
@@ -75,95 +69,80 @@ public class TileEntityQuantumComputer extends TileEntity
         public int m_zMin;
         public int m_zMax;
 
-        public boolean equals( AreaShape o )
-        {
-            return
-                o.m_xMin == m_xMin &&
-                o.m_xMax == m_xMax &&
-                o.m_yMin == m_yMin &&
-                o.m_yMax == m_yMax &&
-                o.m_zMin == m_zMin &&
-                o.m_zMax == m_zMax;
+        public boolean equals(AreaShape o) {
+            return o.m_xMin == m_xMin
+                    && o.m_xMax == m_xMax
+                    && o.m_yMin == m_yMin
+                    && o.m_yMax == m_yMax
+                    && o.m_zMin == m_zMin
+                    && o.m_zMax == m_zMax;
         }
     }
 
-    public static class AreaData
-    {
+    public static class AreaData {
+
         public AreaShape m_shape;
         public Block[] m_blocks;
         public int[] m_metaData;
 
-        public NBTTagCompound encode()
-        {
+        public NBTTagCompound encode() {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
-            nbttagcompound.setInteger( "xmin", m_shape.m_xMin );
-            nbttagcompound.setInteger( "xmax", m_shape.m_xMax );
-            nbttagcompound.setInteger( "ymin", m_shape.m_yMin );
-            nbttagcompound.setInteger( "ymax", m_shape.m_yMax );
-            nbttagcompound.setInteger( "zmin", m_shape.m_zMin );
-            nbttagcompound.setInteger( "zmax", m_shape.m_zMax );
+            nbttagcompound.setInteger("xmin", m_shape.m_xMin);
+            nbttagcompound.setInteger("xmax", m_shape.m_xMax);
+            nbttagcompound.setInteger("ymin", m_shape.m_yMin);
+            nbttagcompound.setInteger("ymax", m_shape.m_yMax);
+            nbttagcompound.setInteger("zmin", m_shape.m_zMin);
+            nbttagcompound.setInteger("zmax", m_shape.m_zMax);
 
             NBTTagList blockNames = new NBTTagList();
-            for( int i=0; i<m_blocks.length; ++i )
-            {
+            for (int i = 0; i < m_blocks.length; ++i) {
                 String name = null;
                 Block block = m_blocks[i];
-                if( block != null )
-                {
-                    name = Block.blockRegistry.getNameForObject( block );
+                if (block != null) {
+                    name = Block.blockRegistry.getNameForObject(block);
                 }
-                if( name != null && name.length() > 0 )
-                {
-                    blockNames.appendTag( new NBTTagString( name ) );
-                }
-                else
-                {
-                    blockNames.appendTag( new NBTTagString( "null" ) );
+                if (name != null && name.length() > 0) {
+                    blockNames.appendTag(new NBTTagString(name));
+                } else {
+                    blockNames.appendTag(new NBTTagString("null"));
                 }
             }
-            nbttagcompound.setTag( "blockNames", blockNames );
+            nbttagcompound.setTag("blockNames", blockNames);
 
-            nbttagcompound.setIntArray( "metaData", m_metaData );
+            nbttagcompound.setIntArray("metaData", m_metaData);
             return nbttagcompound;
         }
 
-        public static AreaData decode( NBTTagCompound nbttagcompound )
-        {
+        public static AreaData decode(NBTTagCompound nbttagcompound) {
             AreaData storedData = new AreaData();
             storedData.m_shape = new AreaShape();
-            storedData.m_shape.m_xMin = nbttagcompound.getInteger( "xmin" );
-            storedData.m_shape.m_xMax = nbttagcompound.getInteger( "xmax" );
-            storedData.m_shape.m_yMin = nbttagcompound.getInteger( "ymin" );
-            storedData.m_shape.m_yMax = nbttagcompound.getInteger( "ymax" );
-            storedData.m_shape.m_zMin = nbttagcompound.getInteger( "zmin" );
-            storedData.m_shape.m_zMax = nbttagcompound.getInteger( "zmax" );
+            storedData.m_shape.m_xMin = nbttagcompound.getInteger("xmin");
+            storedData.m_shape.m_xMax = nbttagcompound.getInteger("xmax");
+            storedData.m_shape.m_yMin = nbttagcompound.getInteger("ymin");
+            storedData.m_shape.m_yMax = nbttagcompound.getInteger("ymax");
+            storedData.m_shape.m_zMin = nbttagcompound.getInteger("zmin");
+            storedData.m_shape.m_zMax = nbttagcompound.getInteger("zmax");
 
-            int size =
-                ( storedData.m_shape.m_xMax - storedData.m_shape.m_xMin + 1 ) *
-                ( storedData.m_shape.m_yMax - storedData.m_shape.m_yMin + 1 ) *
-                ( storedData.m_shape.m_zMax - storedData.m_shape.m_zMin + 1 );
-            storedData.m_blocks = new Block[ size ];
-            if( nbttagcompound.hasKey( "blockData" ) )
-            {
-                int[] blockIDs = nbttagcompound.getIntArray( "blockData" );
-                for( int i=0; i<size; ++i )
-                {
-                    storedData.m_blocks[i] = Block.getBlockById( blockIDs[i] );
+            int size
+                    = (storedData.m_shape.m_xMax - storedData.m_shape.m_xMin + 1)
+                    * (storedData.m_shape.m_yMax - storedData.m_shape.m_yMin + 1)
+                    * (storedData.m_shape.m_zMax - storedData.m_shape.m_zMin + 1);
+            storedData.m_blocks = new Block[size];
+            if (nbttagcompound.hasKey("blockData")) {
+                int[] blockIDs = nbttagcompound.getIntArray("blockData");
+                for (int i = 0; i < size; ++i) {
+                    storedData.m_blocks[i] = Block.getBlockById(blockIDs[i]);
                 }
-            }
-            else
-            {
-                NBTTagList blockNames = nbttagcompound.getTagList( "blockNames", Constants.NBT.TAG_STRING );
-                for( int i=0; i<size; ++i )
-                {
-                    String name = blockNames.getStringTagAt( i );
-                    if( name.length() > 0 && !name.equals( "null" ) )
-                    {
-                        storedData.m_blocks[i] = Block.getBlockFromName( name );
+            } else {
+                NBTTagList blockNames = nbttagcompound.getTagList("blockNames", Constants.NBT.TAG_STRING);
+                for (int i = 0; i < size; ++i) {
+                    String name = blockNames.getStringTagAt(i);
+                    if (name.length() > 0 && !name.equals("null")) {
+                        storedData.m_blocks[i] = Block.getBlockFromName(name);
                     }
                 }
             }
-            storedData.m_metaData = nbttagcompound.getIntArray( "metaData" );
+            storedData.m_metaData = nbttagcompound.getIntArray("metaData");
             return storedData;
         }
     }
@@ -183,8 +162,7 @@ public class TileEntityQuantumComputer extends TileEntity
     private String m_remoteServerName;
     private String m_remotePortalID;
 
-    public TileEntityQuantumComputer()
-    {
+    public TileEntityQuantumComputer() {
         m_powered = false;
         m_entanglementFrequency = -1;
         m_timeSinceEnergize = 0;
@@ -198,86 +176,67 @@ public class TileEntityQuantumComputer extends TileEntity
         m_remotePortalID = null;
     }
 
-    private EntanglementRegistry<TileEntityQuantumComputer> getEntanglementRegistry()
-    {
-        return getEntanglementRegistry( worldObj );
+    private EntanglementRegistry<TileEntityQuantumComputer> getEntanglementRegistry() {
+        return getEntanglementRegistry(worldObj);
     }
 
-    private PortalRegistry getPortalRegistry()
-    {
-        return PortalRegistry.getPortalRegistry( worldObj );
+    private PortalRegistry getPortalRegistry() {
+        return PortalRegistry.getPortalRegistry(worldObj);
     }
 
     @Override
-    public void validate()
-    {
+    public void validate() {
         super.validate();
         register();
     }
 
     @Override
-    public void invalidate()
-    {
+    public void invalidate() {
         unregister();
         super.invalidate();
     }
 
-    public void onDestroy()
-    {
+    public void onDestroy() {
         PortalLocation location = getPortal();
-        if( location != null && isPortalDeployed( location ) )
-        {
-            undeployPortal( location );
+        if (location != null && isPortalDeployed(location)) {
+            undeployPortal(location);
         }
         unregisterPortal();
     }
 
     // Entanglement
-
-    private void register()
-    {
-        if( m_entanglementFrequency >= 0 )
-        {
-            getEntanglementRegistry().register( m_entanglementFrequency, this, this.getWorldObj() );
+    private void register() {
+        if (m_entanglementFrequency >= 0) {
+            getEntanglementRegistry().register(m_entanglementFrequency, this, this.getWorldObj());
         }
     }
 
-    private void unregister()
-    {
-        if( m_entanglementFrequency >= 0 )
-        {
-            getEntanglementRegistry().unregister( m_entanglementFrequency, this, this.getWorldObj() );
+    private void unregister() {
+        if (m_entanglementFrequency >= 0) {
+            getEntanglementRegistry().unregister(m_entanglementFrequency, this, this.getWorldObj());
         }
     }
 
-    public void setEntanglementFrequency( int frequency )
-    {
-        if( m_entanglementFrequency != frequency )
-        {
+    public void setEntanglementFrequency(int frequency) {
+        if (m_entanglementFrequency != frequency) {
             unregister();
             m_entanglementFrequency = frequency;
             register();
         }
     }
 
-    public int getEntanglementFrequency()
-    {
+    public int getEntanglementFrequency() {
         return m_entanglementFrequency;
     }
 
-    private TileEntityQuantumComputer findEntangledTwin()
-    {
-        if( m_entanglementFrequency >= 0 )
-        {
-            List<TileEntityQuantumComputer> twins = ComputerRegistry.getEntangledObjects( m_entanglementFrequency );
-            if( twins != null )
-            {
+    private TileEntityQuantumComputer findEntangledTwin() {
+        if (m_entanglementFrequency >= 0) {
+            List<TileEntityQuantumComputer> twins = ComputerRegistry.getEntangledObjects(m_entanglementFrequency);
+            if (twins != null) {
                 Iterator<TileEntityQuantumComputer> it = twins.iterator();
-                while( it.hasNext() )
-                {
+                while (it.hasNext()) {
                     TileEntityQuantumComputer computer = it.next();
-                    if( computer != this )
-                    {
+                    if (computer != this) {
                         return computer;
                     }
                 }
@@ -287,44 +246,32 @@ public class TileEntityQuantumComputer extends TileEntity
     }
 
     // Area Teleportation
-
-    public void setStoredData( AreaData data )
-    {
+    public void setStoredData(AreaData data) {
         m_storedData = data;
     }
 
-    public AreaData getStoredData()
-    {
+    public AreaData getStoredData() {
         return m_storedData;
     }
 
-    private boolean isPillarBase( int x, int y, int z, int side )
-    {
-        if( y < 0 || y >= 256 )
-        {
+    private boolean isPillarBase(int x, int y, int z, int side) {
+        if (y < 0 || y >= 256) {
             return false;
         }
 
-        TileEntity entity = worldObj.getTileEntity( x, y, z );
-        if( entity != null && entity instanceof TileEntityQBlock )
-        {
+        TileEntity entity = worldObj.getTileEntity(x, y, z);
+        if (entity != null && entity instanceof TileEntityQBlock) {
             TileEntityQBlock quantum = (TileEntityQBlock) entity;
             int[] types = quantum.getTypes();
-            for( int i = 0; i < 6; ++i )
-            {
-                if( i == side )
-                {
-                    if( types[ i ] != 31 ) // GOLD
+            for (int i = 0; i < 6; ++i) {
+                if (i == side) {
+                    if (types[i] != 31) // GOLD
                     {
                         return false;
                     }
-                }
-                else
+                } else if (types[i] != 21) // OBSIDIAN
                 {
-                    if( types[ i ] != 21 ) // OBSIDIAN
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
             return true;
@@ -332,38 +279,25 @@ public class TileEntityQuantumComputer extends TileEntity
         return false;
     }
 
-    private boolean isPillar( int x, int y, int z )
-    {
-        if( y < 0 || y >= 256 )
-        {
+    private boolean isPillar(int x, int y, int z) {
+        if (y < 0 || y >= 256) {
             return false;
         }
 
-        Block block = worldObj.getBlock( x, y, z );
-        if( block == Blocks.obsidian )
-        {
-            return true;
-        }
-        return false;
+        Block block = worldObj.getBlock(x, y, z);
+        return block == Blocks.obsidian;
     }
 
-    private boolean isGlass( int x, int y, int z )
-    {
-        if( y < 0 || y >= 256 )
-        {
+    private boolean isGlass(int x, int y, int z) {
+        if (y < 0 || y >= 256) {
             return false;
         }
 
-        Block block = worldObj.getBlock( x, y, z );
-        if( block.getMaterial() == Material.glass && !(block instanceof BlockPane) )
-        {
-            return true;
-        }
-        return false;
+        Block block = worldObj.getBlock(x, y, z);
+        return block.getMaterial() == Material.glass && !(block instanceof BlockPane);
     }
 
-    private AreaShape calculateShape()
-    {
+    private AreaShape calculateShape() {
         AreaShape shape = new AreaShape();
         shape.m_xMin = -99;
         shape.m_xMax = -99;
@@ -371,81 +305,64 @@ public class TileEntityQuantumComputer extends TileEntity
         shape.m_yMax = 0;
         shape.m_zMin = -99;
         shape.m_zMax = -99;
-        for( int i = 0; i < QCraft.maxQTPSize; ++i )
-        {
-            if( shape.m_xMin == -99 && isPillarBase( xCoord - i - 1, yCoord, zCoord, 5 ) )
-            {
+        for (int i = 0; i < QCraft.maxQTPSize; ++i) {
+            if (shape.m_xMin == -99 && isPillarBase(xCoord - i - 1, yCoord, zCoord, 5)) {
                 shape.m_xMin = -i;
             }
-            if( shape.m_xMax == -99 && isPillarBase( xCoord + i + 1, yCoord, zCoord, 4 ) )
-            {
+            if (shape.m_xMax == -99 && isPillarBase(xCoord + i + 1, yCoord, zCoord, 4)) {
                 shape.m_xMax = i;
             }
-            if( shape.m_zMin == -99 && isPillarBase( xCoord, yCoord, zCoord - i - 1, 3 ) )
-            {
+            if (shape.m_zMin == -99 && isPillarBase(xCoord, yCoord, zCoord - i - 1, 3)) {
                 shape.m_zMin = -i;
             }
-            if( shape.m_zMax == -99 && isPillarBase( xCoord, yCoord, zCoord + i + 1, 2 ) )
-            {
+            if (shape.m_zMax == -99 && isPillarBase(xCoord, yCoord, zCoord + i + 1, 2)) {
                 shape.m_zMax = i;
             }
         }
 
-        if( shape.m_xMin != -99 &&
-                shape.m_xMax != -99 &&
-                shape.m_zMin != -99 &&
-                shape.m_zMax != -99 )
-        {
+        if (shape.m_xMin != -99
+                && shape.m_xMax != -99
+                && shape.m_zMin != -99
+                && shape.m_zMax != -99) {
             // Find Y Min
-            for( int i = 1; i < QCraft.maxQTPSize; ++i )
-            {
-                if( isPillar( xCoord + shape.m_xMin - 1, yCoord - i, zCoord ) &&
-                        isPillar( xCoord + shape.m_xMax + 1, yCoord - i, zCoord ) &&
-                        isPillar( xCoord, yCoord - i, zCoord + shape.m_zMin - 1 ) &&
-                        isPillar( xCoord, yCoord - i, zCoord + shape.m_zMax + 1 ) )
-                {
+            for (int i = 1; i < QCraft.maxQTPSize; ++i) {
+                if (isPillar(xCoord + shape.m_xMin - 1, yCoord - i, zCoord)
+                        && isPillar(xCoord + shape.m_xMax + 1, yCoord - i, zCoord)
+                        && isPillar(xCoord, yCoord - i, zCoord + shape.m_zMin - 1)
+                        && isPillar(xCoord, yCoord - i, zCoord + shape.m_zMax + 1)) {
                     shape.m_yMin = -i;
-                }
-                else
-                {
+                } else {
                     break;
                 }
             }
 
             // Find Y Max
-            for( int i = 1; i < QCraft.maxQTPSize; ++i )
-            {
-                if( isPillar( xCoord + shape.m_xMin - 1, yCoord + i, zCoord ) &&
-                        isPillar( xCoord + shape.m_xMax + 1, yCoord + i, zCoord ) &&
-                        isPillar( xCoord, yCoord + i, zCoord + shape.m_zMin - 1 ) &&
-                        isPillar( xCoord, yCoord + i, zCoord + shape.m_zMax + 1 ) )
-                {
+            for (int i = 1; i < QCraft.maxQTPSize; ++i) {
+                if (isPillar(xCoord + shape.m_xMin - 1, yCoord + i, zCoord)
+                        && isPillar(xCoord + shape.m_xMax + 1, yCoord + i, zCoord)
+                        && isPillar(xCoord, yCoord + i, zCoord + shape.m_zMin - 1)
+                        && isPillar(xCoord, yCoord + i, zCoord + shape.m_zMax + 1)) {
                     shape.m_yMax = i;
-                }
-                else
-                {
+                } else {
                     break;
                 }
             }
 
             // Check glass caps
             int top = yCoord + shape.m_yMax + 1;
-            if( isGlass( xCoord + shape.m_xMin - 1, top, zCoord ) &&
-                    isGlass( xCoord + shape.m_xMax + 1, top, zCoord ) &&
-                    isGlass( xCoord, top, zCoord + shape.m_zMin - 1 ) &&
-                    isGlass( xCoord, top, zCoord + shape.m_zMax + 1 ) )
-            {
+            if (isGlass(xCoord + shape.m_xMin - 1, top, zCoord)
+                    && isGlass(xCoord + shape.m_xMax + 1, top, zCoord)
+                    && isGlass(xCoord, top, zCoord + shape.m_zMin - 1)
+                    && isGlass(xCoord, top, zCoord + shape.m_zMax + 1)) {
                 return shape;
             }
         }
         return null;
     }
 
-    private AreaData storeArea()
-    {
+    private AreaData storeArea() {
         AreaShape shape = calculateShape();
-        if( shape == null )
-        {
+        if (shape == null) {
             return null;
         }
 
@@ -457,33 +374,28 @@ public class TileEntityQuantumComputer extends TileEntity
         int minZ = shape.m_zMin;
         int maxZ = shape.m_zMax;
 
-        int size = ( maxX - minX + 1 ) * ( maxY - minY + 1 ) * ( maxZ - minZ + 1 );
+        int size = (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
         int index = 0;
 
         storedData.m_shape = shape;
-        storedData.m_blocks = new Block[ size ];
-        storedData.m_metaData = new int[ size ];
-        for( int y = minY; y <= maxY; ++y )
-        {
-            for( int x = minX; x <= maxX; ++x )
-            {
-                for( int z = minZ; z <= maxZ; ++z )
-                {
+        storedData.m_blocks = new Block[size];
+        storedData.m_metaData = new int[size];
+        for (int y = minY; y <= maxY; ++y) {
+            for (int x = minX; x <= maxX; ++x) {
+                for (int z = minZ; z <= maxZ; ++z) {
                     int worldX = xCoord + x;
                     int worldY = yCoord + y;
                     int worldZ = zCoord + z;
-                    if( !( worldX == xCoord && worldY == yCoord && worldZ == zCoord ) )
-                    {
-                        TileEntity tileentity = worldObj.getTileEntity( worldX, worldY, worldZ );
-                        if( tileentity != null )
-                        {
+                    if (!(worldX == xCoord && worldY == yCoord && worldZ == zCoord)) {
+                        TileEntity tileentity = worldObj.getTileEntity(worldX, worldY, worldZ);
+                        if (tileentity != null) {
                             return null;
                         }
 
-                        Block block = worldObj.getBlock( worldX, worldY, worldZ );
-                        int meta = worldObj.getBlockMetadata( worldX, worldY, worldZ );
-                        storedData.m_blocks[ index ] = block;
-                        storedData.m_metaData[ index ] = meta;
+                        Block block = worldObj.getBlock(worldX, worldY, worldZ);
+                        int meta = worldObj.getBlockMetadata(worldX, worldY, worldZ);
+                        storedData.m_blocks[index] = block;
+                        storedData.m_metaData[index] = meta;
                     }
                     index++;
                 }
@@ -493,13 +405,11 @@ public class TileEntityQuantumComputer extends TileEntity
         return storedData;
     }
 
-    private void notifyBlockOfNeighborChange( int x, int y, int z )
-    {
-        worldObj.notifyBlockOfNeighborChange( x, y, z, worldObj.getBlock( x, y, z ) );
+    private void notifyBlockOfNeighborChange(int x, int y, int z) {
+        worldObj.notifyBlockOfNeighborChange(x, y, z, worldObj.getBlock(x, y, z));
     }
 
-    private void notifyEdgeBlocks( AreaShape shape )
-    {
+    private void notifyEdgeBlocks(AreaShape shape) {
         // Notify the newly transported blocks on the edges of the area that their neighbours have changed
         int minX = shape.m_xMin;
         int maxX = shape.m_xMax;
@@ -507,79 +417,66 @@ public class TileEntityQuantumComputer extends TileEntity
         int maxY = shape.m_yMax;
         int minZ = shape.m_zMin;
         int maxZ = shape.m_zMax;
-        for( int x = minX; x <= maxX; ++x )
-        {
-            for( int y = minY; y <= maxY; ++y )
-            {
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + y, zCoord + minZ );
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + y, zCoord + maxZ );
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + y, zCoord + minZ );
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + y, zCoord + maxZ + 1 );
+        for (int x = minX; x <= maxX; ++x) {
+            for (int y = minY; y <= maxY; ++y) {
+                notifyBlockOfNeighborChange(xCoord + x, yCoord + y, zCoord + minZ);
+                notifyBlockOfNeighborChange(xCoord + x, yCoord + y, zCoord + maxZ);
+                notifyBlockOfNeighborChange(xCoord + x, yCoord + y, zCoord + minZ);
+                notifyBlockOfNeighborChange(xCoord + x, yCoord + y, zCoord + maxZ + 1);
             }
         }
-        for( int x = minX; x <= maxX; ++x )
-        {
-            for( int z = minZ; z <= maxZ; ++z )
-            {
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + minY, zCoord + z );
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + maxY, zCoord + z );
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + minY - 1, zCoord + z );
-                notifyBlockOfNeighborChange( xCoord + x, yCoord + maxY + 1, zCoord + z );
+        for (int x = minX; x <= maxX; ++x) {
+            for (int z = minZ; z <= maxZ; ++z) {
+                notifyBlockOfNeighborChange(xCoord + x, yCoord + minY, zCoord + z);
+                notifyBlockOfNeighborChange(xCoord + x, yCoord + maxY, zCoord + z);
+                notifyBlockOfNeighborChange(xCoord + x, yCoord + minY - 1, zCoord + z);
+                notifyBlockOfNeighborChange(xCoord + x, yCoord + maxY + 1, zCoord + z);
             }
         }
-        for( int y = minY; y <= maxY; ++y )
-        {
-            for( int z = minZ; z <= maxZ; ++z )
-            {
-                notifyBlockOfNeighborChange( xCoord + minX, yCoord + y, zCoord + z );
-                notifyBlockOfNeighborChange( xCoord + maxX, yCoord + y, zCoord + z );
-                notifyBlockOfNeighborChange( xCoord + minX - 1, yCoord + y, zCoord + z );
-                notifyBlockOfNeighborChange( xCoord + maxX + 1, yCoord + y, zCoord + z );
+        for (int y = minY; y <= maxY; ++y) {
+            for (int z = minZ; z <= maxZ; ++z) {
+                notifyBlockOfNeighborChange(xCoord + minX, yCoord + y, zCoord + z);
+                notifyBlockOfNeighborChange(xCoord + maxX, yCoord + y, zCoord + z);
+                notifyBlockOfNeighborChange(xCoord + minX - 1, yCoord + y, zCoord + z);
+                notifyBlockOfNeighborChange(xCoord + maxX + 1, yCoord + y, zCoord + z);
             }
         }
     }
 
-    private Set<EntityItem> getEntityItemsInArea( AreaShape shape )
-    {
+    private Set<EntityItem> getEntityItemsInArea(AreaShape shape) {
         AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(
-                (double) ( xCoord + shape.m_xMin ),
-                (double) ( yCoord + shape.m_yMin ),
-                (double) ( zCoord + shape.m_zMin ),
-                (double) ( xCoord + shape.m_xMax + 1 ),
-                (double) ( yCoord + shape.m_yMax + 1 ),
-                (double) ( zCoord + shape.m_zMax + 1 )
+                (double) (xCoord + shape.m_xMin),
+                (double) (yCoord + shape.m_yMin),
+                (double) (zCoord + shape.m_zMin),
+                (double) (xCoord + shape.m_xMax + 1),
+                (double) (yCoord + shape.m_yMax + 1),
+                (double) (zCoord + shape.m_zMax + 1)
         );
 
-        List list = worldObj.getEntitiesWithinAABBExcludingEntity( null, aabb );
+        List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, aabb);
         Set<EntityItem> set = new HashSet<EntityItem>();
-        for( int i = 0; i < list.size(); ++i )
-        {
-            Entity entity = (Entity) list.get( i );
-            if( entity instanceof EntityItem && !entity.isDead )
-            {
-                set.add( (EntityItem) entity );
+        for (int i = 0; i < list.size(); ++i) {
+            Entity entity = (Entity) list.get(i);
+            if (entity instanceof EntityItem && !entity.isDead) {
+                set.add((EntityItem) entity);
             }
         }
         return set;
     }
 
-    private void killNewItems( Set<EntityItem> before, Set<EntityItem> after )
-    {
+    private void killNewItems(Set<EntityItem> before, Set<EntityItem> after) {
         Iterator<EntityItem> it = after.iterator();
-        while( it.hasNext() )
-        {
+        while (it.hasNext()) {
             EntityItem item = it.next();
-            if( !item.isDead && !before.contains( item ) )
-            {
+            if (!item.isDead && !before.contains(item)) {
                 item.setDead();
             }
         }
     }
 
-    private void clearArea( AreaShape shape )
-    {
+    private void clearArea(AreaShape shape) {
         // Cache the loose entities
-        Set<EntityItem> before = getEntityItemsInArea( shape );
+        Set<EntityItem> before = getEntityItemsInArea(shape);
 
         // Set the area around us to air, notifying the adjacent blocks
         int minX = shape.m_xMin;
@@ -588,35 +485,30 @@ public class TileEntityQuantumComputer extends TileEntity
         int maxY = shape.m_yMax;
         int minZ = shape.m_zMin;
         int maxZ = shape.m_zMax;
-        for( int y = minY; y <= maxY; ++y )
-        {
-            for( int x = minX; x <= maxX; ++x )
-            {
-                for( int z = minZ; z <= maxZ; ++z )
-                {
+        for (int y = minY; y <= maxY; ++y) {
+            for (int x = minX; x <= maxX; ++x) {
+                for (int z = minZ; z <= maxZ; ++z) {
                     int worldX = xCoord + x;
                     int worldY = yCoord + y;
                     int worldZ = zCoord + z;
-                    if( !( worldX == xCoord && worldY == yCoord && worldZ == zCoord ) )
-                    {
-                        worldObj.setBlockToAir( worldX, worldY, worldZ );
+                    if (!(worldX == xCoord && worldY == yCoord && worldZ == zCoord)) {
+                        worldObj.setBlockToAir(worldX, worldY, worldZ);
                     }
                 }
             }
         }
 
         // Kill the new entities
-        Set<EntityItem> after = getEntityItemsInArea( shape );
-        killNewItems( before, after );
+        Set<EntityItem> after = getEntityItemsInArea(shape);
+        killNewItems(before, after);
 
         // Notify edge blocks
-        notifyEdgeBlocks( shape );
+        notifyEdgeBlocks(shape);
     }
 
-    private void unpackArea( AreaData storedData )
-    {
+    private void unpackArea(AreaData storedData) {
         // Cache the loose entities
-        Set<EntityItem> before = getEntityItemsInArea( storedData.m_shape );
+        Set<EntityItem> before = getEntityItemsInArea(storedData.m_shape);
 
         // Set the area around us to the stored data
         int index = 0;
@@ -626,26 +518,19 @@ public class TileEntityQuantumComputer extends TileEntity
         int maxY = storedData.m_shape.m_yMax;
         int minZ = storedData.m_shape.m_zMin;
         int maxZ = storedData.m_shape.m_zMax;
-        for( int y = minY; y <= maxY; ++y )
-        {
-            for( int x = minX; x <= maxX; ++x )
-            {
-                for( int z = minZ; z <= maxZ; ++z )
-                {
+        for (int y = minY; y <= maxY; ++y) {
+            for (int x = minX; x <= maxX; ++x) {
+                for (int z = minZ; z <= maxZ; ++z) {
                     int worldX = xCoord + x;
                     int worldY = yCoord + y;
                     int worldZ = zCoord + z;
-                    if( !( worldX == xCoord && worldY == yCoord && worldZ == zCoord ) )
-                    {
-                        Block block = storedData.m_blocks[ index ];
-                        if( block != null )
-                        {
-                            int meta = storedData.m_metaData[ index ];
-                            worldObj.setBlock( worldX, worldY, worldZ, block, meta, 2 );
-                        }
-                        else
-                        {
-                            worldObj.setBlockToAir( worldX, worldY, worldZ );
+                    if (!(worldX == xCoord && worldY == yCoord && worldZ == zCoord)) {
+                        Block block = storedData.m_blocks[index];
+                        if (block != null) {
+                            int meta = storedData.m_metaData[index];
+                            worldObj.setBlock(worldX, worldY, worldZ, block, meta, 2);
+                        } else {
+                            worldObj.setBlockToAir(worldX, worldY, worldZ);
                         }
                     }
                     index++;
@@ -654,31 +539,27 @@ public class TileEntityQuantumComputer extends TileEntity
         }
 
         // Kill the new entities
-        Set<EntityItem> after = getEntityItemsInArea( storedData.m_shape );
-        killNewItems( before, after );
+        Set<EntityItem> after = getEntityItemsInArea(storedData.m_shape);
+        killNewItems(before, after);
 
         // Notify edge blocks
-        notifyEdgeBlocks( storedData.m_shape );
+        notifyEdgeBlocks(storedData.m_shape);
     }
 
-    private boolean checkCooling()
-    {
-        for( int i = 0; i < 6; ++i )
-        {
-            int x = xCoord + Facing.offsetsXForSide[ i ];
-            int y = yCoord + Facing.offsetsYForSide[ i ];
-            int z = zCoord + Facing.offsetsZForSide[ i ];
-            Block block = worldObj.getBlock( x, y, z );
-            if( block != null && (block.getMaterial() == Material.ice || block.getMaterial() == Material.packedIce) )
-            {
+    private boolean checkCooling() {
+        for (int i = 0; i < 6; ++i) {
+            int x = xCoord + Facing.offsetsXForSide[i];
+            int y = yCoord + Facing.offsetsYForSide[i];
+            int z = zCoord + Facing.offsetsZForSide[i];
+            Block block = worldObj.getBlock(x, y, z);
+            if (block != null && (block.getMaterial() == Material.ice || block.getMaterial() == Material.packedIce)) {
                 return true;
             }
         }
         return false;
     }
 
-    public static enum TeleportError
-    {
+    public static enum TeleportError {
         Ok,
         NoTwin,
         FrameIncomplete,
@@ -692,82 +573,63 @@ public class TileEntityQuantumComputer extends TileEntity
         NameConflict,
         MultiplePossiblePortalsFound;
 
-        public static String decode( TeleportError error )
-        {
-            if( error != Ok )
-            {
-                return "gui.qcraft:computer.error_" + CaseFormat.UPPER_CAMEL.to( CaseFormat.LOWER_UNDERSCORE, error.toString() );
+        public static String decode(TeleportError error) {
+            if (error != Ok) {
+                return "gui.qcraft:computer.error_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, error.toString());
             }
             return null;
         }
     }
 
-    private TeleportError canTeleport()
-    {
+    private TeleportError canTeleport() {
         // Check entangled:
         TileEntityQuantumComputer twin = null;
-        if( m_entanglementFrequency >= 0 )
-        {
+        if (m_entanglementFrequency >= 0) {
             // Find entangled twin:
             twin = findEntangledTwin();
 
             // Check the twin exists:
-            if( twin == null )
-            {
+            if (twin == null) {
                 return TeleportError.NoTwin;
             }
         }
 
         // Check the shape is big enough:
         AreaShape localShape = calculateShape();
-        if( localShape == null )
-        {
+        if (localShape == null) {
             return TeleportError.FrameIncomplete;
         }
 
-        if( twin != null )
-        {
+        if (twin != null) {
             // Check the twin shape matches
             AreaShape twinShape = twin.calculateShape();
-            if( twinShape == null )
-            {
+            if (twinShape == null) {
                 return TeleportError.DestinationFrameIncomplete;
             }
-            if( !localShape.equals( twinShape ) )
-            {
+            if (!localShape.equals(twinShape)) {
                 return TeleportError.FrameMismatch;
             }
-        }
-        else
-        {
-            // Check the stored shape matches
-            if( m_storedData != null )
-            {
-                if( !localShape.equals( m_storedData.m_shape ) )
-                {
+        } else // Check the stored shape matches
+         if (m_storedData != null) {
+                if (!localShape.equals(m_storedData.m_shape)) {
                     return TeleportError.FrameMismatch;
                 }
             }
-        }
 
         // Check cooling
-        if( !checkCooling() )
-        {
+        if (!checkCooling()) {
             return TeleportError.InsufficientCooling;
         }
 
         // Store the two areas:
         AreaData localData = storeArea();
-        if( localData == null )
-        {
+        if (localData == null) {
             return TeleportError.AreaNotTransportable;
         }
 
-        if( twin != null )
-        {
+        if (twin != null) {
             AreaData twinData = twin.storeArea();
-            if( twinData == null )
-            {
+            if (twinData == null) {
                 return TeleportError.DestinationNotTransportable;
             }
         }
@@ -775,183 +637,134 @@ public class TileEntityQuantumComputer extends TileEntity
         return TeleportError.Ok;
     }
 
-    private TeleportError tryTeleport()
-    {
+    private TeleportError tryTeleport() {
         TeleportError error = canTeleport();
-        if( error == TeleportError.Ok )
-        {
-            if( m_entanglementFrequency >= 0 )
-            {
+        if (error == TeleportError.Ok) {
+            if (m_entanglementFrequency >= 0) {
                 // Store the two areas:
                 TileEntityQuantumComputer twin = findEntangledTwin();
-                if( twin != null )
-                {
+                if (twin != null) {
                     AreaData localData = storeArea();
                     AreaData twinData = twin.storeArea();
-                    if( localData != null && twinData != null )
-                    {
+                    if (localData != null && twinData != null) {
                         // Unpack the two areas:
-                        unpackArea( twinData );
-                        twin.unpackArea( localData );
+                        unpackArea(twinData);
+                        twin.unpackArea(localData);
                     }
                 }
-            }
-            else
-            {
+            } else {
                 // Store the local area:
                 AreaData localData = storeArea();
 
                 // Unpack the stored area:
-                if( m_storedData != null )
-                {
-                    unpackArea( m_storedData );
-                }
-                else
-                {
-                    clearArea( localData.m_shape );
+                if (m_storedData != null) {
+                    unpackArea(m_storedData);
+                } else {
+                    clearArea(localData.m_shape);
                 }
 
                 m_storedData = localData;
             }
 
             // Effects
-            worldObj.playSoundEffect( xCoord + 0.5, yCoord + 0.5, zCoord + 0.5, "mob.endermen.portal", 1.0F, 1.0F );
+            worldObj.playSoundEffect(xCoord + 0.5, yCoord + 0.5, zCoord + 0.5, "mob.endermen.portal", 1.0F, 1.0F);
         }
         return error;
     }
 
     // Server Teleportation
-
-    private void registerPortal()
-    {
+    private void registerPortal() {
         PortalLocation location = findPortal();
-        if( location != null )
-        {
-            if( m_portalID == null )
-            {
+        if (location != null) {
+            if (m_portalID == null) {
                 m_portalID = getPortalRegistry().getUnusedID();
-                worldObj.markBlockForUpdate( xCoord, yCoord, zCoord );
+                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
             }
-            if( !getPortalRegistry().register( m_portalID, location ) )
-            {
-                m_portalNameConflict = true;
-            }
-            else
-            {
-                m_portalNameConflict = false;
-            }
+            m_portalNameConflict = !getPortalRegistry().register(m_portalID, location);
             EntanglementSavedData.get(this.getWorldObj()).markDirty(); //Notify that this needs to be saved on world save
         }
         tooManyPossiblePortals = false;
     }
 
-    private void unregisterPortal()
-    {
-        if( m_portalID != null )
-        {
-            if( !m_portalNameConflict )
-            {
-                getPortalRegistry().unregister( m_portalID );
+    private void unregisterPortal() {
+        if (m_portalID != null) {
+            if (!m_portalNameConflict) {
+                getPortalRegistry().unregister(m_portalID);
                 EntanglementSavedData.get(this.getWorldObj()).markDirty(); //Notify that this needs to be saved on world save
             }
             m_portalNameConflict = false;
         }
     }
 
-    public void setPortalID( String id )
-    {
+    public void setPortalID(String id) {
         unregisterPortal();
         m_portalID = id;
         registerPortal();
     }
 
-    public String getPortalID()
-    {
+    public String getPortalID() {
         return m_portalID;
     }
 
-    public void setRemoteServerAddress( String address )
-    {
+    public void setRemoteServerAddress(String address) {
         m_remoteServerAddress = address;
-        m_remoteServerName = getPortalRegistry().getServerName( address );
+        m_remoteServerName = getPortalRegistry().getServerName(address);
     }
 
-    public String getRemoteServerAddress()
-    {
+    public String getRemoteServerAddress() {
         return m_remoteServerAddress;
     }
 
-    public String getRemoteServerName()
-    {
+    public String getRemoteServerName() {
         return m_remoteServerName;
     }
 
-    public void cycleRemoteServerAddress( String previousAddress )
-    {
-        m_remoteServerAddress = getPortalRegistry().getServerAddressAfter( previousAddress );
-        m_remoteServerName = getPortalRegistry().getServerName( m_remoteServerAddress );
+    public void cycleRemoteServerAddress(String previousAddress) {
+        m_remoteServerAddress = getPortalRegistry().getServerAddressAfter(previousAddress);
+        m_remoteServerName = getPortalRegistry().getServerName(m_remoteServerAddress);
     }
 
-    public void setRemotePortalID( String id )
-    {
+    public void setRemotePortalID(String id) {
         m_remotePortalID = id;
     }
 
-    public String getRemotePortalID()
-    {
+    public String getRemotePortalID() {
         return m_remotePortalID;
     }
 
-    public boolean isTeleporter()
-    {
-        if( m_entanglementFrequency >= 0 )
-        {
+    public boolean isTeleporter() {
+        if (m_entanglementFrequency >= 0) {
             return false;
         }
-        if( !QCraft.canAnybodyCreatePortals() )
-        {
+        if (!QCraft.canAnybodyCreatePortals()) {
             return false;
         }
         PortalLocation location = getPortal();
-        if( location != null )
-        {
-            return true;
-        }
-        return false;
+        return location != null;
     }
 
-    public boolean isTeleporterEnergized()
-    {
+    public boolean isTeleporterEnergized() {
         return canDeactivatePortal() == TeleportError.Ok;
     }
 
-    private boolean isPortalCorner( int x, int y, int z, int dir )
-    {
-        if( y < 0 || y >= 256 )
-        {
+    private boolean isPortalCorner(int x, int y, int z, int dir) {
+        if (y < 0 || y >= 256) {
             return false;
         }
 
-        TileEntity entity = worldObj.getTileEntity( x, y, z );
-        if( entity != null && entity instanceof TileEntityQBlock )
-        {
+        TileEntity entity = worldObj.getTileEntity(x, y, z);
+        if (entity != null && entity instanceof TileEntityQBlock) {
             TileEntityQBlock quantum = (TileEntityQBlock) entity;
             int[] types = quantum.getTypes();
-            for( int i = 0; i < 6; ++i )
-            {
-                if( i == dir || i == Facing.oppositeSide[ dir ] )
-                {
-                    if( types[ i ] != 31 ) // GOLD
+            for (int i = 0; i < 6; ++i) {
+                if (i == dir || i == Facing.oppositeSide[dir]) {
+                    if (types[i] != 31) // GOLD
                     {
                         return false;
                     }
-                }
-                else
+                } else if (types[i] != 21) // OBSIDIAN
                 {
-                    if( types[ i ] != 21 ) // OBSIDIAN
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
             return true;
@@ -959,8 +772,8 @@ public class TileEntityQuantumComputer extends TileEntity
         return false;
     }
 
-    public static class PortalLocation
-    {
+    public static class PortalLocation {
+
         public int m_dimensionID;
         public int m_x1;
         public int m_x2;
@@ -968,7 +781,7 @@ public class TileEntityQuantumComputer extends TileEntity
         public int m_y2;
         public int m_z1;
         public int m_z2;
-        
+
         private PortalLocation(int x1, int y1, int z1, int x2, int y2, int z2, int id) {
             m_dimensionID = id;
             m_x1 = x1;
@@ -978,43 +791,37 @@ public class TileEntityQuantumComputer extends TileEntity
             m_z1 = z1;
             m_z2 = z2;
         }
-        
-        public NBTTagCompound encode()
-        {
+
+        public NBTTagCompound encode() {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
-            nbttagcompound.setInteger( "dimensionID", m_dimensionID );
-            nbttagcompound.setInteger( "x1", m_x1 );
-            nbttagcompound.setInteger( "y1", m_y1 );
-            nbttagcompound.setInteger( "z1", m_z1 );
-            nbttagcompound.setInteger( "x2", m_x2 );
-            nbttagcompound.setInteger( "y2", m_y2 );
-            nbttagcompound.setInteger( "z2", m_z2 );
+            nbttagcompound.setInteger("dimensionID", m_dimensionID);
+            nbttagcompound.setInteger("x1", m_x1);
+            nbttagcompound.setInteger("y1", m_y1);
+            nbttagcompound.setInteger("z1", m_z1);
+            nbttagcompound.setInteger("x2", m_x2);
+            nbttagcompound.setInteger("y2", m_y2);
+            nbttagcompound.setInteger("z2", m_z2);
             return nbttagcompound;
         }
 
-        public static PortalLocation decode( NBTTagCompound nbttagcompound )
-        {
+        public static PortalLocation decode(NBTTagCompound nbttagcompound) {
             int dimID;
-            if( nbttagcompound.hasKey( "dimensionID" ) )
-            {
-                dimID = nbttagcompound.getInteger( "dimensionID" );
-            }
-            else
-            {
+            if (nbttagcompound.hasKey("dimensionID")) {
+                dimID = nbttagcompound.getInteger("dimensionID");
+            } else {
                 dimID = 0;
             }
-            int x1 = nbttagcompound.getInteger( "x1" );
-            int y1 = nbttagcompound.getInteger( "y1" );
-            int z1 = nbttagcompound.getInteger( "z1" );
-            int x2 = nbttagcompound.getInteger( "x2" );
-            int y2 = nbttagcompound.getInteger( "y2" );
-            int z2 = nbttagcompound.getInteger( "z2" );
+            int x1 = nbttagcompound.getInteger("x1");
+            int y1 = nbttagcompound.getInteger("y1");
+            int z1 = nbttagcompound.getInteger("z1");
+            int x2 = nbttagcompound.getInteger("x2");
+            int y2 = nbttagcompound.getInteger("y2");
+            int z2 = nbttagcompound.getInteger("z2");
             return new PortalLocation(x1, y1, z1, x2, y2, z2, dimID);
         }
     }
 
-    private boolean portalExistsAt( PortalLocation location )
-    {
+    private boolean portalExistsAt(PortalLocation location) {
         int lookDir; //direction the portal is looking
         int c1;
         int c2;
@@ -1027,124 +834,103 @@ public class TileEntityQuantumComputer extends TileEntity
             c1 = location.m_x1;
             c2 = location.m_x2;
         }
-        
+
         // Check walls from bottom to top
-        for( int y = Math.min(location.m_y1, location.m_y2) + 1; y < Math.max(location.m_y1, location.m_y2); ++y )
-        {
-            if( !isGlass( location.m_x1, y, location.m_z1) )
-            {
+        for (int y = Math.min(location.m_y1, location.m_y2) + 1; y < Math.max(location.m_y1, location.m_y2); ++y) {
+            if (!isGlass(location.m_x1, y, location.m_z1)) {
                 return false;
             }
-            if( !isGlass( location.m_x2, y, location.m_z2) )
-            {
+            if (!isGlass(location.m_x2, y, location.m_z2)) {
                 return false;
             }
         }
-        
+
         // Check ceiling and floor
-        for( int xz = Math.min(c1, c2) + 1; xz < Math.max(c1, c2); ++xz )
-        {
-            if( !isGlass( (location.m_x1 == location.m_x2 ? location.m_x1 : xz) , location.m_y1, (location.m_z1 == location.m_z2 ? location.m_z1 : xz) ) )
-            {
+        for (int xz = Math.min(c1, c2) + 1; xz < Math.max(c1, c2); ++xz) {
+            if (!isGlass((location.m_x1 == location.m_x2 ? location.m_x1 : xz), location.m_y1, (location.m_z1 == location.m_z2 ? location.m_z1 : xz))) {
                 return false;
             }
-            if( !isGlass( (location.m_x1 == location.m_x2 ? location.m_x1 : xz), location.m_y2, (location.m_z1 == location.m_z2 ? location.m_z1 : xz) ) )
-            {
+            if (!isGlass((location.m_x1 == location.m_x2 ? location.m_x1 : xz), location.m_y2, (location.m_z1 == location.m_z2 ? location.m_z1 : xz))) {
                 return false;
             }
         }
         // Check corners
-        if( !isPortalCorner( location.m_x1, location.m_y1, location.m_z1, lookDir ) )
-        {
+        if (!isPortalCorner(location.m_x1, location.m_y1, location.m_z1, lookDir)) {
             return false;
         }
-        if( !isPortalCorner( location.m_x1, location.m_y2, location.m_z1, lookDir ) )
-        {
+        if (!isPortalCorner(location.m_x1, location.m_y2, location.m_z1, lookDir)) {
             return false;
         }
-        if( !isPortalCorner( location.m_x2, location.m_y1, location.m_z2, lookDir ) )
-        {
+        if (!isPortalCorner(location.m_x2, location.m_y1, location.m_z2, lookDir)) {
             return false;
         }
-        if( !isPortalCorner( location.m_x2, location.m_y2, location.m_z2, lookDir ) )
-        {
-            return false;
-        }        
-        return true;
+        return isPortalCorner(location.m_x2, location.m_y2, location.m_z2, lookDir);
     }
 
-    private PortalLocation getPortal()
-    {
-        if( m_portalID != null )
-        {
-            if( !m_portalNameConflict )
-            {
-                PortalLocation portal = getPortalRegistry().getPortal( m_portalID );
-                if( portal != null )
-                {
+    private PortalLocation getPortal() {
+        if (m_portalID != null) {
+            if (!m_portalNameConflict) {
+                PortalLocation portal = getPortalRegistry().getPortal(m_portalID);
+                if (portal != null) {
                     return portal;
                 }
-            }
-            else
-            {
+            } else {
                 PortalLocation portal = findPortal();
-                if( portal != null )
-                {
+                if (portal != null) {
                     return portal;
                 }
             }
         }
         return null;
     }
-    
+
     private ArrayList<PortalLocation> findPortalsAt(int x, int y, int z) {
         ArrayList<PortalLocation> returnValue = new ArrayList();
         ArrayList<int[]> possibleCornerPairs = new ArrayList<int[]>();
-        if (isGlass(x,y,z)) { //must find a pair of corner blocks that are on the same line and have the same facing.            
+        if (isGlass(x, y, z)) { //must find a pair of corner blocks that are on the same line and have the same facing.            
             int x1 = 0;
             int y1 = 0;
-            int z1 = 0;        
-            for( int dir = 0; dir < 6; ++dir ) {
+            int z1 = 0;
+            for (int dir = 0; dir < 6; ++dir) {
                 int tempX = x;
                 int tempY = y;
                 int tempZ = z;
                 for (int i = 0; i < QCraft.maxPortalSize + 1; i++) { // maximum portal size
-                    tempX += Facing.offsetsXForSide[ dir ];
-                    tempY += Facing.offsetsYForSide[ dir ];
-                    tempZ += Facing.offsetsZForSide[ dir ];
+                    tempX += Facing.offsetsXForSide[dir];
+                    tempY += Facing.offsetsYForSide[dir];
+                    tempZ += Facing.offsetsZForSide[dir];
                     if (!isGlass(tempX, tempY, tempZ)) {
                         break;
                     }
                 }
                 if (dir % 2 == 0) { //every first corner
-                     x1 = tempX;
-                     y1 = tempY;
-                     z1 = tempZ;
-                } else { // every second corner
-                    if (dir < 2) { //if direction of search was up/down
-                        for (int i = 0; i<2; i++) {
-                            if (isPortalCorner(tempX, tempY, tempZ, (i+1)*2) &&
-                                    isPortalCorner(x1, y1, z1, (i+1)*2) &&
-                                    Math.abs(tempY-y1) < QCraft.maxPortalSize + 2) { //+2: +1 for the extra corner block and +1 for the "<" boolean operator
-                                int[] temp = {tempX, tempY, tempZ, x1, y1, z1, (i+1)*2};
+                    x1 = tempX;
+                    y1 = tempY;
+                    z1 = tempZ;
+                } else // every second corner
+                 if (dir < 2) { //if direction of search was up/down
+                        for (int i = 0; i < 2; i++) {
+                            if (isPortalCorner(tempX, tempY, tempZ, (i + 1) * 2)
+                                    && isPortalCorner(x1, y1, z1, (i + 1) * 2)
+                                    && Math.abs(tempY - y1) < QCraft.maxPortalSize + 2) { //+2: +1 for the extra corner block and +1 for the "<" boolean operator
+                                int[] temp = {tempX, tempY, tempZ, x1, y1, z1, (i + 1) * 2};
                                 possibleCornerPairs.add(temp);
                                 break;
                             }
                         }
                     } else { //if search direction was sideways
                         int perpenDir = ((dir - 1) % 4) + 2;
-                        if (isPortalCorner(tempX, tempY, tempZ, perpenDir) &&
-                                isPortalCorner(x1, y1, z1, perpenDir) &&
-                                Math.abs(tempX-x1) < QCraft.maxPortalSize + 2 &&
-                                Math.abs(tempZ-z1) < QCraft.maxPortalSize + 2) {
+                        if (isPortalCorner(tempX, tempY, tempZ, perpenDir)
+                                && isPortalCorner(x1, y1, z1, perpenDir)
+                                && Math.abs(tempX - x1) < QCraft.maxPortalSize + 2
+                                && Math.abs(tempZ - z1) < QCraft.maxPortalSize + 2) {
                             int[] temp = {tempX, tempY, tempZ, x1, y1, z1, perpenDir};
                             possibleCornerPairs.add(temp);
                         }
                     }
-                }
-            }            
+            }
         } else { //if it's a corner
-            for( int dir = 0; dir < 6; ++dir ) {
+            for (int dir = 0; dir < 6; ++dir) {
                 if (isPortalCorner(x, y, z, dir)) {
                     continue; //skipping the two directions in which this portalCorner can not be part of a portal.
                 }
@@ -1152,17 +938,17 @@ public class TileEntityQuantumComputer extends TileEntity
                 int tempY = y;
                 int tempZ = z;
                 for (int i = 0; i < QCraft.maxPortalSize + 1; i++) { // maximum portal size
-                    tempX += Facing.offsetsXForSide[ dir ];
-                    tempY += Facing.offsetsYForSide[ dir ];
-                    tempZ += Facing.offsetsZForSide[ dir ];
+                    tempX += Facing.offsetsXForSide[dir];
+                    tempY += Facing.offsetsYForSide[dir];
+                    tempZ += Facing.offsetsZForSide[dir];
                     if (!isGlass(tempX, tempY, tempZ)) {
                         break;
                     }
                 }
                 if (dir < 2) { //if direction of search was up/down
-                    for (int i = 0; i<2; i++) { //northsouth OR eastwest
-                        if (isPortalCorner(x, y, z, (i+1)*2) && isPortalCorner(tempX, tempY, tempZ, (i+1)*2)) {
-                            int[] temp = {x, y, z, tempX, tempY, tempZ, (i+1)*2};
+                    for (int i = 0; i < 2; i++) { //northsouth OR eastwest
+                        if (isPortalCorner(x, y, z, (i + 1) * 2) && isPortalCorner(tempX, tempY, tempZ, (i + 1) * 2)) {
+                            int[] temp = {x, y, z, tempX, tempY, tempZ, (i + 1) * 2};
                             possibleCornerPairs.add(temp);
                             break;
                         }
@@ -1181,12 +967,12 @@ public class TileEntityQuantumComputer extends TileEntity
             if (temp != null) {
                 for (PortalLocation location : temp) {
                     returnValue.add(location);
-                }                
+                }
             }
         }
         return returnValue; //contains 0 up to 6 portal locations
     }
-    
+
     private ArrayList<PortalLocation> findRestOfPortal(int[] cornerPair) {
         ArrayList<PortalLocation> returnValue = new ArrayList();
         int x1 = cornerPair[0]; //x = east/west = dir 4 5
@@ -1199,12 +985,12 @@ public class TileEntityQuantumComputer extends TileEntity
         int searchDir = ((lookDir - (lookDir % 2)) % 4) + 2; //converts {2, 3, 4, 5} to {4, 4, 2, 2}
         if (Math.abs(y1 - y2) < 4 && (Math.abs(x1 - x2) < 3) && (Math.abs(z1 - z2) < 3)) { //if the portal would be too small if this pair of corners would make a portal
             return null;
-        } else  if (y1 == y2){ //both corners and the glass between them would form the upper OR lower portal border
+        } else if (y1 == y2) { //both corners and the glass between them would form the upper OR lower portal border
             for (int dir = 0; dir < 2; dir++) {
                 int tempY = y2;
                 for (int i = 0; i < QCraft.maxPortalSize + 1; i++) { //check for maximal portal size
-                    tempY += Facing.offsetsYForSide[ dir ];
-                    if (!isGlass(x1, tempY, z1) || !isGlass(x2, tempY,z2)) { //once connected glass stops
+                    tempY += Facing.offsetsYForSide[dir];
+                    if (!isGlass(x1, tempY, z1) || !isGlass(x2, tempY, z2)) { //once connected glass stops
                         break;
                     }
                 }
@@ -1222,8 +1008,8 @@ public class TileEntityQuantumComputer extends TileEntity
                         c2 = x2;
                     }
                     //check for completeness of last horizontal border.
-                    for(int i = Math.min(c1, c2) + 1; i < Math.max(c1, c2); i++ ) {
-                        if (!isGlass((x1 == x2) ? x1 : i, tempY, (z1 == z2) ? z1 : i )) {
+                    for (int i = Math.min(c1, c2) + 1; i < Math.max(c1, c2); i++) {
+                        if (!isGlass((x1 == x2) ? x1 : i, tempY, (z1 == z2) ? z1 : i)) {
                             break;
                         }
                         if (i == Math.max(c1, c2) - 1) {
@@ -1233,54 +1019,51 @@ public class TileEntityQuantumComputer extends TileEntity
                 }
             }
         } else { //if the z and x coordinates of both corners are equal (corners are above eachother)
-            for (int dir = searchDir; dir < searchDir+2 ; dir++) {
+            for (int dir = searchDir; dir < searchDir + 2; dir++) {
                 int tempX = x2;
                 int tempZ = z2;
                 for (int i = 0; i < QCraft.maxPortalSize + 1; i++) { //check for maximal portal size
-                    tempX += Facing.offsetsXForSide[ dir ];
-                    tempZ += Facing.offsetsZForSide[ dir ];
-                    if (!isGlass(tempX, y1, tempZ) || !isGlass(tempX, y2,tempZ)) { //once connected glass stops
+                    tempX += Facing.offsetsXForSide[dir];
+                    tempZ += Facing.offsetsZForSide[dir];
+                    if (!isGlass(tempX, y1, tempZ) || !isGlass(tempX, y2, tempZ)) { //once connected glass stops
                         break;
                     }
                 }
-                if (isGlass(tempX, y1, tempZ) || isGlass(tempX, y2, tempZ) || (Math.abs(x1 - tempX) < 3 && Math.abs(z1 - tempZ) < 3) ) { //if not both are non-glass OR the portal wouldn't be high enough
+                if (isGlass(tempX, y1, tempZ) || isGlass(tempX, y2, tempZ) || (Math.abs(x1 - tempX) < 3 && Math.abs(z1 - tempZ) < 3)) { //if not both are non-glass OR the portal wouldn't be high enough
                     continue;
                 }
                 if (isPortalCorner(tempX, y1, tempZ, lookDir) && isPortalCorner(tempX, y2, tempZ, lookDir)) {
                     //check for completeness of last vertical border.
-                    for(int i = Math.min(y1, y2) + 1; i < Math.max(y1, y2); i++ ) {
-                        if (!isGlass(tempX, i, tempZ )) {
+                    for (int i = Math.min(y1, y2) + 1; i < Math.max(y1, y2); i++) {
+                        if (!isGlass(tempX, i, tempZ)) {
                             break;
                         }
                         if (i == Math.max(y1, y2) - 1) {
                             returnValue.add(new PortalLocation(x1, y1, z1, tempX, y2, tempZ, worldObj.provider.dimensionId));
                         }
-                    }                    
+                    }
                 }
-            }            
+            }
         }
         return returnValue; //contains 0 up to 2 portal locations
     }
 
-    private PortalLocation findPortal() 
-    {
+    private PortalLocation findPortal() {
         ArrayList<PortalLocation> portalLocations = new ArrayList();
         tooManyPossiblePortals = false;
-        for( int dir = 0; dir < 6; ++dir )
-        {
+        for (int dir = 0; dir < 6; ++dir) {
             // See if this adjoining block is part of a portal:
-            int x = xCoord + Facing.offsetsXForSide[ dir ];
-            int y = yCoord + Facing.offsetsYForSide[ dir ];
-            int z = zCoord + Facing.offsetsZForSide[ dir ];
-            if( !isGlass( x, y, z ) && !isPortalCorner( x, y, z, 2 ) && !isPortalCorner( x, y, z, 4 ) )
-            {
+            int x = xCoord + Facing.offsetsXForSide[dir];
+            int y = yCoord + Facing.offsetsYForSide[dir];
+            int z = zCoord + Facing.offsetsZForSide[dir];
+            if (!isGlass(x, y, z) && !isPortalCorner(x, y, z, 2) && !isPortalCorner(x, y, z, 4)) {
                 continue;
-            }            
-            
+            }
+
             ArrayList<PortalLocation> tempLocations = findPortalsAt(x, y, z);
-            if ( (tempLocations.size() == 2 && ! (isPortalCorner( x, y, z, 2 ) || isPortalCorner( x, y, z, 4 ) ) ) || tempLocations.size() > 2)  {
-                    tooManyPossiblePortals = true;
-                    return null;
+            if ((tempLocations.size() == 2 && !(isPortalCorner(x, y, z, 2) || isPortalCorner(x, y, z, 4))) || tempLocations.size() > 2) {
+                tooManyPossiblePortals = true;
+                return null;
             }
             portalLocations.addAll(tempLocations);
             if (portalLocations.size() > 2) {
@@ -1288,17 +1071,16 @@ public class TileEntityQuantumComputer extends TileEntity
                 return null;
             }
         }
-        
+
         if (portalLocations.size() < 1) {
             return null;
         } else if (portalLocations.size() == 2) {
             PortalLocation portal1 = portalLocations.get(0);
-            PortalLocation portal2 = portalLocations.get(1);            
-            
-            if( Math.min(portal1.m_x1,  portal1.m_x2) == Math.min(portal2.m_x1,  portal2.m_x2) &&
-                    Math.min(portal1.m_y1,  portal1.m_y2) == Math.min(portal2.m_y1,  portal2.m_y2) &&
-                    Math.min(portal1.m_z1,  portal1.m_z2) == Math.min(portal2.m_z1,  portal2.m_z2))
-            {
+            PortalLocation portal2 = portalLocations.get(1);
+
+            if (Math.min(portal1.m_x1, portal1.m_x2) == Math.min(portal2.m_x1, portal2.m_x2)
+                    && Math.min(portal1.m_y1, portal1.m_y2) == Math.min(portal2.m_y1, portal2.m_y2)
+                    && Math.min(portal1.m_z1, portal1.m_z2) == Math.min(portal2.m_z1, portal2.m_z2)) {
                 return portalLocations.get(0);
             } else {
                 tooManyPossiblePortals = true;
@@ -1312,21 +1094,15 @@ public class TileEntityQuantumComputer extends TileEntity
         }
     }
 
-    private boolean isPortalClear( PortalLocation portal )
-    {
-        for( int y = Math.min(portal.m_y1, portal.m_y2) + 1; y < Math.max(portal.m_y1, portal.m_y2); ++y )
-        {
-            for( int x = Math.min(portal.m_x1, portal.m_x2) + 1; x < Math.max(portal.m_x1, portal.m_x2); ++x )
-            {
-                if( !worldObj.isAirBlock( x, y, portal.m_z1 ) )
-                {
+    private boolean isPortalClear(PortalLocation portal) {
+        for (int y = Math.min(portal.m_y1, portal.m_y2) + 1; y < Math.max(portal.m_y1, portal.m_y2); ++y) {
+            for (int x = Math.min(portal.m_x1, portal.m_x2) + 1; x < Math.max(portal.m_x1, portal.m_x2); ++x) {
+                if (!worldObj.isAirBlock(x, y, portal.m_z1)) {
                     return false;
                 }
             }
-            for( int z = Math.min(portal.m_z1, portal.m_z2) + 1; z < Math.max(portal.m_z1, portal.m_z2); ++z )
-            {
-                if( !worldObj.isAirBlock( portal.m_x1, y, z ) )
-                {
+            for (int z = Math.min(portal.m_z1, portal.m_z2) + 1; z < Math.max(portal.m_z1, portal.m_z2); ++z) {
+                if (!worldObj.isAirBlock(portal.m_x1, y, z)) {
                     return false;
                 }
             }
@@ -1334,51 +1110,37 @@ public class TileEntityQuantumComputer extends TileEntity
         return true;
     }
 
-    private void deployPortal( PortalLocation portal )
-    {
-        for( int y = Math.min(portal.m_y1, portal.m_y2) + 1; y < Math.max(portal.m_y1, portal.m_y2); ++y )
-        {
-            for( int x = Math.min(portal.m_x1, portal.m_x2) + 1; x < Math.max(portal.m_x1, portal.m_x2); ++x )
-            {
-                worldObj.setBlock( x, y, portal.m_z1, QCraft.Blocks.quantumPortal, 0, 2 );
+    private void deployPortal(PortalLocation portal) {
+        for (int y = Math.min(portal.m_y1, portal.m_y2) + 1; y < Math.max(portal.m_y1, portal.m_y2); ++y) {
+            for (int x = Math.min(portal.m_x1, portal.m_x2) + 1; x < Math.max(portal.m_x1, portal.m_x2); ++x) {
+                worldObj.setBlock(x, y, portal.m_z1, QCraft.Blocks.quantumPortal, 0, 2);
             }
-            for( int z = Math.min(portal.m_z1, portal.m_z2) + 1; z < Math.max(portal.m_z1, portal.m_z2); ++z )
-            {
-                worldObj.setBlock( portal.m_x1, y, z, QCraft.Blocks.quantumPortal, 0, 2 );
+            for (int z = Math.min(portal.m_z1, portal.m_z2) + 1; z < Math.max(portal.m_z1, portal.m_z2); ++z) {
+                worldObj.setBlock(portal.m_x1, y, z, QCraft.Blocks.quantumPortal, 0, 2);
             }
         }
     }
 
-    private void undeployPortal( PortalLocation portal )
-    {
-        for( int y = Math.min(portal.m_y1, portal.m_y2) + 1; y < Math.max(portal.m_y1, portal.m_y2); ++y )
-        {
-            for( int x = Math.min(portal.m_x1, portal.m_x2) + 1; x < Math.max(portal.m_x1, portal.m_x2); ++x )
-            {
-                worldObj.setBlockToAir( x, y, portal.m_z1 );
+    private void undeployPortal(PortalLocation portal) {
+        for (int y = Math.min(portal.m_y1, portal.m_y2) + 1; y < Math.max(portal.m_y1, portal.m_y2); ++y) {
+            for (int x = Math.min(portal.m_x1, portal.m_x2) + 1; x < Math.max(portal.m_x1, portal.m_x2); ++x) {
+                worldObj.setBlockToAir(x, y, portal.m_z1);
             }
-            for( int z = Math.min(portal.m_z1, portal.m_z2) + 1; z < Math.max(portal.m_z1, portal.m_z2); ++z )
-            {
-                worldObj.setBlockToAir( portal.m_x1, y, z );
+            for (int z = Math.min(portal.m_z1, portal.m_z2) + 1; z < Math.max(portal.m_z1, portal.m_z2); ++z) {
+                worldObj.setBlockToAir(portal.m_x1, y, z);
             }
         }
     }
 
-    private boolean isPortalDeployed( PortalLocation portal )
-    {
-        for( int y = Math.min(portal.m_y1, portal.m_y2) + 1; y < Math.max(portal.m_y1, portal.m_y2); ++y )
-        {
-            for( int x = Math.min(portal.m_x1, portal.m_x2) + 1; x < Math.max(portal.m_x1, portal.m_x2); ++x )
-            {
-                if( worldObj.getBlock( x, y, portal.m_z1 ) != QCraft.Blocks.quantumPortal )
-                {
+    private boolean isPortalDeployed(PortalLocation portal) {
+        for (int y = Math.min(portal.m_y1, portal.m_y2) + 1; y < Math.max(portal.m_y1, portal.m_y2); ++y) {
+            for (int x = Math.min(portal.m_x1, portal.m_x2) + 1; x < Math.max(portal.m_x1, portal.m_x2); ++x) {
+                if (worldObj.getBlock(x, y, portal.m_z1) != QCraft.Blocks.quantumPortal) {
                     return false;
                 }
             }
-            for( int z = Math.min(portal.m_z1, portal.m_z2) + 1; z < Math.max(portal.m_z1, portal.m_z2); ++z )
-            {
-                if( worldObj.getBlock( portal.m_x1, y, z ) != QCraft.Blocks.quantumPortal )
-                {
+            for (int z = Math.min(portal.m_z1, portal.m_z2) + 1; z < Math.max(portal.m_z1, portal.m_z2); ++z) {
+                if (worldObj.getBlock(portal.m_x1, y, z) != QCraft.Blocks.quantumPortal) {
                     return false;
                 }
             }
@@ -1386,231 +1148,180 @@ public class TileEntityQuantumComputer extends TileEntity
         return true;
     }
 
-    private TeleportError canActivatePortal()
-    {
-        if( m_entanglementFrequency >= 0 )
-        {
+    private TeleportError canActivatePortal() {
+        if (m_entanglementFrequency >= 0) {
             return TeleportError.FrameIncomplete;
         }
-        if( !QCraft.canAnybodyCreatePortals() )
-        {
+        if (!QCraft.canAnybodyCreatePortals()) {
             return TeleportError.FrameIncomplete;
         }
 
         tooManyPossiblePortals = false;
         PortalLocation location = getPortal();
-        if(tooManyPossiblePortals) {
+        if (tooManyPossiblePortals) {
             tooManyPossiblePortals = false;
             return TeleportError.MultiplePossiblePortalsFound;
         }
-        
-        if( location == null )
-        {
+
+        if (location == null) {
             return TeleportError.FrameIncomplete;
         }
-        if( isPortalDeployed( location ) )
-        {
+        if (isPortalDeployed(location)) {
             return TeleportError.FrameDeployed;
         }
-        if( m_portalNameConflict )
-        {
+        if (m_portalNameConflict) {
             return TeleportError.NameConflict;
         }
-        if( !isPortalClear( location ) )
-        {
+        if (!isPortalClear(location)) {
             return TeleportError.FrameObstructed;
         }
-        if( !checkCooling() )
-        {
+        if (!checkCooling()) {
             return TeleportError.InsufficientCooling;
         }
         return TeleportError.Ok;
     }
 
-    private TeleportError tryActivatePortal()
-    {
+    private TeleportError tryActivatePortal() {
         TeleportError error = canActivatePortal();
-        if( error == TeleportError.Ok )
-        {
+        if (error == TeleportError.Ok) {
             // Deploy
             PortalLocation location = getPortal();
-            if( location != null )
-            {
-                deployPortal( location );
+            if (location != null) {
+                deployPortal(location);
             }
 
             // Effects
-            worldObj.playSoundEffect( xCoord + 0.5, yCoord + 0.5, zCoord + 0.5, "mob.endermen.portal", 1.0F, 1.0F );
+            worldObj.playSoundEffect(xCoord + 0.5, yCoord + 0.5, zCoord + 0.5, "mob.endermen.portal", 1.0F, 1.0F);
         }
         return error;
     }
 
-    public TeleportError canDeactivatePortal()
-    {
-        if( m_entanglementFrequency >= 0 )
-        {
+    public TeleportError canDeactivatePortal() {
+        if (m_entanglementFrequency >= 0) {
             return TeleportError.FrameIncomplete;
         }
         PortalLocation location = getPortal();
-        if( location == null )
-        {
+        if (location == null) {
             return TeleportError.FrameIncomplete;
         }
-        if( !isPortalDeployed( location ) )
-        {
+        if (!isPortalDeployed(location)) {
             return TeleportError.FrameIncomplete;
         }
         return TeleportError.Ok;
     }
 
-    private TeleportError tryDeactivatePortal()
-    {
+    private TeleportError tryDeactivatePortal() {
         TeleportError error = canDeactivatePortal();
-        if( error == TeleportError.Ok )
-        {
+        if (error == TeleportError.Ok) {
             // Deploy
             PortalLocation location = getPortal();
-            if( location != null )
-            {
-                undeployPortal( location );
+            if (location != null) {
+                undeployPortal(location);
             }
 
             // Effects
-            worldObj.playSoundEffect( xCoord + 0.5, yCoord + 0.5, zCoord + 0.5, "mob.endermen.portal", 1.0F, 1.0F );
+            worldObj.playSoundEffect(xCoord + 0.5, yCoord + 0.5, zCoord + 0.5, "mob.endermen.portal", 1.0F, 1.0F);
         }
         return error;
     }
 
-
     // Common
-
-    public void setRedstonePowered( boolean powered )
-    {
-        if( m_powered != powered )
-        {
+    public void setRedstonePowered(boolean powered) {
+        if (m_powered != powered) {
             m_powered = powered;
-            if( !worldObj.isRemote )
-            {
-                if( m_powered && m_timeSinceEnergize >= 4 )
-                {
+            if (!worldObj.isRemote) {
+                if (m_powered && m_timeSinceEnergize >= 4) {
                     tryEnergize();
                 }
             }
         }
     }
 
-    public TeleportError canEnergize()
-    {
+    public TeleportError canEnergize() {
         TeleportError error = canTeleport();
-        if( error == TeleportError.Ok )
-        {
+        if (error == TeleportError.Ok) {
             return error;
         }
 
         TeleportError serverError = canActivatePortal();
-        if( serverError == TeleportError.Ok )
-        {
+        if (serverError == TeleportError.Ok) {
             return serverError;
         }
 
         TeleportError deactivateError = canDeactivatePortal();
-        if( deactivateError == TeleportError.Ok )
-        {
+        if (deactivateError == TeleportError.Ok) {
             return deactivateError;
         }
 
-        if( error.ordinal() >= serverError.ordinal() )
-        {
+        if (error.ordinal() >= serverError.ordinal()) {
             return error;
-        }
-        else
-        {
+        } else {
             return serverError;
         }
     }
 
-    public TeleportError tryEnergize()
-    {
+    public TeleportError tryEnergize() {
         TeleportError error = tryTeleport();
-        if( error == TeleportError.Ok )
-        {
+        if (error == TeleportError.Ok) {
             m_timeSinceEnergize = 0;
             return error;
         }
 
         TeleportError serverError = tryActivatePortal();
-        if( serverError == TeleportError.Ok )
-        {
+        if (serverError == TeleportError.Ok) {
             m_timeSinceEnergize = 0;
             return serverError;
         }
 
         TeleportError deactivateError = tryDeactivatePortal();
-        if( deactivateError == TeleportError.Ok )
-        {
+        if (deactivateError == TeleportError.Ok) {
             return deactivateError;
         }
 
-        if( error.ordinal() >= serverError.ordinal() )
-        {
+        if (error.ordinal() >= serverError.ordinal()) {
             return error;
-        }
-        else
-        {
+        } else {
             return serverError;
         }
     }
 
     @Override
-    public void updateEntity()
-    {
+    public void updateEntity() {
         m_timeSinceEnergize++;
 
-        if( !worldObj.isRemote )
-        {
+        if (!worldObj.isRemote) {
             // Try to register conflicted portal
-            if( m_portalNameConflict )
-            {
+            if (m_portalNameConflict) {
                 registerPortal();
             }
 
             // Validate existing portal
             PortalLocation location = getPortal();
-            if( location != null )
-            {
-                if( !portalExistsAt( location ) )
-                {
-                    if( isPortalDeployed( location ) )
-                    {
-                        undeployPortal( location );
+            if (location != null) {
+                if (!portalExistsAt(location)) {
+                    if (isPortalDeployed(location)) {
+                        undeployPortal(location);
                     }
                     unregisterPortal();
                     location = null;
-                }
-                else if( !checkCooling() )
-                {
-                    if( isPortalDeployed( location ) )
-                    {
-                        undeployPortal( location );
+                } else if (!checkCooling()) {
+                    if (isPortalDeployed(location)) {
+                        undeployPortal(location);
                     }
                 }
-            }
-            else
-            {
+            } else {
                 unregisterPortal();
                 location = null;
             }
 
             // Find new portal
-            if( location == null )
-            {
+            if (location == null) {
                 registerPortal();
                 location = getPortal();
             }
 
             // Try teleporting entities through portal
-            if( location != null && isPortalDeployed( location ) )
-            {
+            if (location != null && isPortalDeployed(location)) {
                 // Search for players
                 int x1 = Math.min(location.m_x1, location.m_x2);
                 int x2 = Math.max(location.m_x1, location.m_x2);
@@ -1619,29 +1330,25 @@ public class TileEntityQuantumComputer extends TileEntity
                 int z1 = Math.min(location.m_z1, location.m_z2);
                 int z2 = Math.max(location.m_z1, location.m_z2);
                 AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(
-                    ((double) x1 ) + (x1 == x2 ? 0.25 : 1),
-                    ((double) y1 + 1),
-                    ((double) z1 ) + (z1 == z2 ? 0.25 : 1),
-                    ((double) x2 ) + (x1 == x2 ? 0.75 : 0),
-                    ((double) y2 ),
-                    ((double) z2 ) + (z1 == z2 ? 0.75 : 0)
+                        ((double) x1) + (x1 == x2 ? 0.25 : 1),
+                        ((double) y1 + 1),
+                        ((double) z1) + (z1 == z2 ? 0.25 : 1),
+                        ((double) x2) + (x1 == x2 ? 0.75 : 0),
+                        ((double) y2),
+                        ((double) z2) + (z1 == z2 ? 0.75 : 0)
                 );
 
-                List entities = worldObj.getEntitiesWithinAABB( EntityPlayer.class, aabb );
-                if( entities != null && entities.size() > 0 )
-                {
+                List entities = worldObj.getEntitiesWithinAABB(EntityPlayer.class, aabb);
+                if (entities != null && entities.size() > 0) {
                     Iterator it = entities.iterator();
-                    while( it.hasNext() )
-                    {
+                    while (it.hasNext()) {
                         Object next = it.next();
-                        if( next != null && next instanceof EntityPlayer )
-                        {
-                            EntityPlayer player = (EntityPlayer)next;
-                            if( player.timeUntilPortal <= 0 && player.ticksExisted >= 200 &&
-                                player.ridingEntity == null && player.riddenByEntity == null )
-                            {
+                        if (next != null && next instanceof EntityPlayer) {
+                            EntityPlayer player = (EntityPlayer) next;
+                            if (player.timeUntilPortal <= 0 && player.ticksExisted >= 200
+                                    && player.ridingEntity == null && player.riddenByEntity == null) {
                                 // Teleport them:
-                                teleportPlayer( player );
+                                teleportPlayer(player);
                             }
                         }
                     }
@@ -1650,52 +1357,40 @@ public class TileEntityQuantumComputer extends TileEntity
         }
     }
 
-    private void teleportPlayer( EntityPlayer player )
-    {
-        if( m_remoteServerAddress != null )
-        {
-            queryTeleportPlayerRemote( player );
-        }
-        else
-        {
-            teleportPlayerLocal( player, m_remotePortalID );
+    private void teleportPlayer(EntityPlayer player) {
+        if (m_remoteServerAddress != null) {
+            queryTeleportPlayerRemote(player);
+        } else {
+            teleportPlayerLocal(player, m_remotePortalID);
         }
     }
 
-    private void queryTeleportPlayerRemote( EntityPlayer player )
-    {
-        QCraft.requestQueryGoToServer( player, this );
+    private void queryTeleportPlayerRemote(EntityPlayer player) {
+        QCraft.requestQueryGoToServer(player, this);
         player.timeUntilPortal = 50;
     }
 
-    public void teleportPlayerRemote( EntityPlayer player, boolean takeItems )
-    {
-        teleportPlayerRemote( player, m_remoteServerAddress, m_remotePortalID, takeItems );
+    public void teleportPlayerRemote(EntityPlayer player, boolean takeItems) {
+        teleportPlayerRemote(player, m_remoteServerAddress, m_remotePortalID, takeItems);
     }
 
-    public static void teleportPlayerRemote( EntityPlayer player, String remoteServerAddress, String remotePortalID, boolean takeItems )
-    {
+    public static void teleportPlayerRemote(EntityPlayer player, String remoteServerAddress, String remotePortalID, boolean takeItems) {
         // Log the trip
-        QCraft.log( "Sending player " + player.getDisplayName() + " to server \"" + remoteServerAddress + "\"" );
+        QCraft.log("Sending player " + player.getDisplayName() + " to server \"" + remoteServerAddress + "\"");
 
         NBTTagCompound luggage = new NBTTagCompound();
-        if( takeItems )
-        {
+        if (takeItems) {
             // Remove and encode the items from the players inventory we want them to take with them
             NBTTagList items = new NBTTagList();
             InventoryPlayer playerInventory = player.inventory;
-            for( int i = 0; i < playerInventory.getSizeInventory(); ++i )
-            {
-                ItemStack stack = playerInventory.getStackInSlot( i );
-                if( stack != null && stack.stackSize > 0 )
-                {
+            for (int i = 0; i < playerInventory.getSizeInventory(); ++i) {
+                ItemStack stack = playerInventory.getStackInSlot(i);
+                if (stack != null && stack.stackSize > 0) {
                     // Ignore entangled items
-                    if( stack.getItem() == Item.getItemFromBlock( QCraft.Blocks.quantumComputer ) && ItemQuantumComputer.getEntanglementFrequency( stack ) >= 0 )
-                    {
+                    if (stack.getItem() == Item.getItemFromBlock(QCraft.Blocks.quantumComputer) && ItemQuantumComputer.getEntanglementFrequency(stack) >= 0) {
                         continue;
                     }
-                    if( stack.getItem() == Item.getItemFromBlock( QCraft.Blocks.qBlock ) && ItemQBlock.getEntanglementFrequency( stack ) >= 0 )
-                    {
+                    if (stack.getItem() == Item.getItemFromBlock(QCraft.Blocks.qBlock) && ItemQBlock.getEntanglementFrequency(stack) >= 0) {
                         continue;
                     }
 
@@ -1707,230 +1402,183 @@ public class TileEntityQuantumComputer extends TileEntity
                         GameRegistry.UniqueIdentifier uniqueId = GameRegistry.findUniqueIdentifierFor(stack.getItem());
                         String itemName = uniqueId.modId + ":" + uniqueId.name;
                         itemTag.setString("Name", itemName);
-                        stack.writeToNBT( itemTag );
+                        stack.writeToNBT(itemTag);
                     }
-                    items.appendTag( itemTag );
+                    items.appendTag(itemTag);
 
                     // Remove items
-                    playerInventory.setInventorySlotContents( i, null );
+                    playerInventory.setInventorySlotContents(i, null);
                 }
             }
 
-            if( items.tagCount() > 0 )
-            {
-                QCraft.log( "Removed " + items.tagCount() + " items from " + player.getDisplayName() + "'s inventory." );
+            if (items.tagCount() > 0) {
+                QCraft.log("Removed " + items.tagCount() + " items from " + player.getDisplayName() + "'s inventory.");
                 playerInventory.markDirty();
-                luggage.setTag( "items", items );
+                luggage.setTag("items", items);
             }
         }
 
         // Set the destination portal ID
-        if( remotePortalID != null )
-        {
-            luggage.setString( "destinationPortal", remotePortalID );
+        if (remotePortalID != null) {
+            luggage.setString("destinationPortal", remotePortalID);
         }
 
-        try
-        {
+        try {
             // Cryptographically sign the luggage
-            luggage.setString( "uuid", UUID.randomUUID().toString() );
-            byte[] luggageData = CompressedStreamTools.compress( luggage );
-            byte[] luggageSignature = EncryptionRegistry.Instance.signData( luggageData );
+            luggage.setString("uuid", UUID.randomUUID().toString());
+            byte[] luggageData = CompressedStreamTools.compress(luggage);
+            byte[] luggageSignature = EncryptionRegistry.Instance.signData(luggageData);
             NBTTagCompound signedLuggage = new NBTTagCompound();
-            signedLuggage.setByteArray( "key", EncryptionRegistry.Instance.encodePublicKey( EncryptionRegistry.Instance.getLocalKeyPair().getPublic() ) );
-            signedLuggage.setByteArray( "luggage", luggageData );
-            signedLuggage.setByteArray( "signature", luggageSignature );
+            signedLuggage.setByteArray("key", EncryptionRegistry.Instance.encodePublicKey(EncryptionRegistry.Instance.getLocalKeyPair().getPublic()));
+            signedLuggage.setByteArray("luggage", luggageData);
+            signedLuggage.setByteArray("signature", luggageSignature);
 
             // Send the player to the remote server with the luggage
-            byte[] signedLuggageData = CompressedStreamTools.compress( signedLuggage );
-            QCraft.requestGoToServer( player, remoteServerAddress, signedLuggageData );
-        }
-        catch( IOException e )
-        {
-            throw new RuntimeException( "Error encoding inventory" );
-        }
-        finally
-        {
+            byte[] signedLuggageData = CompressedStreamTools.compress(signedLuggage);
+            QCraft.requestGoToServer(player, remoteServerAddress, signedLuggageData);
+        } catch (IOException e) {
+            throw new RuntimeException("Error encoding inventory");
+        } finally {
             // Prevent the player from being warped twice
             player.timeUntilPortal = 200;
         }
     }
 
-    public void teleportPlayerLocal( EntityPlayer player )
-    {
-        teleportPlayerLocal( player, m_remotePortalID );
+    public void teleportPlayerLocal(EntityPlayer player) {
+        teleportPlayerLocal(player, m_remotePortalID);
     }
 
-    public static void teleportPlayerLocal( EntityPlayer player, String portalID )
-    {
-        PortalLocation location = (portalID != null) ?
-            PortalRegistry.PortalRegistry.getPortal( portalID ) :
-            null;
+    public static void teleportPlayerLocal(EntityPlayer player, String portalID) {
+        PortalLocation location = (portalID != null)
+                ? PortalRegistry.PortalRegistry.getPortal(portalID)
+                : null;
 
-        if( location != null )
-        {
-            double xPos = ((double)location.m_x1 + location.m_x2 + 1) / 2;
+        if (location != null) {
+            double xPos = ((double) location.m_x1 + location.m_x2 + 1) / 2;
             double yPos = (double) Math.min(location.m_y1, location.m_y2) + 1;
-            double zPos = ((double)location.m_z1 + location.m_z2 + 1) / 2;
-            if( location.m_dimensionID == player.dimension )
-            {
+            double zPos = ((double) location.m_z1 + location.m_z2 + 1) / 2;
+            if (location.m_dimensionID == player.dimension) {
                 player.timeUntilPortal = 40;
-                player.setPositionAndUpdate( xPos, yPos, zPos );
-            }
-            else if( player instanceof EntityPlayerMP )
-            {
+                player.setPositionAndUpdate(xPos, yPos, zPos);
+            } else if (player instanceof EntityPlayerMP) {
                 player.timeUntilPortal = 40;
                 MinecraftServer.getServer().getConfigurationManager().transferPlayerToDimension(
-                    (EntityPlayerMP)player,
-                    location.m_dimensionID,
-                    new QuantumTeleporter(
-                        MinecraftServer.getServer().worldServerForDimension( location.m_dimensionID ),
-                        xPos, yPos, zPos
-                    )
+                        (EntityPlayerMP) player,
+                        location.m_dimensionID,
+                        new QuantumTeleporter(
+                                MinecraftServer.getServer().worldServerForDimension(location.m_dimensionID),
+                                xPos, yPos, zPos
+                        )
                 );
             }
         }
     }
 
     @Override
-    public void readFromNBT( NBTTagCompound nbttagcompound )
-    {
+    public void readFromNBT(NBTTagCompound nbttagcompound) {
         // Read properties
-        super.readFromNBT( nbttagcompound );
-        m_powered = nbttagcompound.getBoolean( "p" );
-        m_timeSinceEnergize = nbttagcompound.getInteger( "tse" );
-        m_entanglementFrequency = nbttagcompound.getInteger( "f" );
-        if( nbttagcompound.hasKey( "d" ) )
-        {
-            m_storedData = AreaData.decode( nbttagcompound.getCompoundTag( "d" ) );
+        super.readFromNBT(nbttagcompound);
+        m_powered = nbttagcompound.getBoolean("p");
+        m_timeSinceEnergize = nbttagcompound.getInteger("tse");
+        m_entanglementFrequency = nbttagcompound.getInteger("f");
+        if (nbttagcompound.hasKey("d")) {
+            m_storedData = AreaData.decode(nbttagcompound.getCompoundTag("d"));
         }
-        if( nbttagcompound.hasKey( "portalID" ) )
-        {
-            m_portalID = nbttagcompound.getString( "portalID" );
+        if (nbttagcompound.hasKey("portalID")) {
+            m_portalID = nbttagcompound.getString("portalID");
         }
-        m_portalNameConflict = nbttagcompound.getBoolean( "portalNameConflict" );
-        if( nbttagcompound.hasKey( "remoteIPAddress" ) )
-        {
-            m_remoteServerAddress = nbttagcompound.getString( "remoteIPAddress" );
+        m_portalNameConflict = nbttagcompound.getBoolean("portalNameConflict");
+        if (nbttagcompound.hasKey("remoteIPAddress")) {
+            m_remoteServerAddress = nbttagcompound.getString("remoteIPAddress");
         }
-        if( nbttagcompound.hasKey( "remoteIPName" ) )
-        {
-            m_remoteServerName = nbttagcompound.getString( "remoteIPName" );
-        }
-        else
-        {
+        if (nbttagcompound.hasKey("remoteIPName")) {
+            m_remoteServerName = nbttagcompound.getString("remoteIPName");
+        } else {
             m_remoteServerName = m_remoteServerAddress;
         }
-        if( nbttagcompound.hasKey( "remotePortalID" ) )
-        {
-            m_remotePortalID = nbttagcompound.getString( "remotePortalID" );
+        if (nbttagcompound.hasKey("remotePortalID")) {
+            m_remotePortalID = nbttagcompound.getString("remotePortalID");
         }
     }
 
     @Override
-    public void writeToNBT( NBTTagCompound nbttagcompound )
-    {
+    public void writeToNBT(NBTTagCompound nbttagcompound) {
         // Write properties
-        super.writeToNBT( nbttagcompound );
-        nbttagcompound.setBoolean( "p", m_powered );
-        nbttagcompound.setInteger( "tse", m_timeSinceEnergize );
-        nbttagcompound.setInteger( "f", m_entanglementFrequency );
-        if( m_storedData != null )
-        {
-            nbttagcompound.setTag( "d", m_storedData.encode() );
+        super.writeToNBT(nbttagcompound);
+        nbttagcompound.setBoolean("p", m_powered);
+        nbttagcompound.setInteger("tse", m_timeSinceEnergize);
+        nbttagcompound.setInteger("f", m_entanglementFrequency);
+        if (m_storedData != null) {
+            nbttagcompound.setTag("d", m_storedData.encode());
         }
-        if( m_portalID != null )
-        {
-            nbttagcompound.setString( "portalID", m_portalID );
+        if (m_portalID != null) {
+            nbttagcompound.setString("portalID", m_portalID);
         }
-        nbttagcompound.setBoolean( "portalNameConflict", m_portalNameConflict );
-        if( m_remoteServerAddress != null )
-        {
-            nbttagcompound.setString( "remoteIPAddress", m_remoteServerAddress );
+        nbttagcompound.setBoolean("portalNameConflict", m_portalNameConflict);
+        if (m_remoteServerAddress != null) {
+            nbttagcompound.setString("remoteIPAddress", m_remoteServerAddress);
         }
-        if( m_remoteServerName != null )
-        {
-            nbttagcompound.setString( "remoteIPName", m_remoteServerName );
+        if (m_remoteServerName != null) {
+            nbttagcompound.setString("remoteIPName", m_remoteServerName);
         }
-        if( m_remotePortalID != null )
-        {
-            nbttagcompound.setString( "remotePortalID", m_remotePortalID );
+        if (m_remotePortalID != null) {
+            nbttagcompound.setString("remotePortalID", m_remotePortalID);
         }
     }
 
     @Override
-    public Packet getDescriptionPacket()
-    {
+    public Packet getDescriptionPacket() {
         // Communicate networked state
         NBTTagCompound nbttagcompound = new NBTTagCompound();
-        nbttagcompound.setInteger( "f", m_entanglementFrequency );
-        if( m_portalID != null )
-        {
-            nbttagcompound.setString( "portalID", m_portalID );
+        nbttagcompound.setInteger("f", m_entanglementFrequency);
+        if (m_portalID != null) {
+            nbttagcompound.setString("portalID", m_portalID);
         }
-        nbttagcompound.setBoolean( "portalNameConflict", m_portalNameConflict );
-        if( m_remoteServerAddress != null )
-        {
-            nbttagcompound.setString( "remoteIPAddress", m_remoteServerAddress );
+        nbttagcompound.setBoolean("portalNameConflict", m_portalNameConflict);
+        if (m_remoteServerAddress != null) {
+            nbttagcompound.setString("remoteIPAddress", m_remoteServerAddress);
         }
-        if( m_remoteServerName != null )
-        {
-            nbttagcompound.setString( "remoteIPName", m_remoteServerName );
+        if (m_remoteServerName != null) {
+            nbttagcompound.setString("remoteIPName", m_remoteServerName);
         }
-        if( m_remotePortalID != null )
-        {
-            nbttagcompound.setString( "remotePortalID", m_remotePortalID );
+        if (m_remotePortalID != null) {
+            nbttagcompound.setString("remotePortalID", m_remotePortalID);
         }
-        return new S35PacketUpdateTileEntity( this.xCoord, this.yCoord, this.zCoord, 0, nbttagcompound );
+        return new S35PacketUpdateTileEntity(this.xCoord, this.yCoord, this.zCoord, 0, nbttagcompound);
     }
 
     @Override
-    public void onDataPacket( NetworkManager net, S35PacketUpdateTileEntity packet )
-    {
-        switch( packet.func_148853_f() ) // actionType
+    public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity packet) {
+        switch (packet.func_148853_f()) // actionType
         {
-            case 0:
-            {
+            case 0: {
                 // Read networked state
                 NBTTagCompound nbttagcompound = packet.func_148857_g(); // data
-                setEntanglementFrequency( nbttagcompound.getInteger( "f" ) );
-                if( nbttagcompound.hasKey( "portalID" ) )
-                {
-                    m_portalID = nbttagcompound.getString( "portalID" );
-                }
-                else
-                {
+                setEntanglementFrequency(nbttagcompound.getInteger("f"));
+                if (nbttagcompound.hasKey("portalID")) {
+                    m_portalID = nbttagcompound.getString("portalID");
+                } else {
                     m_portalID = null;
                 }
-                m_portalNameConflict = nbttagcompound.getBoolean( "portalNameConflict" );
-                if( nbttagcompound.hasKey( "remoteIPAddress" ) )
-                {
-                    m_remoteServerAddress = nbttagcompound.getString( "remoteIPAddress" );
-                }
-                else
-                {
+                m_portalNameConflict = nbttagcompound.getBoolean("portalNameConflict");
+                if (nbttagcompound.hasKey("remoteIPAddress")) {
+                    m_remoteServerAddress = nbttagcompound.getString("remoteIPAddress");
+                } else {
                     m_remoteServerAddress = null;
                 }
-                if( nbttagcompound.hasKey( "remoteIPName" ) )
-                {
-                    m_remoteServerName = nbttagcompound.getString( "remoteIPName" );
-                }
-                else
-                {
+                if (nbttagcompound.hasKey("remoteIPName")) {
+                    m_remoteServerName = nbttagcompound.getString("remoteIPName");
+                } else {
                     m_remoteServerName = null;
                 }
-                if( nbttagcompound.hasKey( "remotePortalID" ) )
-                {
-                    m_remotePortalID = nbttagcompound.getString( "remotePortalID" );
-                }
-                else
-                {
+                if (nbttagcompound.hasKey("remotePortalID")) {
+                    m_remotePortalID = nbttagcompound.getString("remotePortalID");
+                } else {
                     m_remotePortalID = null;
                 }
                 break;
             }
-            default:
-            {
+            default: {
                 break;
             }
         }

@@ -12,9 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
-
-
+ */
 package dan200.qcraft.shared;
 
 import net.minecraft.entity.Entity;
@@ -22,44 +20,38 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
 
-public class QuantumTeleporter extends Teleporter
-{
-    private double m_xPos;
-    private double m_yPos;
-    private double m_zPos;
+public class QuantumTeleporter extends Teleporter {
 
-    public QuantumTeleporter( WorldServer server, double xPos, double yPos, double zPos )
-    {
-        super( server );
+    private final double m_xPos;
+    private final double m_yPos;
+    private final double m_zPos;
+
+    public QuantumTeleporter(WorldServer server, double xPos, double yPos, double zPos) {
+        super(server);
         m_xPos = xPos;
         m_yPos = yPos;
         m_zPos = zPos;
     }
 
     @Override
-    public void placeInPortal( Entity entity, double par2, double par4, double par6, float par8 )
-    {
-        if( entity instanceof EntityPlayer )
-        {
-            ((EntityPlayer)entity).setPositionAndUpdate( m_xPos, m_yPos, m_zPos );
+    public void placeInPortal(Entity entity, double par2, double par4, double par6, float par8) {
+        if (entity instanceof EntityPlayer) {
+            ((EntityPlayer) entity).setPositionAndUpdate(m_xPos, m_yPos, m_zPos);
             entity.motionX = entity.motionY = entity.motionZ = 0.0;
         }
     }
 
     @Override
-    public boolean placeInExistingPortal(Entity par1Entity, double par2, double par4, double par6, float par8)
-    {
+    public boolean placeInExistingPortal(Entity par1Entity, double par2, double par4, double par6, float par8) {
         return false;
     }
 
     @Override
-    public boolean makePortal(Entity par1Entity)
-    {
+    public boolean makePortal(Entity par1Entity) {
         return false;
     }
 
     @Override
-    public void removeStalePortalLocations(long par1)
-    {
+    public void removeStalePortalLocations(long par1) {
     }
 }

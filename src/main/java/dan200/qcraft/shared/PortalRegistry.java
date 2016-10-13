@@ -12,9 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
-
-
+ */
 package dan200.qcraft.shared;
 
 import net.minecraft.nbt.NBTTagCompound;
@@ -26,180 +24,144 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PortalRegistry
-{
+public class PortalRegistry {
+
     public static final PortalRegistry PortalRegistry = new PortalRegistry();
     public static final PortalRegistry ClientPortalRegistry = new PortalRegistry();
 
-    public static PortalRegistry getPortalRegistry( World world )
-    {
-        if( !world.isRemote )
-        {
+    public static PortalRegistry getPortalRegistry(World world) {
+        if (!world.isRemote) {
             return PortalRegistry;
-        }
-        else
-        {
+        } else {
             return ClientPortalRegistry;
         }
     }
 
-    private static class Server
-    {
+    private static class Server {
+
         public String m_name;
         public String m_address;
 
-        public Server( String name, String address )
-        {
+        public Server(String name, String address) {
             m_name = name;
             m_address = address;
         }
     }
 
     // Privates
-    private List<Server> m_servers;
-    private Map<String, TileEntityQuantumComputer.PortalLocation> m_portals;
+    private final List<Server> m_servers;
+    private final Map<String, TileEntityQuantumComputer.PortalLocation> m_portals;
 
     // Methods
-    public PortalRegistry()
-    {
+    public PortalRegistry() {
         m_servers = new ArrayList<Server>();
         m_portals = new HashMap<String, TileEntityQuantumComputer.PortalLocation>();
     }
 
-    public void reset()
-    {
+    public void reset() {
         m_servers.clear();
         m_portals.clear();
     }
 
-    public void readFromNBT( NBTTagCompound nbt )
-    {
-        if( nbt.hasKey( "servers" ) )
-        {
-            NBTTagList servers = nbt.getTagList( "servers", 10 );
-            for( int i=0; i<servers.tagCount(); ++i )
-            {
-                NBTTagCompound server = servers.getCompoundTagAt( i );
-                m_servers.add( new Server( server.getString( "name" ), server.getString( "address" ) ) );
+    public void readFromNBT(NBTTagCompound nbt) {
+        if (nbt.hasKey("servers")) {
+            NBTTagList servers = nbt.getTagList("servers", 10);
+            for (int i = 0; i < servers.tagCount(); ++i) {
+                NBTTagCompound server = servers.getCompoundTagAt(i);
+                m_servers.add(new Server(server.getString("name"), server.getString("address")));
             }
         }
 
-        NBTTagList portals = nbt.getTagList( "portals", 10 );
-        for( int i=0; i<portals.tagCount(); ++i )
-        {
-            NBTTagCompound portal = portals.getCompoundTagAt( i );
-            m_portals.put( portal.getString( "id" ), TileEntityQuantumComputer.PortalLocation.decode( portal ) );
+        NBTTagList portals = nbt.getTagList("portals", 10);
+        for (int i = 0; i < portals.tagCount(); ++i) {
+            NBTTagCompound portal = portals.getCompoundTagAt(i);
+            m_portals.put(portal.getString("id"), TileEntityQuantumComputer.PortalLocation.decode(portal));
         }
     }
 
-    public void writeToNBT( NBTTagCompound nbt )
-    {
+    public void writeToNBT(NBTTagCompound nbt) {
         NBTTagList servers = new NBTTagList();
-        for( Server entry : m_servers )
-        {
+        for (Server entry : m_servers) {
             NBTTagCompound server = new NBTTagCompound();
-            server.setString( "name", entry.m_name );
-            server.setString( "address", entry.m_address );
-            servers.appendTag( server );
+            server.setString("name", entry.m_name);
+            server.setString("address", entry.m_address);
+            servers.appendTag(server);
         }
-        nbt.setTag( "servers", servers );
+        nbt.setTag("servers", servers);
 
         NBTTagList portals = new NBTTagList();
-        for( Map.Entry<String, TileEntityQuantumComputer.PortalLocation> entry : m_portals.entrySet() )
-        {
+        for (Map.Entry<String, TileEntityQuantumComputer.PortalLocation> entry : m_portals.entrySet()) {
             NBTTagCompound portal = entry.getValue().encode();
-            portal.setString( "id", entry.getKey() );
-            portals.appendTag( portal );
+            portal.setString("id", entry.getKey());
+            portals.appendTag(portal);
         }
-        nbt.setTag( "portals", portals );
+        nbt.setTag("portals", portals);
     }
 
-    public String getUnusedID()
-    {
+    public String getUnusedID() {
         int id = 1;
-        while( m_portals.containsKey( "Gate " + id ) )
-        {
+        while (m_portals.containsKey("Gate " + id)) {
             ++id;
         }
         return "Gate " + id;
     }
 
-    public boolean register( String id, TileEntityQuantumComputer.PortalLocation portal )
-    {
-        if( !m_portals.containsKey( id ) )
-        {
-            m_portals.put( id, portal );
+    public boolean register(String id, TileEntityQuantumComputer.PortalLocation portal) {
+        if (!m_portals.containsKey(id)) {
+            m_portals.put(id, portal);
             //QCraft.log( "Portal " + id + " registered (now " + m_portals.size() + " total)" );
             return true;
         }
         return false;
     }
 
-    public void unregister( String id )
-    {
-        if( m_portals.containsKey( id ) )
-        {
-            m_portals.remove( id );
+    public void unregister(String id) {
+        if (m_portals.containsKey(id)) {
+            m_portals.remove(id);
             //QCraft.log( "Portal " + id + " unregistered (now " + m_portals.size() + " total)" );
         }
     }
 
-    public TileEntityQuantumComputer.PortalLocation getPortal( String id )
-    {
-        return m_portals.get( id );
+    public TileEntityQuantumComputer.PortalLocation getPortal(String id) {
+        return m_portals.get(id);
     }
 
-    public void registerServer( String name, String address )
-    {
+    public void registerServer(String name, String address) {
         // Try to rename existing first (to avoid dupes)
-        for( int i=0; i<m_servers.size(); ++i )
-        {
-            if( m_servers.get( i ).m_address.equals( address ) )
-            {
-                m_servers.get( i ).m_name = name;
+        for (int i = 0; i < m_servers.size(); ++i) {
+            if (m_servers.get(i).m_address.equals(address)) {
+                m_servers.get(i).m_name = name;
                 return;
             }
         }
 
         // Otherwise, add new entry
-        m_servers.add( new Server( name, address ) );
+        m_servers.add(new Server(name, address));
     }
 
-    public void unregisterServer( String address )
-    {
+    public void unregisterServer(String address) {
         // Find and remove
-        for( int i=0; i<m_servers.size(); ++i )
-        {
-            if( m_servers.get( i ).m_address.equals( address ) )
-            {
-                m_servers.remove( i );
+        for (int i = 0; i < m_servers.size(); ++i) {
+            if (m_servers.get(i).m_address.equals(address)) {
+                m_servers.remove(i);
                 break;
             }
         }
     }
 
-    public String getServerAddressAfter( String address )
-    {
-        if( address == null )
-        {
+    public String getServerAddressAfter(String address) {
+        if (address == null) {
             // If null is passed in, return the first result
             return m_servers.size() >= 0 ? m_servers.get(0).m_address : null;
-        }
-        else
-        {
+        } else {
             // If an entry is passed in, return the result after it, or null if it's the last in the list
-            for( int i=0; i<m_servers.size(); ++i )
-            {
-                if( m_servers.get( i ).m_address.equals( address ) )
-                {
+            for (int i = 0; i < m_servers.size(); ++i) {
+                if (m_servers.get(i).m_address.equals(address)) {
                     int indexAfter = i + 1;
-                    if( indexAfter >= m_servers.size() )
-                    {
+                    if (indexAfter >= m_servers.size()) {
                         return null;
-                    }
-                    else
-                    {
-                        return m_servers.get( indexAfter ).m_address;
+                    } else {
+                        return m_servers.get(indexAfter).m_address;
                     }
                 }
             }
@@ -207,15 +169,11 @@ public class PortalRegistry
         }
     }
 
-    public String getServerName( String address )
-    {
-        if( address != null )
-        {
-            for( int i=0; i<m_servers.size(); ++i )
-            {
-                if( m_servers.get( i ).m_address.equals( address ) )
-                {
-                    return m_servers.get( i ).m_name;
+    public String getServerName(String address) {
+        if (address != null) {
+            for (int i = 0; i < m_servers.size(); ++i) {
+                if (m_servers.get(i).m_address.equals(address)) {
+                    return m_servers.get(i).m_name;
                 }
             }
         }

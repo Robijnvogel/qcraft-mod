@@ -12,37 +12,42 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
-
-
+ */
 package dan200.qcraft.shared;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.world.World;
 
-public interface IQCraftProxy
-{
+public interface IQCraftProxy {
+
     public boolean isClient();
+
     public void preLoad();
+
     public void load();
 
-    public Object getQuantumComputerGUI( InventoryPlayer inventory, TileEntityQuantumComputer computer );
-    public void showItemTransferGUI( EntityPlayer player, TileEntityQuantumComputer computer );
+    public Object getQuantumComputerGUI(InventoryPlayer inventory, TileEntityQuantumComputer computer);
 
-    public void travelToServer( LostLuggage.Address address );
+    public void showItemTransferGUI(EntityPlayer player, TileEntityQuantumComputer computer);
 
-    public void spawnQuantumDustFX( World world, double x, double y, double z );
+    public void travelToServer(LostLuggage.Address address);
+
+    public void spawnQuantumDustFX(World world, double x, double y, double z);
 
     public EntityPlayer getLocalPlayer();
 
-    public boolean isPlayerWearingGoggles( EntityPlayer player );
-    public boolean isPlayerWearingQuantumGoggles( EntityPlayer player );
+    public boolean isPlayerWearingGoggles(EntityPlayer player);
+
+    public boolean isPlayerWearingQuantumGoggles(EntityPlayer player);
+
     public boolean isLocalPlayerWearingGoggles();
+
     public boolean isLocalPlayerWearingQuantumGoggles();
 
-    public void renderQuantumGogglesOverlay( float width, float height );
-    public void renderAOGogglesOverlay( float width, float height );
+    public void renderQuantumGogglesOverlay(float width, float height);
+
+    public void renderAOGogglesOverlay(float width, float height);
 
     public World getDefWorld();
 }

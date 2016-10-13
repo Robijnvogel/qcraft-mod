@@ -12,9 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
-
-
+ */
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
@@ -40,222 +38,187 @@ import java.util.Iterator;
 import java.util.Random;
 
 public class BlockQuantumComputer extends BlockDirectional
-        implements ITileEntityProvider
-{
-    private static class Icons
-    {
-        public static IIcon Front;
-        public static IIcon Top;
-        public static IIcon Side;
+        implements ITileEntityProvider {
+
+    private static class Icons {
+
+        public static IIcon FRONT;
+        public static IIcon TOP;
+        public static IIcon SIDE;
     }
 
-    public BlockQuantumComputer()
-    {
-        super( Material.iron );
-        setCreativeTab( QCraft.getCreativeTab() );
-        setHardness( 5.0f );
-        setResistance( 10.0f );
-        setStepSound( Block.soundTypeMetal );
-        setBlockName( "qcraft:computer" );
+    public BlockQuantumComputer() {
+        super(Material.iron);
+        setCreativeTab(QCraft.getCreativeTab());
+        setHardness(5.0f);
+        setResistance(10.0f);
+        setStepSound(Block.soundTypeMetal);
+        setBlockName("qcraft:computer");
     }
 
     @Override
-    public boolean isOpaqueCube()
-    {
+    public boolean isOpaqueCube() {
         return false;
     }
 
     @Override
-    public Item getItemDropped( int i, Random random, int j )
-    {
-        return Item.getItemFromBlock( this );
+    public Item getItemDropped(int i, Random random, int j) {
+        return Item.getItemFromBlock(this);
     }
 
     @Override
-    public int damageDropped( int i )
-    {
+    public int damageDropped(int i) {
         return 0;
     }
 
     @Override
-    public void dropBlockAsItemWithChance( World world, int x, int y, int z, int side, float f, int unknown )
-    {
+    public void dropBlockAsItemWithChance(World world, int x, int y, int z, int side, float f, int unknown) {
         // RemoveBlockByPlayer handles this instead
     }
 
     @Override
-    public ArrayList<ItemStack> getDrops( World world, int x, int y, int z, int metadata, int fortune )
-    {
+    public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune) {
         ArrayList<ItemStack> blocks = new ArrayList<ItemStack>();
-        TileEntity entity = world.getTileEntity( x, y, z );
-        if( entity != null && entity instanceof TileEntityQuantumComputer )
-        {
+        TileEntity entity = world.getTileEntity(x, y, z);
+        if (entity != null && entity instanceof TileEntityQuantumComputer) {
             // Get the computer back
             TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
-            ItemStack stack = ItemQuantumComputer.create( computer.getEntanglementFrequency(), 1 );
-            ItemQuantumComputer.setStoredData( stack, computer.getStoredData() );
-            blocks.add( stack );
+            ItemStack stack = ItemQuantumComputer.create(computer.getEntanglementFrequency(), 1);
+            ItemQuantumComputer.setStoredData(stack, computer.getStoredData());
+            blocks.add(stack);
         }
         return blocks;
     }
 
-    protected boolean shouldDropItemsInCreative( World world, int x, int y, int z )
-    {
+    protected boolean shouldDropItemsInCreative(World world, int x, int y, int z) {
         return false;
     }
 
     @Override
-    public boolean removedByPlayer( World world, EntityPlayer player, int x, int y, int z )
-    {
-        if( world.isRemote )
-        {
+    public boolean removedByPlayer(World world, EntityPlayer player, int x, int y, int z) {
+        if (world.isRemote) {
             return false;
         }
 
-        if( !player.capabilities.isCreativeMode || shouldDropItemsInCreative( world, x, y, z ) )
-        {
+        if (!player.capabilities.isCreativeMode || shouldDropItemsInCreative(world, x, y, z)) {
             // Regular and silk touch block (identical)
-            int metadata = world.getBlockMetadata( x, y, z );
-            ArrayList<ItemStack> items = getDrops( world, x, y, z, metadata, 0 );
+            int metadata = world.getBlockMetadata(x, y, z);
+            ArrayList<ItemStack> items = getDrops(world, x, y, z, metadata, 0);
             Iterator<ItemStack> it = items.iterator();
-            while( it.hasNext() )
-            {
+            while (it.hasNext()) {
                 ItemStack item = it.next();
-                dropBlockAsItem( world, x, y, z, item );
+                dropBlockAsItem(world, x, y, z, item);
             }
         }
 
-        return super.removedByPlayer( world, player, x, y, z );
+        return super.removedByPlayer(world, player, x, y, z);
     }
 
     @Override
-    public ItemStack getPickBlock( MovingObjectPosition target, World world, int x, int y, int z )
-    {
-        int metadata = world.getBlockMetadata( x, y, z );
-        ArrayList<ItemStack> items = getDrops( world, x, y, z, metadata, 0 );
-        if( items.size() > 0 )
-        {
-            return items.get( 0 );
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
+        int metadata = world.getBlockMetadata(x, y, z);
+        ArrayList<ItemStack> items = getDrops(world, x, y, z, metadata, 0);
+        if (items.size() > 0) {
+            return items.get(0);
         }
         return null;
     }
 
     @Override
-    public boolean onBlockActivated( World world, int x, int y, int z, EntityPlayer player, int l, float m, float n, float o )
-    {
-        if( player.isSneaking() )
-        {
+    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int l, float m, float n, float o) {
+        if (player.isSneaking()) {
             return false;
         }
 
-        if( !world.isRemote )
-        {
+        if (!world.isRemote) {
             // Show GUI
-            TileEntity entity = world.getTileEntity( x, y, z );
-            if( entity != null && entity instanceof TileEntityQuantumComputer )
-            {
+            TileEntity entity = world.getTileEntity(x, y, z);
+            if (entity != null && entity instanceof TileEntityQuantumComputer) {
                 TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
-                QCraft.openQuantumComputerGUI( player, computer );
+                QCraft.openQuantumComputerGUI(player, computer);
             }
         }
         return true;
     }
 
     @Override
-    public void breakBlock( World world, int x, int y, int z, Block par5, int par6 )
-    {
-        TileEntity entity = world.getTileEntity( x, y, z );
-        if( entity != null && entity instanceof TileEntityQuantumComputer )
-        {
+    public void breakBlock(World world, int x, int y, int z, Block par5, int par6) {
+        TileEntity entity = world.getTileEntity(x, y, z);
+        if (entity != null && entity instanceof TileEntityQuantumComputer) {
             TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
             computer.onDestroy();
         }
-        super.breakBlock( world, x, y, z, par5, par6 );
+        super.breakBlock(world, x, y, z, par5, par6);
     }
 
     @Override
-    public void onBlockPlacedBy( World world, int x, int y, int z, EntityLivingBase player, ItemStack stack )
-    {
-        int direction = ( ( MathHelper.floor_double( (double) ( player.rotationYaw * 4.0F / 360.0F ) + 0.5D ) & 0x3 ) + 2 ) % 4;
-        int metadata = ( direction & 0x3 );
-        world.setBlockMetadataWithNotify( x, y, z, metadata, 3 );
+    public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase player, ItemStack stack) {
+        int direction = ((MathHelper.floor_double((double) (player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 0x3) + 2) % 4;
+        int metadata = (direction & 0x3);
+        world.setBlockMetadataWithNotify(x, y, z, metadata, 3);
     }
 
     @Override
-    public void onNeighborBlockChange( World world, int x, int y, int z, Block id )
-    {
-        super.onNeighborBlockChange( world, x, y, z, id );
+    public void onNeighborBlockChange(World world, int x, int y, int z, Block id) {
+        super.onNeighborBlockChange(world, x, y, z, id);
 
-        TileEntity entity = world.getTileEntity( x, y, z );
-        if( entity != null && entity instanceof TileEntityQuantumComputer )
-        {
+        TileEntity entity = world.getTileEntity(x, y, z);
+        if (entity != null && entity instanceof TileEntityQuantumComputer) {
             TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
-            computer.setRedstonePowered( world.isBlockIndirectlyGettingPowered( x, y, z ) );
+            computer.setRedstonePowered(world.isBlockIndirectlyGettingPowered(x, y, z));
         }
     }
 
     @Override
-    public boolean canConnectRedstone( IBlockAccess world, int x, int y, int z, int side )
-    {
+    public boolean canConnectRedstone(IBlockAccess world, int x, int y, int z, int side) {
         return true;
     }
 
     @Override
-    public void registerBlockIcons( IIconRegister iconRegister )
-    {
-        Icons.Front = iconRegister.registerIcon( "qcraft:computer" );
-        Icons.Top = iconRegister.registerIcon( "qcraft:computer_top" );
-        Icons.Side = iconRegister.registerIcon( "qcraft:computer_side" );
+    public void registerBlockIcons(IIconRegister iconRegister) {
+        Icons.FRONT = iconRegister.registerIcon("qcraft:computer");
+        Icons.TOP = iconRegister.registerIcon("qcraft:computer_top");
+        Icons.SIDE = iconRegister.registerIcon("qcraft:computer_side");
     }
 
     @Override
-    public IIcon getIcon( IBlockAccess world, int i, int j, int k, int side )
-    {
-        if( side == 0 || side == 1 )
-        {
-            return Icons.Top;
+    public IIcon getIcon(IBlockAccess world, int i, int j, int k, int side) {
+        if (side == 0 || side == 1) {
+            return Icons.TOP;
         }
 
-        int metadata = world.getBlockMetadata( i, j, k );
-        int direction = Direction.directionToFacing[ getDirection( metadata ) ];
-        if( side == direction )
-        {
-            return Icons.Front;
+        int metadata = world.getBlockMetadata(i, j, k);
+        int direction = Direction.directionToFacing[getDirection(metadata)];
+        if (side == direction) {
+            return Icons.FRONT;
         }
 
-        return Icons.Side;
+        return Icons.SIDE;
     }
 
     @Override
-    public IIcon getIcon( int side, int damage )
-    {
-        switch( side )
-        {
+    public IIcon getIcon(int side, int damage) {
+        switch (side) {
             case 0:
-            case 1:
-            {
-                return Icons.Top;
+            case 1: {
+                return Icons.TOP;
             }
-            case 4:
-            {
-                return Icons.Front;
+            case 4: {
+                return Icons.FRONT;
             }
-            default:
-            {
-                return Icons.Side;
+            default: {
+                return Icons.SIDE;
             }
         }
     }
 
     @Override
-    public TileEntity createNewTileEntity( World world, int metadata )
-    {
+    public TileEntity createNewTileEntity(World world, int metadata) {
         return new TileEntityQuantumComputer();
     }
 
     @Override
-    public TileEntity createTileEntity( World world, int metadata )
-    {
-        return createNewTileEntity( world, metadata );
+    public TileEntity createTileEntity(World world, int metadata) {
+        return createNewTileEntity(world, metadata);
     }
 }
