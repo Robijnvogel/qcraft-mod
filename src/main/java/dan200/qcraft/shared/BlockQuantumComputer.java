@@ -53,7 +53,7 @@ public class BlockQuantumComputer extends BlockDirectional
         setHardness(5.0f);
         setResistance(10.0f);
         setStepSound(Block.soundTypeMetal);
-        setBlockName("qcraft:computer");
+        setUnlocalizedName("qcraft:computer");
     }
 
     @Override

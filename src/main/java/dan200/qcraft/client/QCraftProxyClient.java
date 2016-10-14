@@ -15,12 +15,12 @@ limitations under the License.
  */
 package dan200.qcraft.client;
 
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
-import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.client.registry.ISimpleBlockRenderingHandler;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import dan200.QCraft;
 import dan200.qcraft.shared.*;
 import net.minecraft.block.Block;
@@ -102,9 +102,9 @@ public class QCraftProxyClient extends QCraftProxyCommon {
     @Override
     public void spawnQuantumDustFX(World world, double x, double y, double z) {
         Minecraft mc = Minecraft.getMinecraft();
-        double dx = mc.renderViewEntity.posX - x;
-        double dy = mc.renderViewEntity.posY - y;
-        double dz = mc.renderViewEntity.posZ - z;
+        double dx = mc.getRenderViewEntity().posX - x;
+        double dy = mc.getRenderViewEntity().posY - y;
+        double dz = mc.getRenderViewEntity().posZ - z;
         if (dx * dx + dy * dy + dz * dz < 16.0 * 16.0) {
             EntityFX fx = new EntityQuantumDustFX(world, x, y, z, 1.0f);
             mc.effectRenderer.addEffect(fx);

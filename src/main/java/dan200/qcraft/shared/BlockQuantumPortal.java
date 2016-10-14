@@ -39,7 +39,7 @@ public class BlockQuantumPortal extends Block {
         setHardness(-1.0f);
         setStepSound(Block.soundTypeGlass);
         setLightLevel(0.75f);
-        setBlockName("qcraft:portal");
+        setUnlocalizedName("qcraft:portal");
     }
 
     @Override

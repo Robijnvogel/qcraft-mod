@@ -1,6 +1,6 @@
 package dan200.qcraft.shared;
 
-import cpw.mods.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import dan200.QCraft;
 import java.io.File;
 import net.minecraft.world.World;

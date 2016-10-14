@@ -17,6 +17,7 @@ package dan200.qcraft.shared;
 
 import dan200.QCraft;
 import net.minecraft.block.*;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -29,11 +30,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -188,7 +191,7 @@ public class BlockQBlock extends BlockSand
         setHardness(5.0f);
         setResistance(10.0f);
         setStepSound(Block.soundTypeMetal);
-        setBlockName("qcraft:qblock");
+        setUnlocalizedName("qcraft:qblock");
     }
 
     @Override
@@ -196,14 +199,14 @@ public class BlockQBlock extends BlockSand
         return true;
     }
 
-    public int getSubType(IBlockAccess world, int x, int y, int z) {
-        return world.getBlockMetadata(x, y, z);
+    public int getSubType(IBlockAccess world, BlockPos pos) {
+        return world.getTileEntity(pos).getBlockMetadata();
     }
 
     // IQuantumObservable implementation
     @Override
-    public boolean isObserved(World world, int x, int y, int z, int side) {
-        TileEntity entity = world.getTileEntity(x, y, z);
+    public boolean isObserved(World world, BlockPos pos, int side) {
+        TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQBlock) {
             TileEntityQBlock qBlock = (TileEntityQBlock) entity;
             if (qBlock.isForceObserved(side)) {
@@ -214,8 +217,8 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public void observe(World world, int x, int y, int z, int side) {
-        TileEntity entity = world.getTileEntity(x, y, z);
+    public void observe(World world, BlockPos pos, int side) {
+        TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQBlock) {
             TileEntityQBlock qBlock = (TileEntityQBlock) entity;
             qBlock.setForceObserved(side, true);
@@ -223,8 +226,8 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public void reset(World world, int x, int y, int z, int side) {
-        TileEntity entity = world.getTileEntity(x, y, z);
+    public void reset(World world, BlockPos pos, int side) {
+        TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQBlock) {
             TileEntityQBlock qBlock = (TileEntityQBlock) entity;
             qBlock.setForceObserved(side, false);
@@ -242,7 +245,7 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public boolean shouldSideBeRendered(IBlockAccess iblockaccess, int i, int j, int k, int l) {
+    public boolean shouldSideBeRendered(IBlockAccess iblockaccess, BlockPos pos, EnumFacing side) {
         return true;
     }
 
@@ -252,25 +255,25 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public boolean isNormalCube(IBlockAccess world, int x, int y, int z) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public boolean isNormalCube(IBlockAccess world, BlockPos pos) {
+        Block block = getImpostorBlock(world, pos);
         return block != null && !(block instanceof BlockCompressedPowered) && block != Blocks.ice && block != Blocks.packed_ice && block != Blocks.glass && block != Blocks.stained_glass;
     }
 
     @Override
-    public int colorMultiplier(IBlockAccess world, int x, int y, int z) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public int colorMultiplier(IBlockAccess world, BlockPos pos) {
+        Block block = getImpostorBlock(world, pos);
         if (block == Blocks.grass) {
-            return block.colorMultiplier(world, x, y, z);
+            return block.colorMultiplier(world, pos);
         }
         return 0xffffff;
     }
 
     @Override
-    public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB bigBox, List list, Entity entity) {
+    public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB bigBox, List list, Entity entity) {
         // Determine if solid
         boolean solid = false;
-        int type = getImpostorType(world, x, y, z);
+        int type = getImpostorType(world, pos);
         if (type > 0) {
             // Solid blocks are solid to everyone
             solid = true;
@@ -284,9 +287,9 @@ public class BlockQBlock extends BlockSand
 
         // Add AABB if so
         if (solid) {
-            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(
-                    (double) x, (double) y, (double) z,
-                    (double) x + 1.0, (double) y + 1.0, (double) z + 1.0
+            AxisAlignedBB aabb = AxisAlignedBB.fromBounds(
+                    (double) pos.getX(), (double) pos.getY(), (double) pos.getZ(),
+                    (double) pos.getX() + 1.0, (double) pos.getY() + 1.0, (double) pos.getZ() + 1.0
             );
             if (aabb != null && aabb.intersectsWith(bigBox)) {
                 list.add(aabb);
@@ -295,7 +298,7 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public boolean isReplaceable(IBlockAccess world, int x, int y, int z) {
+    public boolean isReplaceable(World world, BlockPos pos) {
         /*
 		Appearance appearance = getAppearance( world, x, y, z );
 		int type = getImpostorType( world, x, y, z );
@@ -308,9 +311,9 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z) {
-        Appearance appearance = getAppearance(world, x, y, z);
-        int type = getImpostorType(world, x, y, z);
+    public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
+        Appearance appearance = getAppearance(world, pos);
+        int type = getImpostorType(world, pos);
         if (appearance != Appearance.Block || type > 0) {
             super.setBlockBounds(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
         } else {
@@ -319,141 +322,151 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
-        setBlockBoundsBasedOnState(world, x, y, z);
-        return super.getCollisionBoundingBoxFromPool(world, x, y, z);
+    public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos pos, IBlockState state) {
+        setBlockBoundsBasedOnState(world, pos);
+        return super.getCollisionBoundingBox(world, pos, state);
     }
 
     @Override
-    public AxisAlignedBB getSelectedBoundingBoxFromPool(World world, int x, int y, int z) {
-        setBlockBoundsBasedOnState(world, x, y, z);
-        return super.getSelectedBoundingBoxFromPool(world, x, y, z);
+    public AxisAlignedBB getSelectedBoundingBox(World world, BlockPos pos) {
+        setBlockBoundsBasedOnState(world, pos);
+        return super.getSelectedBoundingBox(world, pos);
     }
 
     @Override
-    public float getBlockHardness(World world, int x, int y, int z) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public float getBlockHardness(World world, BlockPos pos) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null) {
-            return block.getBlockHardness(world, x, y, z);
+            return block.getBlockHardness(world, pos);
         }
         return 0.0f;
     }
 
     @Override
-    public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public float getExplosionResistance(World world, BlockPos pos, Entity exploder, Explosion explosion) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null) {
-            return block.getExplosionResistance(entity, world, x, y, z, explosionX, explosionY, explosionZ);
+            return block.getExplosionResistance(world, pos, exploder, explosion);
         }
         return 0.0f;
     }
 
     @Override
-    public boolean isSideSolid(IBlockAccess world, int x, int y, int z, ForgeDirection side) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public boolean isSideSolid(IBlockAccess world, BlockPos pos, EnumFacing side) {
+        Block block = getImpostorBlock(world, pos);
         return block != null;
     }
 
     @Override
-    public boolean isAir(IBlockAccess world, int x, int y, int z) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public boolean isAir(IBlockAccess world, BlockPos pos) {
+        Block block = getImpostorBlock(world, pos);
         return block == null;
     }
 
     @Override
-    public boolean canSustainLeaves(IBlockAccess world, int x, int y, int z) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public boolean canSustainLeaves(IBlockAccess world, BlockPos pos) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null) {
-            return block.canSustainLeaves(world, x, y, z);
+            return block.canSustainLeaves(world, pos);
         }
         return false;
     }
 
     @Override
-    public boolean canBeReplacedByLeaves(IBlockAccess world, int x, int y, int z) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public boolean canBeReplacedByLeaves(IBlockAccess world, BlockPos pos) {
+        Block block = getImpostorBlock(world, pos);
         return block == null;
     }
 
     @Override
-    public boolean isWood(IBlockAccess world, int x, int y, int z) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public boolean isWood(IBlockAccess world, BlockPos pos) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null) {
-            return block.isWood(world, x, y, z);
+            return block.isWood(world, pos);
         }
         return true;
     }
 
     @Override
-    public int getFlammability(IBlockAccess world, int x, int y, int z, ForgeDirection face) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null) {
-            return block.getFlammability(world, x, y, z, face);
+            return block.getFlammability(world, pos, face);
         }
         return 0;
     }
 
     @Override
-    public boolean isFlammable(IBlockAccess world, int x, int y, int z, ForgeDirection face) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public boolean isFlammable(IBlockAccess world, BlockPos pos, EnumFacing face) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null) {
-            return block.isFlammable(world, x, y, z, face);
+            return block.isFlammable(world, pos, face);
         }
         return false;
     }
 
     @Override
-    public int getFireSpreadSpeed(IBlockAccess world, int x, int y, int z, ForgeDirection face) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public int getFireSpreadSpeed(IBlockAccess world, BlockPos pos, EnumFacing face) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null) {
-            return block.getFireSpreadSpeed(world, x, y, z, face);
+            return block.getFireSpreadSpeed(world, pos, face);
         }
         return 0;
     }
 
     @Override
-    public boolean isFireSource(World world, int x, int y, int z, ForgeDirection side) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public boolean isFireSource(World world, BlockPos pos, EnumFacing side) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null) {
-            return block.isFireSource(world, x, y, z, side);
+            return block.isFireSource(world, pos, side);
         }
         return false;
     }
 
     @Override
-    public int getLightOpacity(IBlockAccess world, int x, int y, int z) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public int getLightOpacity(IBlockAccess world, BlockPos pos) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null) {
-            return block.getLightOpacity(world, x, y, z);
+            return block.getLightOpacity(world, pos);
         }
         return 0;
     }
 
     @Override
-    public boolean isBeaconBase(IBlockAccess world, int x, int y, int z, int beaconX, int beaconY, int beaconZ) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public boolean isBeaconBase(IBlockAccess world, BlockPos pos, BlockPos beaconPos) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null) {
-            return block.isBeaconBase(world, x, y, z, beaconX, beaconY, beaconZ);
+            return block.isBeaconBase(world, pos, beaconPos);
         }
         return false;
     }
 
     @Override
-    public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null) {
-            return block.getDrops(world, x, y, z, getImpostorDamage(world, x, y, z), fortune);
+            return block.getDrops(world, pos, block.getDefaultState(), fortune);
         }
         return new ArrayList<ItemStack>();
     }
 
     @Override
-    public void dropBlockAsItemWithChance(World world, int i, int j, int k, int l, float f, int unknown) {
-        // removeBlockByPlayer handles this instead
+    public void dropBlockAsItemWithChance(World world, BlockPos pos, IBlockState state, float chance, int fortune) {
+        TileEntity entity = world.getTileEntity(pos);
+        if (entity != null && entity instanceof TileEntityQBlock) {
+            TileEntityQBlock qblock = (TileEntityQBlock) entity;
+            ItemStack item = ItemQBlock.create(qblock.getSubType(), qblock.getTypes(), qblock.getEntanglementFrequency(), 1);
+            if (!world.isRemote && !world.restoringBlockSnapshots) // do not drop items while restoring blockstates, prevents item dupe
+            {
+                if (world.rand.nextFloat() <= chance) {
+                    spawnAsEntity(world, pos, item);
+                }
+            }
+        }
     }
 
     @Override
-    public boolean removedByPlayer(World world, EntityPlayer player, int x, int y, int z) {
+    public boolean removedByPlayer(World world, BlockPos pos, EntityPlayer player, boolean harvestable) {
         if (world.isRemote) {
             return false;
         }
@@ -461,35 +474,36 @@ public class BlockQBlock extends BlockSand
         if (!player.capabilities.isCreativeMode) {
             if (EnchantmentHelper.getSilkTouchModifier(player)) {
                 // Silk harvest (get qblock back)
-                TileEntity entity = world.getTileEntity(x, y, z);
-                if (entity != null && entity instanceof TileEntityQBlock) {
-                    TileEntityQBlock qblock = (TileEntityQBlock) entity;
-                    ItemStack item = ItemQBlock.create(qblock.getSubType(), qblock.getTypes(), qblock.getEntanglementFrequency(), 1);
-                    dropBlockAsItem(world, x, y, z, item);
-                }
+                dropBlockAsItem(world, pos, world.getBlockState(pos), 0); //0 -> fortune doesn't matter and should always be null on a silk touch tool anyway
+                //moved to "dropBlockAsItemWithChance" method
             } else {
                 // Regular harvest (get impostor)
-                Block block = getImpostorBlock(world, x, y, z);
+                Block block = getImpostorBlock(world, pos);
                 if (block != null) {
-                    int metadata = getImpostorDamage(world, x, y, z);
-                    if (block.canHarvestBlock(player, metadata)) {
+                    int metadata = getImpostorDamage(world, pos);
+                    if (harvestable) {
                         int fortune = EnchantmentHelper.getFortuneModifier(player);
-                        ArrayList<ItemStack> items = getDrops(world, x, y, z, metadata, fortune);
+                        List<ItemStack> items = getDrops(world, pos, world.getBlockState(pos), fortune);
                         Iterator<ItemStack> it = items.iterator();
                         while (it.hasNext()) {
                             ItemStack item = it.next();
-                            dropBlockAsItem(world, x, y, z, item);
+                            if (!world.isRemote && !world.restoringBlockSnapshots) // do not drop items while restoring blockstates, prevents item dupe
+                            {
+                                if (world.rand.nextFloat() <= 1) {
+                                    spawnAsEntity(world, pos, item);
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-        return super.removedByPlayer(world, player, x, y, z);
+        return super.removedByPlayer(world, pos, player, harvestable);
     }
 
     @Override
-    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
-        TileEntity entity = world.getTileEntity(x, y, z);
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, BlockPos pos) {
+        TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQBlock) {
             TileEntityQBlock qblock = (TileEntityQBlock) entity;
             return ItemQBlock.create(qblock.getSubType(), qblock.getTypes(), qblock.getEntanglementFrequency(), 1);
@@ -498,57 +512,58 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public boolean canHarvestBlock(EntityPlayer player, int metadata) {
+    public boolean canHarvestBlock(IBlockAccess world, BlockPos pos, EntityPlayer player) {
         return true;
     }
 
     @Override
-    public void harvestBlock(World world, EntityPlayer player, int x, int y, int z, int metadata) {
+    public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te) {
     }
 
     @Override
-    public boolean canSilkHarvest(World world, EntityPlayer player, int x, int y, int z, int metadata) {
+    public boolean canSilkHarvest(World world, BlockPos pos, IBlockState state, EntityPlayer player) {
         return false;
     }
 
     @Override
-    public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase player, ItemStack stack) {
+    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase player, ItemStack stack) {
         int subType = stack.getItemDamage();
         int metadata = subType;
-        world.setBlockMetadataWithNotify(x, y, z, metadata, 3);
+        world.setBlockMetadataWithNotify(pos, metadata, 3);
     }
 
     @Override
-    public void updateTick(World world, int x, int y, int z, Random r) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public void updateTick(World world, BlockPos pos, IBlockState state, Random r) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null && block instanceof BlockSand) {
-            super.updateTick(world, x, y, z, r);
+            super.updateTick(world, pos, state, r);
         }
     }
 
     @Override
-    protected void func_149829_a(EntityFallingBlock entityFallingSand) // onStartFalling
+    protected void onStartFalling(EntityFallingBlock entityFallingSand)
     {
         // Setup NBT for block to place
-        World world = entityFallingSand.worldObj;
+        World world = entityFallingSand.worldObj;        
         int x = (int) (entityFallingSand.posX - 0.5f);
         int y = (int) (entityFallingSand.posY - 0.5f);
         int z = (int) (entityFallingSand.posZ - 0.5f);
-        TileEntity entity = world.getTileEntity(x, y, z);
+        BlockPos pos = new BlockPos(x, y, z);
+        TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQBlock) {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
             entity.writeToNBT(nbttagcompound);
-            entityFallingSand.field_145810_d = nbttagcompound; // data
+            entityFallingSand.tileEntityData = nbttagcompound;
         }
 
         // Prevent the falling qBlock from dropping items
-        entityFallingSand.field_145813_c = false; // dropItems
+        entityFallingSand.shouldDropItem = false;
     }
 
     @Override
-    public void func_149828_a(World world, int x, int y, int z, int p) // onStopFalling
+    public void onEndFalling(World world, BlockPos pos) // onStopFalling
     {
-        TileEntity entity = world.getTileEntity(x, y, z);
+        TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQBlock) {
             TileEntityQBlock qBlock = (TileEntityQBlock) entity;
             qBlock.hasJustFallen = true;
@@ -561,14 +576,14 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public boolean canConnectRedstone(IBlockAccess world, int x, int y, int z, int side) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public boolean canConnectRedstone(IBlockAccess world, BlockPos pos, EnumFacing side) {
+        Block block = getImpostorBlock(world, pos);
         return block != null && block instanceof BlockCompressedPowered;
     }
 
     @Override
-    public int isProvidingWeakPower(IBlockAccess world, int x, int y, int z, int side) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public int getWeakPower(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null && block instanceof BlockCompressedPowered) {
             return 15;
         }
@@ -576,23 +591,23 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public int getLightValue(IBlockAccess world, int x, int y, int z) {
-        Block block = getImpostorBlock(world, x, y, z);
+    public int getLightValue(IBlockAccess world, BlockPos pos) {
+        Block block = getImpostorBlock(world, pos);
         if (block != null) {
             return block.getLightValue();
         }
         return 0;
     }
 
-    public int getColorForType(int side, int type) {
+    public int getColorForType(EnumFacing side, int type) {
         if (type == 2) // grass
         {
-            return (side == 1) ? Blocks.grass.getRenderColor(0) : 0xffffff;
+            return (side == EnumFacing.UP) ? Blocks.grass.getRenderColor(Block.getBlockById(1).getDefaultState()) : 0xffffff;
         }
         return 0xffffff;
     }
 
-    public IIcon getIconForType(int side, int type, Appearance appearance) {
+    public IIcon getIconForType(EnumFacing side, int type, Appearance appearance) {
         if (appearance == Appearance.Swirl) {
             return s_swirlIcon;
         } else if (appearance == Appearance.Fuzz) {
@@ -603,7 +618,7 @@ public class BlockQBlock extends BlockSand
             if (type >= 0 && type < blockList.length) {
                 ItemStack item = blockList[type];
                 if (item != null) {
-                    Block block = ((ItemBlock) item.getItem()).field_150939_a;
+                    Block block = ((ItemBlock) item.getItem()).block;
                     int damage = item.getItemDamage();
                     return block.getIcon(side, damage);
                 }
@@ -643,12 +658,12 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public TileEntity createTileEntity(World world, int metadata) {
-        return createNewTileEntity(world, metadata);
+    public TileEntity createTileEntity(World world, IBlockState state) {
+        return createNewTileEntity(world, 0); //because why bother passing a metadata value that is not even used?
     }
 
-    private Appearance getAppearance(IBlockAccess world, int x, int y, int z) {
-        TileEntity entity = world.getTileEntity(x, y, z);
+    private Appearance getAppearance(IBlockAccess world, BlockPos pos) {
+        TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQBlock) {
             TileEntityQBlock quantum = (TileEntityQBlock) entity;
             return quantum.getAppearance();
@@ -656,10 +671,10 @@ public class BlockQBlock extends BlockSand
         return Appearance.Fuzz;
     }
 
-    private int getImpostorType(IBlockAccess world, int x, int y, int z) {
+    private int getImpostorType(IBlockAccess world, BlockPos pos) {
         int type = 0;
-        if (y >= 0) {
-            TileEntity entity = world.getTileEntity(x, y, z);
+        if (pos.getY() >= 0) {
+            TileEntity entity = world.getTileEntity(pos);
             if (entity != null && entity instanceof TileEntityQBlock) {
                 TileEntityQBlock quantum = (TileEntityQBlock) entity;
                 type = quantum.getObservedType();
@@ -668,9 +683,9 @@ public class BlockQBlock extends BlockSand
         return type;
     }
 
-    public Block getImpostorBlock(IBlockAccess world, int x, int y, int z) {
+    public Block getImpostorBlock(IBlockAccess world, BlockPos pos) {
         // Return block
-        int type = getImpostorType(world, x, y, z);
+        int type = getImpostorType(world, pos);
         ItemStack[] blockList = getImpostorBlockList();
         if (type < blockList.length) {
             ItemStack item = blockList[type];
@@ -681,9 +696,9 @@ public class BlockQBlock extends BlockSand
         return null;
     }
 
-    private int getImpostorDamage(IBlockAccess world, int x, int y, int z) {
+    private int getImpostorDamage(IBlockAccess world, BlockPos pos) {
         // Return damage
-        int type = getImpostorType(world, x, y, z);
+        int type = getImpostorType(world, pos);
         ItemStack[] blockList = getImpostorBlockList();
         if (type < blockList.length) {
             ItemStack item = blockList[type];

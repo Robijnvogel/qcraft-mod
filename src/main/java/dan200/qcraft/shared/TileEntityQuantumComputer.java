@@ -16,7 +16,7 @@ limitations under the License.
 package dan200.qcraft.shared;
 
 import com.google.common.base.CaseFormat;
-import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import dan200.QCraft;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPane;

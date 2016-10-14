@@ -5,8 +5,8 @@
  */
 package dan200.qcraft.shared;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import dan200.QCraft;
 import net.minecraft.network.NetHandlerPlayServer;
 

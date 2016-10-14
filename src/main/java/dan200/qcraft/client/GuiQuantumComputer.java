@@ -18,6 +18,7 @@ package dan200.qcraft.client;
 import dan200.QCraft;
 import dan200.qcraft.shared.ContainerQuantumComputer;
 import dan200.qcraft.shared.TileEntityQuantumComputer;
+import java.io.IOException;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -77,12 +78,12 @@ public class GuiQuantumComputer extends GuiContainer {
         m_energizeButton = new GuiButton(BUTTON_ENERGIZE, x + 8, y + 8, xSize - 16, 20, "");
         m_energizeButton2 = new GuiButton(BUTTON_ENERGIZE, x + 8, y + 8 + 8 + 20 + 6 + 20 + 6, xSize - 16, 20, "");
 
-        m_localPortalIDField = new GuiTextField(fontRendererObj, x + 9, y - 20, xSize - 18, 20);
+        m_localPortalIDField = new GuiTextField(0, fontRendererObj, x + 9, y - 20, xSize - 18, 20);
         m_localPortalIDField.setFocused(false);
         m_localPortalIDField.setMaxStringLength(32);
         m_localPortalIDField.setText(encodeOptionalText(m_computer.getPortalID()));
 
-        m_destinationPortalIDField = new GuiTextField(fontRendererObj, x + 9, y + 8 + 8, xSize - 18, 20);
+        m_destinationPortalIDField = new GuiTextField(1, fontRendererObj, x + 9, y + 8 + 8, xSize - 18, 20);
         m_destinationPortalIDField.setFocused(false);
         m_destinationPortalIDField.setMaxStringLength(32);
         m_destinationPortalIDField.setText(encodeOptionalText(m_computer.getRemotePortalID()));
@@ -92,7 +93,7 @@ public class GuiQuantumComputer extends GuiContainer {
         m_removeServerButton = new GuiButton(BUTTON_REMOVE_SERVER, x + xSize - 8 - 16, y + 8 + 8 + 20 + 6, 16, 20, "-");
         m_confirmAddServerButton = new GuiButton(BUTTON_CONFIRM_ADD_SERVER, x + xSize - 8 - 35, y + 8 + 8 + 20 + 6, 35, 20, I18n.format("gui.qcraft:computer.ok"));
 
-        m_newServerAddressField = new GuiTextField(fontRendererObj, x + 9, y + 8 + 8 + 20 + 7, xSize - 18 - 35 - 3, 18);
+        m_newServerAddressField = new GuiTextField(2, fontRendererObj, x + 9, y + 8 + 8 + 20 + 7, xSize - 18 - 35 - 3, 18);
         m_newServerAddressField.setFocused(false);
         m_newServerAddressField.setMaxStringLength(64);
         m_newServerAddressField.setText(encodeOptionalText(m_computer.getRemoteServerAddress()));
@@ -262,7 +263,7 @@ public class GuiQuantumComputer extends GuiContainer {
     }
 
     @Override
-    public void keyTyped(char c, int k) {
+    public void keyTyped(char c, int k) throws IOException {
         if (k == 1) // escape
         {
             if (m_addingServer) {
@@ -285,7 +286,7 @@ public class GuiQuantumComputer extends GuiContainer {
     }
 
     @Override
-    protected void mouseClicked(int par1, int par2, int par3) {
+    protected void mouseClicked(int par1, int par2, int par3) throws IOException {
         super.mouseClicked(par1, par2, par3);
         m_localPortalIDField.mouseClicked(par1, par2, par3);
         m_destinationPortalIDField.mouseClicked(par1, par2, par3);
@@ -293,7 +294,7 @@ public class GuiQuantumComputer extends GuiContainer {
     }
 
     @Override
-    protected void actionPerformed(GuiButton button) {
+    protected void actionPerformed(GuiButton button) throws IOException {
         super.actionPerformed(button);
         switch (button.id) {
             case BUTTON_ENERGIZE: {

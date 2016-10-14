@@ -15,7 +15,7 @@ limitations under the License.
  */
 package dan200.qcraft.shared;
 
-import cpw.mods.fml.common.IWorldGenerator;
+import net.minecraftforge.fml.common.IWorldGenerator;
 import dan200.QCraft;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;

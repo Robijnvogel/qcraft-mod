@@ -53,7 +53,7 @@ public class BlockQuantumLogic extends BlockDirectional {
         setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
         setHardness(0.0F);
         setStepSound(Block.soundTypeWood);
-        setBlockName("qcraft:automatic_observer");
+        setUnlocalizedName("qcraft:automatic_observer");
         setCreativeTab(QCraft.getCreativeTab());
     }
 

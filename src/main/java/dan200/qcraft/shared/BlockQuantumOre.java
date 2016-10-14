@@ -38,7 +38,7 @@ public class BlockQuantumOre extends Block {
         super(Material.rock);
         setHardness(3.0f);
         setResistance(5.0f);
-        setBlockName("qcraft:ore");
+        setUnlocalizedName("qcraft:ore");
 
         m_glowing = glowing;
         if (m_glowing) {
