@@ -16,8 +16,9 @@ limitations under the License.
 package dan200.qcraft.shared;
 
 import com.google.common.base.CaseFormat;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import dan200.QCraft;
+import java.io.IOException;
+import java.util.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPane;
 import net.minecraft.block.material.Material;
@@ -42,9 +43,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Facing;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
-
-import java.io.IOException;
-import java.util.*;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public class TileEntityQuantumComputer extends TileEntity {
 

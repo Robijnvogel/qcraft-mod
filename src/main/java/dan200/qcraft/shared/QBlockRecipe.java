@@ -135,4 +135,9 @@ public class QBlockRecipe implements IRecipe {
         }
         return null;
     }
+
+    @Override
+    public ItemStack[] getRemainingItems(InventoryCrafting inv) {
+        return null;
+    }
 }

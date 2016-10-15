@@ -37,6 +37,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.oredict.RecipeSorter;
 
 import java.io.*;
+import net.minecraft.util.BlockPos;
 
 import static net.minecraftforge.oredict.RecipeSorter.Category.SHAPED;
 
@@ -230,7 +231,7 @@ public abstract class QCraftProxyCommon implements IQCraftProxy {
         // IGuiHandler implementation
         @Override
         public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-            TileEntity tile = world.getTileEntity(x, y, z);
+            TileEntity tile = world.getTileEntity(new BlockPos(x, y, z));
             switch (id) {
                 case QCraft.QUANTUMCOMPUTERGUIID: {
                     if (tile != null && tile instanceof TileEntityQuantumComputer) {
@@ -245,7 +246,7 @@ public abstract class QCraftProxyCommon implements IQCraftProxy {
 
         @Override
         public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-            TileEntity tile = world.getTileEntity(x, y, z);
+            TileEntity tile = world.getTileEntity(new BlockPos(x, y, z));
             switch (id) {
                 case QCraft.QUANTUMCOMPUTERGUIID: {
                     if (tile != null && tile instanceof TileEntityQuantumComputer) {

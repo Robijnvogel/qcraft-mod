@@ -16,26 +16,27 @@ limitations under the License.
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Random;
 
 public class BlockQuantumComputer extends BlockDirectional
         implements ITileEntityProvider {
@@ -62,24 +63,24 @@ public class BlockQuantumComputer extends BlockDirectional
     }
 
     @Override
-    public Item getItemDropped(int i, Random random, int j) {
+    public Item getItemDropped(IBlockState state, Random random, int j) {
         return Item.getItemFromBlock(this);
     }
 
     @Override
-    public int damageDropped(int i) {
+    public int damageDropped(IBlockState state) {
         return 0;
     }
 
     @Override
-    public void dropBlockAsItemWithChance(World world, int x, int y, int z, int side, float f, int unknown) {
+    public void dropBlockAsItemWithChance(World world, BlockPos pos, IBlockState state, float chance, int fortune) {
         // RemoveBlockByPlayer handles this instead
     }
 
     @Override
-    public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune) {
+    public ArrayList<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
         ArrayList<ItemStack> blocks = new ArrayList<ItemStack>();
-        TileEntity entity = world.getTileEntity(x, y, z);
+        TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQuantumComputer) {
             // Get the computer back
             TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
@@ -90,34 +91,37 @@ public class BlockQuantumComputer extends BlockDirectional
         return blocks;
     }
 
-    protected boolean shouldDropItemsInCreative(World world, int x, int y, int z) {
+    protected boolean shouldDropItemsInCreative(World world, BlockPos pos) {
         return false;
     }
 
     @Override
-    public boolean removedByPlayer(World world, EntityPlayer player, int x, int y, int z) {
+    public boolean removedByPlayer(World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
         if (world.isRemote) {
             return false;
         }
 
-        if (!player.capabilities.isCreativeMode || shouldDropItemsInCreative(world, x, y, z)) {
+        if (!player.capabilities.isCreativeMode || shouldDropItemsInCreative(world, pos)) {
             // Regular and silk touch block (identical)
-            int metadata = world.getBlockMetadata(x, y, z);
-            ArrayList<ItemStack> items = getDrops(world, x, y, z, metadata, 0);
+            ArrayList<ItemStack> items = getDrops(world, pos, world.getBlockState(pos), 0);
             Iterator<ItemStack> it = items.iterator();
             while (it.hasNext()) {
                 ItemStack item = it.next();
-                dropBlockAsItem(world, x, y, z, item);
+                if (!world.isRemote && !world.restoringBlockSnapshots) // do not drop items while restoring blockstates, prevents item dupe
+                {
+                    if (world.rand.nextFloat() <= 1) {
+                        spawnAsEntity(world, pos, item);
+                    }
+                }
             }
         }
 
-        return super.removedByPlayer(world, player, x, y, z);
+        return super.removedByPlayer(world, pos, player, willHarvest);
     }
 
     @Override
-    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
-        int metadata = world.getBlockMetadata(x, y, z);
-        ArrayList<ItemStack> items = getDrops(world, x, y, z, metadata, 0);
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, BlockPos pos) {
+        ArrayList<ItemStack> items = getDrops(world, pos, world.getBlockState(pos), 0);
         if (items.size() > 0) {
             return items.get(0);
         }
@@ -125,14 +129,14 @@ public class BlockQuantumComputer extends BlockDirectional
     }
 
     @Override
-    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int l, float m, float n, float o) {
+    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float m, float n, float o) {
         if (player.isSneaking()) {
             return false;
         }
 
         if (!world.isRemote) {
             // Show GUI
-            TileEntity entity = world.getTileEntity(x, y, z);
+            TileEntity entity = world.getTileEntity(pos);
             if (entity != null && entity instanceof TileEntityQuantumComputer) {
                 TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
                 QCraft.openQuantumComputerGUI(player, computer);
@@ -142,27 +146,27 @@ public class BlockQuantumComputer extends BlockDirectional
     }
 
     @Override
-    public void breakBlock(World world, int x, int y, int z, Block par5, int par6) {
-        TileEntity entity = world.getTileEntity(x, y, z);
+    public void breakBlock(World world, BlockPos pos, IBlockState state) {
+        TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQuantumComputer) {
             TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
             computer.onDestroy();
         }
-        super.breakBlock(world, x, y, z, par5, par6);
+        super.breakBlock(world, pos, state);
     }
 
     @Override
-    public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase player, ItemStack stack) {
+    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase player, ItemStack stack) {
         int direction = ((MathHelper.floor_double((double) (player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 0x3) + 2) % 4;
         int metadata = (direction & 0x3);
-        world.setBlockMetadataWithNotify(x, y, z, metadata, 3);
+        world.setBlockMetadataWithNotify(pos, metadata, 3); //sets the front of the machine facing the player
     }
 
     @Override
-    public void onNeighborBlockChange(World world, int x, int y, int z, Block id) {
-        super.onNeighborBlockChange(world, x, y, z, id);
+    public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block neighborBlock) {
+        super.onNeighborBlockChange(world, pos, state, neighborBlock);
 
-        TileEntity entity = world.getTileEntity(x, y, z);
+        TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQuantumComputer) {
             TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
             computer.setRedstonePowered(world.isBlockIndirectlyGettingPowered(x, y, z));
@@ -170,7 +174,7 @@ public class BlockQuantumComputer extends BlockDirectional
     }
 
     @Override
-    public boolean canConnectRedstone(IBlockAccess world, int x, int y, int z, int side) {
+    public boolean canConnectRedstone(IBlockAccess world, BlockPos pos, EnumFacing side) {
         return true;
     }
 
@@ -218,7 +222,7 @@ public class BlockQuantumComputer extends BlockDirectional
     }
 
     @Override
-    public TileEntity createTileEntity(World world, int metadata) {
-        return createNewTileEntity(world, metadata);
+    public TileEntity createTileEntity(World world, IBlockState state) {
+        return createNewTileEntity(world, 0); //0 -> metadata gets discarded anyway, so why bother?
     }
 }

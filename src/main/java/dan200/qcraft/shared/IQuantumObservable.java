@@ -16,13 +16,14 @@ limitations under the License.
 package dan200.qcraft.shared;
 
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public interface IQuantumObservable {
 
-    public boolean isObserved(World world, BlockPos pos, int side);
+    public boolean isObserved(World world, BlockPos pos, EnumFacing side);
 
-    public void observe(World world, BlockPos pos, int side);
+    public void observe(World world, BlockPos pos, EnumFacing side);
 
-    public void reset(World world, BlockPos pos, int side);
+    public void reset(World world, BlockPos pos, EnumFacing side);
 }

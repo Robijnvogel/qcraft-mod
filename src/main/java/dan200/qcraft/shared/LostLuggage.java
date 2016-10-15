@@ -15,11 +15,10 @@ limitations under the License.
  */
 package dan200.qcraft.shared;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-
 import java.io.File;
 import java.util.*;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 
 public class LostLuggage {
 

@@ -16,18 +16,19 @@ limitations under the License.
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
+import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-
-import java.util.Random;
 
 public class BlockQuantumPortal extends Block {
 
@@ -43,21 +44,21 @@ public class BlockQuantumPortal extends Block {
     }
 
     @Override
-    public void updateTick(World par1World, int par2, int par3, int par4, Random par5Random) {
-        super.updateTick(par1World, par2, par3, par4, par5Random);
+    public void updateTick(World par1World, BlockPos pos, IBlockState state, Random par5Random) {
+        super.updateTick(par1World, pos, state, par5Random);
     }
 
     @Override
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World par1World, int par2, int par3, int par4) {
+    public AxisAlignedBB getCollisionBoundingBox(World par1World, BlockPos pos, IBlockState state) {
         return null;
     }
 
     @Override
-    public void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z) {
+    public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) { //@TODO?
         float f;
         float f1;
 
-        if (world.getBlock(x - 1, y, z) != this && world.getBlock(x + 1, y, z) != this) {
+        if (world.getBlockState(pos.east()).getBlock() != this && world.getBlockState(pos.west()).getBlock() != this) {
             f = 0.125F;
             f1 = 0.5F;
             this.setBlockBounds(0.5F - f, 0.0F, 0.5F - f1, 0.5F + f, 1.0F, 0.5F + f1);
@@ -79,36 +80,37 @@ public class BlockQuantumPortal extends Block {
     }
 
     @Override
-    public void onNeighborBlockChange(World world, int x, int y, int z, Block id) {
+    public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block id) {
         byte b0 = 0;
         byte b1 = 1;
 
-        if (world.getBlock(x - 1, y, z) == this || world.getBlock(x + 1, y, z) == this) {
+        if (world.getBlockState(pos.east()).getBlock() == this || world.getBlockState(pos.west()).getBlock() == this) {
             b0 = 1;
             b1 = 0;
         }
 
-        int yOrigin = y;
-        while (world.getBlock(x, yOrigin - 1, z) == this) {
-            --yOrigin;
+        BlockPos temp = pos.down().up(); //:P
+        while (world.getBlockState(temp.down()).getBlock() == this) {
+            temp = temp.down();
         }
 
-        if (world.getBlock(x, yOrigin - 1, z) != Blocks.glass) {
-            world.setBlockToAir(x, y, z);
+        if (world.getBlock(temp.down()) != Blocks.glass) {
+            world.setBlockToAir(pos);
         } else {
             int h = 1;
-            while (h < 4 && world.getBlock(x, yOrigin + h, z) == this) {
+            while (h < 4 && world.getBlockState(temp.up(h)).getBlock() == this) {
                 ++h;
             }
 
-            if (h == 3 && world.getBlock(x, yOrigin + h, z) == Blocks.glass) {
-                boolean flag = world.getBlock(x - 1, y, z) == this || world.getBlock(x + 1, y, z) == this;
-                boolean flag1 = world.getBlock(x, y, z - 1) == this || world.getBlock(x, y, z + 1) == this;
+            if (h == 3 && world.getBlockState(temp.up(h)).getBlock() == Blocks.glass) {
+                boolean flag = world.getBlockState(pos.east()).getBlock() == this || world.getBlockState(pos.west()).getBlock() == this;
+                boolean flag1 = world.getBlockState(pos.north()).getBlock() == this || world.getBlockState(pos.south()).getBlock() == this;
 
                 if (flag && flag1) {
-                    world.setBlockToAir(x, y, z);
+                    world.setBlockToAir(pos);
+                    //about pos (line under here)
                 } else if ((world.getBlock(x + b0, y, z + b1) != Blocks.glass || world.getBlock(x - b0, y, z - b1) != this) && (world.getBlock(x - b0, y, z - b1) != Blocks.glass || world.getBlock(x + b0, y, z + b1) != this)) {
-                    world.setBlockToAir(x, y, z);
+                    world.setBlockToAir(pos);
                 }
             } else {
                 world.setBlockToAir(x, y, z);

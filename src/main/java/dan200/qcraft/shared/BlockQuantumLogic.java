@@ -16,21 +16,21 @@ limitations under the License.
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
+import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Facing;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-
-import java.util.Random;
 
 public class BlockQuantumLogic extends BlockDirectional {
 
@@ -73,17 +73,17 @@ public class BlockQuantumLogic extends BlockDirectional {
     }
 
     @Override
-    public boolean canPlaceBlockAt(World world, int x, int y, int z) {
-        if (World.doesBlockHaveSolidTopSurface(world, x, y - 1, z)) {
-            return super.canPlaceBlockAt(world, x, y, z);
+    public boolean canPlaceBlockAt(World world, BlockPos pos) {
+        if (World.doesBlockHaveSolidTopSurface(world, pos.offset(EnumFacing.DOWN))) {
+            return super.canPlaceBlockAt(world, pos);
         }
         return false;
     }
 
     @Override
-    public boolean canBlockStay(World world, int x, int y, int z) {
-        if (World.doesBlockHaveSolidTopSurface(world, x, y - 1, z)) {
-            return super.canBlockStay(world, x, y, z);
+    public boolean canBlockStay(World world, BlockPos pos) {
+        if (World.doesBlockHaveSolidTopSurface(world, pos.offset(EnumFacing.DOWN))) {
+            return super.canBlockStay(world, pos);
         }
         return false;
     }
@@ -105,20 +105,24 @@ public class BlockQuantumLogic extends BlockDirectional {
     }
 
     @Override
-    public int isProvidingStrongPower(IBlockAccess world, int x, int y, int z, int side) {
+    public int getStrongPower(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side) {
         return 0;
     }
 
     @Override
-    public int isProvidingWeakPower(IBlockAccess world, int x, int y, int z, int side) {
+    public int getWeakPower(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side) {
         return 0;
     }
 
     @Override
-    public boolean canConnectRedstone(IBlockAccess world, int x, int y, int z, int side) {
-        int metadata = world.getBlockMetadata(x, y, z);
-        int direction = Direction.rotateOpposite[getDirection(metadata)];
-        return (side == direction);
+    public boolean canConnectRedstone(IBlockAccess world, BlockPos pos, EnumFacing side) {
+        Block block = world.getBlockState(pos).getBlock();
+        if (block != null && block instanceof BlockDirectional) {
+            BlockDirectional blockDir = (BlockDirectional) block;
+            EnumFacing direction = blockDir.FACING; //cast to blockfacing if it's quantum logic then get FACING
+            return (side == direction);
+        }
+        return false;
     }
 
     @Override
@@ -127,69 +131,63 @@ public class BlockQuantumLogic extends BlockDirectional {
     }
 
     @Override
-    public void onNeighborBlockChange(World world, int x, int y, int z, Block block) {
-        int metadata = world.getBlockMetadata(x, y, z);
-        if (!this.canBlockStay(world, x, y, z)) {
+    public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block neighborBlock) {
+        if (!this.canBlockStay(world, pos)) {
             if (!world.isRemote) {
                 // Destroy
-                this.dropBlockAsItem(world, x, y, z, metadata, 0);
-                world.setBlockToAir(x, y, z);
+                this.dropBlockAsItem(world, pos, state, 0);
+                world.setBlockToAir(pos);
             }
         } else {
             // Redetermine subtype
-            updateOutput(world, x, y, z);
+            updateOutput(world, pos);
         }
     }
 
-    private void updateOutput(World world, int x, int y, int z) {
+    private void updateOutput(World world, BlockPos pos) {
         if (world.isRemote) {
             return;
         }
 
         // Redetermine subtype
-        int metadata = world.getBlockMetadata(x, y, z);
-        int direction = getDirection(metadata);
+        int metadata = world.getBlockMetadata(pos);
+        EnumFacing direction = getDirection(metadata);
         int subType = getSubType(metadata);
-        int newSubType = evaluateInput(world, x, y, z) ? SubType.OBSERVERON : SubType.OBSERVEROFF;
+        int newSubType = evaluateInput(world, pos) ? SubType.OBSERVERON : SubType.OBSERVEROFF;
         if (newSubType != subType) {
             // Set new subtype
-            setDirectionAndSubType(world, x, y, z, direction, newSubType);
+            setDirectionAndSubType(world, pos, direction, newSubType);
             subType = newSubType;
 
             // Notify
-            world.markBlockForUpdate(x, y, z);
-            world.notifyBlocksOfNeighborChange(x, y, z, this);
+            world.markBlockForUpdate(pos);
+            world.notifyNeighborsOfStateChange(pos, this);
         }
 
         // Observe
-        int facing = Facing.oppositeSide[Direction.directionToFacing[direction]];
-        observe(world, x, y, z, facing, subType == SubType.OBSERVERON);
+        EnumFacing facing = direction.getOpposite();
+        observe(world, pos, facing, subType == SubType.OBSERVERON);
     }
 
-    private void setDirectionAndSubType(World world, int x, int y, int z, int direction, int subType) {
+    private void setDirectionAndSubType(World world, BlockPos pos, EnumFacing direction, int subType) {
         int metadata = (direction & 0x3) + ((subType & 0x3) << 2);
-        world.setBlockMetadataWithNotify(x, y, z, metadata, 3);
+        world.setBlockMetadataWithNotify(pos, metadata, 3);
     }
 
     @Override
-    public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase player, ItemStack stack) {
-        int direction = ((MathHelper.floor_double((double) (player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3) + 2) % 4;
+    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase player, ItemStack stack) {
+        EnumFacing direction = ((MathHelper.floor_double((double) (player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3) + 2) % 4;
         int subType = stack.getItemDamage();
-        setDirectionAndSubType(world, x, y, z, direction, subType);
+        setDirectionAndSubType(world, pos, direction, subType);
     }
 
     @Override
-    public void onBlockAdded(World world, int x, int y, int z) {
-        updateOutput(world, x, y, z);
+    public void onBlockAdded(World world, BlockPos pos) {
+        updateOutput(world, pos);
     }
 
     @Override
-    public void onBlockDestroyedByPlayer(World par1World, int par2, int par3, int par4, int par5) {
-        super.onBlockDestroyedByPlayer(par1World, par2, par3, par4, par5);
-    }
-
-    @Override
-    public void randomDisplayTick(World world, int i, int j, int k, Random r) {
+    public void randomDisplayTick(World world, BlockPos pos, IBlockState state, Random r) {
     }
 
     @Override
@@ -199,34 +197,30 @@ public class BlockQuantumLogic extends BlockDirectional {
         m_icons[SubType.OBSERVERON] = iconRegister.registerIcon("qcraft:automatic_observer_on");
     }
 
-    private boolean evaluateInput(World world, int i, int j, int k) {
-        int metadata = world.getBlockMetadata(i, j, k);
-        int direction = Facing.oppositeSide[Direction.directionToFacing[getDirection(metadata)]];
-        int backDir = Facing.oppositeSide[direction];
-        return getRedstoneSignal(world, i, j, k, backDir);
+    private boolean evaluateInput(World world, BlockPos pos) {
+        int metadata = world.getBlockMetadata(pos);
+        EnumFacing direction = Direction.directionToFacing[getDirection(metadata)].getOpposite();
+        EnumFacing backDir = direction.getOpposite();
+        return getRedstoneSignal(world, pos, backDir);
     }
 
-    private boolean getRedstoneSignal(World world, int i, int j, int k, int dir) {
-        i += Facing.offsetsXForSide[dir];
-        j += Facing.offsetsYForSide[dir];
-        k += Facing.offsetsZForSide[dir];
-        int side = Facing.oppositeSide[dir];
-        return QuantumUtil.getRedstoneSignal(world, i, j, k, side);
+    private boolean getRedstoneSignal(World world, BlockPos pos, EnumFacing dir) {
+        BlockPos pos2 = pos.offset(dir);
+        EnumFacing side = dir.getOpposite();
+        return QuantumUtil.getRedstoneSignal(world, pos2, side);
     }
 
-    private void observe(World world, int i, int j, int k, int dir, boolean observe) {
-        i += Facing.offsetsXForSide[dir];
-        j += Facing.offsetsYForSide[dir];
-        k += Facing.offsetsZForSide[dir];
-        Block block = world.getBlock(i, j, k);
+    private void observe(World world, BlockPos pos, EnumFacing dir, boolean observe) {
+        BlockPos pos2 = pos.offset(dir);
+        Block block = world.getBlockState(pos2).getBlock();
         if (block != null && block instanceof IQuantumObservable) {
-            int side = Facing.oppositeSide[dir];
+            EnumFacing side = dir.getOpposite();
             IQuantumObservable observable = (IQuantumObservable) block;
-            if (observable.isObserved(world, i, j, k, side) != observe) {
+            if (observable.isObserved(world, pos2, side) != observe) {
                 if (observe) {
-                    observable.observe(world, i, j, k, side);
+                    observable.observe(world, pos2, side);
                 } else {
-                    observable.reset(world, i, j, k, side);
+                    observable.reset(world, pos2, side);
                 }
             }
         }
