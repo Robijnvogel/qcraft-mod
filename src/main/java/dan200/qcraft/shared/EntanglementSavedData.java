@@ -29,7 +29,7 @@ public class EntanglementSavedData extends QCraftSavedData {
     }
 
     public static EntanglementSavedData get(World world) {
-        MapStorage storage = world.mapStorage;
+        MapStorage storage = world.getMapStorage();
         EntanglementSavedData instance = (EntanglementSavedData) storage.loadData(EntanglementSavedData.class, DATA_NAME);
 
         if (instance == null) {

@@ -16,9 +16,11 @@ limitations under the License.
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
+import java.util.EnumMap;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class EntangledQBlockRecipe implements IRecipe {
@@ -33,7 +35,7 @@ public class EntangledQBlockRecipe implements IRecipe {
 
     @Override
     public ItemStack getRecipeOutput() {
-        return ItemQBlock.create(BlockQBlock.SubType.STANDARD, new int[6], 0, 2);
+        return ItemQBlock.create(BlockQBlock.SubType.STANDARD, new EnumMap(EnumFacing.class), 0, 2);
     }
 
     @Override
@@ -66,7 +68,7 @@ public class EntangledQBlockRecipe implements IRecipe {
 
         // Find ODB
         int subType = -1;
-        int[] types = null;
+        EnumMap<EnumFacing, Integer> types = new EnumMap(EnumFacing.class);
         int entanglementFrequency = -1;
         int odbsFound = 0;
         for (int x = 0; x < 3; ++x) {
@@ -116,5 +118,10 @@ public class EntangledQBlockRecipe implements IRecipe {
 
         // Create item
         return ItemQBlock.create(subType, types, entanglementFrequency, odbsFound);
+    }
+
+    @Override
+    public ItemStack[] getRemainingItems(InventoryCrafting inv) {
+        return null;
     }
 }

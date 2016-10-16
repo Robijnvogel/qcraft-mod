@@ -119,7 +119,7 @@ public class BlockQuantumLogic extends BlockDirectional {
         Block block = world.getBlockState(pos).getBlock();
         if (block != null && block instanceof BlockDirectional) {
             BlockDirectional blockDir = (BlockDirectional) block;
-            EnumFacing direction = blockDir.FACING; //cast to blockfacing if it's quantum logic then get FACING
+            EnumFacing direction = blockDir.FACING; //@TODO cast to blockfacing if it's quantum logic then get FACING?
             return (side == direction);
         }
         return false;
@@ -182,7 +182,7 @@ public class BlockQuantumLogic extends BlockDirectional {
     }
 
     @Override
-    public void onBlockAdded(World world, BlockPos pos) {
+    public void onBlockAdded(World world, BlockPos pos, IBlockState state) {
         updateOutput(world, pos);
     }
 

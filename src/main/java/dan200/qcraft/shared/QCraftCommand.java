@@ -22,6 +22,7 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 
 public class QCraftCommand implements ICommand {
@@ -63,7 +64,7 @@ public class QCraftCommand implements ICommand {
             EntityPlayer targetPlayer;
             if (astring.length >= 2) {
                 String targetPlayerName = astring[1];
-                targetPlayer = MinecraftServer.getServer().getConfigurationManager().func_152612_a(targetPlayerName);
+                targetPlayer = MinecraftServer.getServer().getConfigurationManager().getPlayerByUsername(targetPlayerName);
             } else {
                 targetPlayer = player;
             }
@@ -97,8 +98,12 @@ public class QCraftCommand implements ICommand {
     }
 
     @Override
-    public List addTabCompletionOptions(ICommandSender icommandsender, String[] astring) {
-        return null;
+    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+        List<String> returnvalue = new ArrayList();
+        if (args.length > 0 && args[0].equals(m_name)) {
+            returnvalue.add("verify");
+        }
+        return returnvalue;
     }
 
     @Override
@@ -107,7 +112,7 @@ public class QCraftCommand implements ICommand {
     }
 
     @Override
-    public int compareTo(Object o) {
+    public int compareTo(ICommand o) {
         if (o instanceof ICommand) {
             return ((ICommand) o).getCommandName().compareTo(getCommandName());
         }

@@ -29,7 +29,7 @@ public class EncryptionSavedData extends QCraftSavedData {
     }
 
     public static EncryptionSavedData get(World world) {
-        MapStorage storage = world.mapStorage;
+        MapStorage storage = world.getMapStorage();
         EncryptionSavedData instance = (EncryptionSavedData) storage.loadData(EncryptionSavedData.class, DATA_NAME);
 
         if (instance == null) {

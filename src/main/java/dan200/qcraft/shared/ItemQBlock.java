@@ -16,8 +16,10 @@ limitations under the License.
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
+import java.util.EnumMap;
 import java.util.List;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -25,6 +27,8 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class ItemQBlock extends ItemBlock {
@@ -37,7 +41,7 @@ public class ItemQBlock extends ItemBlock {
         setCreativeTab(QCraft.getCreativeTab());
     }
 
-    public static ItemStack create(int subType, int[] types, int entanglementFrequency, int quantity) {
+    public static ItemStack create(int subType, EnumMap<EnumFacing, Integer> types, int entanglementFrequency, int quantity) {
         ItemStack result = new ItemStack(QCraft.Blocks.qBlock, quantity, subType);
         setTypes(result, types);
         setEntanglementFrequency(result, entanglementFrequency);
@@ -48,7 +52,7 @@ public class ItemQBlock extends ItemBlock {
         return stack.getItemDamage();
     }
 
-    public static void setTypes(ItemStack stack, int[] types) {
+    public static void setTypes(ItemStack stack, EnumMap<EnumFacing, Integer> types) {
         // Ensure the nbt
         if (!stack.hasTagCompound()) {
             stack.setTagCompound(new NBTTagCompound());
@@ -56,30 +60,30 @@ public class ItemQBlock extends ItemBlock {
 
         // Set the tags
         NBTTagCompound nbt = stack.getTagCompound();
-        for (int i = 0; i < types.length; ++i) {
-            nbt.setInteger("s" + i, types[i]);
+        for ( EnumFacing side : EnumFacing.values()) {
+            nbt.setInteger("s" + side.getIndex(), types.get(side));
         }
     }
 
-    public static int[] getTypes(ItemStack stack) {
+    public static EnumMap<EnumFacing, Integer> getTypes(ItemStack stack) {
         // Get the tags
-        int[] types = new int[6];
+        EnumMap<EnumFacing, Integer> types = new EnumMap(EnumFacing.class);
         if (stack.hasTagCompound()) {
             NBTTagCompound nbt = stack.getTagCompound();
-            for (int i = 0; i < types.length; ++i) {
-                if (nbt.hasKey("s" + i)) {
-                    types[i] = nbt.getInteger("s" + i);
+            for (EnumFacing side : EnumFacing.values()) {
+                if (nbt.hasKey("s" + side.getIndex())) {
+                    types.put(side, nbt.getInteger("s" + side.getIndex()));
                 } else {
-                    types[i] = 0;
+                    types.put(side, 0);
                 }
             }
         }
         return types;
     }
 
-    public static boolean compareTypes(int[] left, int[] right) {
-        for (int i = 0; i < 6; ++i) {
-            if (left[i] != right[i]) {
+    public static boolean compareTypes(EnumMap<EnumFacing, Integer> left, EnumMap<EnumFacing, Integer> right) {
+        for (EnumFacing side : EnumFacing.values()) {
+            if (left.get(side) != right.get(side)) {
                 return false;
             }
         }
@@ -146,9 +150,9 @@ public class ItemQBlock extends ItemBlock {
     }
 
     @Override
-    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
-        if (super.placeBlockAt(stack, player, world, x, y, z, side, hitX, hitY, hitZ, metadata)) {
-            TileEntity entity = world.getTileEntity(x, y, z);
+    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newstate) {
+        if (super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newstate)) {
+            TileEntity entity = world.getTileEntity(pos);
             if (entity != null && entity instanceof TileEntityQBlock) {
                 TileEntityQBlock quantum = (TileEntityQBlock) entity;
                 quantum.setTypes(getTypes(stack));

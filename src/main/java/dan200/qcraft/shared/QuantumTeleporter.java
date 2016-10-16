@@ -34,7 +34,7 @@ public class QuantumTeleporter extends Teleporter {
     }
 
     @Override
-    public void placeInPortal(Entity entity, double par2, double par4, double par6, float par8) {
+    public void placeInPortal(Entity entity, float par8) {
         if (entity instanceof EntityPlayer) {
             ((EntityPlayer) entity).setPositionAndUpdate(m_xPos, m_yPos, m_zPos);
             entity.motionX = entity.motionY = entity.motionZ = 0.0;
@@ -42,7 +42,7 @@ public class QuantumTeleporter extends Teleporter {
     }
 
     @Override
-    public boolean placeInExistingPortal(Entity par1Entity, double par2, double par4, double par6, float par8) {
+    public boolean placeInExistingPortal(Entity par1Entity, float par8) {
         return false;
     }
 

@@ -169,7 +169,7 @@ public class BlockQuantumComputer extends BlockDirectional
         TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQuantumComputer) {
             TileEntityQuantumComputer computer = (TileEntityQuantumComputer) entity;
-            computer.setRedstonePowered(world.isBlockIndirectlyGettingPowered(x, y, z));
+            computer.setRedstonePowered(world.isBlockIndirectlyGettingPowered(pos) > 0);
         }
     }
 

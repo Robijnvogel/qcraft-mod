@@ -99,4 +99,9 @@ public class EntangledQuantumComputerRecipe implements IRecipe {
         // Create item
         return ItemQuantumComputer.create(entanglementFrequency, computersFound);
     }
+
+    @Override
+    public ItemStack[] getRemainingItems(InventoryCrafting inv) {
+        return null;
+    }
 }

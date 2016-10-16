@@ -204,7 +204,7 @@ public class BlockQBlock extends BlockSand
 
     // IQuantumObservable implementation
     @Override
-    public boolean isObserved(World world, BlockPos pos, int side) {
+    public boolean isObserved(World world, BlockPos pos, EnumFacing side) {
         TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQBlock) {
             TileEntityQBlock qBlock = (TileEntityQBlock) entity;
@@ -216,7 +216,7 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public void observe(World world, BlockPos pos, int side) {
+    public void observe(World world, BlockPos pos, EnumFacing side) {
         TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQBlock) {
             TileEntityQBlock qBlock = (TileEntityQBlock) entity;
@@ -225,7 +225,7 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public void reset(World world, BlockPos pos, int side) {
+    public void reset(World world, BlockPos pos, EnumFacing side) {
         TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQBlock) {
             TileEntityQBlock qBlock = (TileEntityQBlock) entity;

@@ -27,7 +27,7 @@ public class ConnectionHandler {
     @SubscribeEvent
     public void connectionOpened(FMLNetworkEvent.ClientConnectedToServerEvent event) {
         if (!event.isLocal) {
-            SocketAddress socketAddress = event.manager.getSocketAddress();
+            SocketAddress socketAddress = event.manager.getRemoteAddress();
             if (socketAddress != null && socketAddress instanceof InetSocketAddress) {
                 InetSocketAddress internet = (InetSocketAddress) socketAddress;
                 String hostString;

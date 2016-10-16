@@ -16,6 +16,7 @@ limitations under the License.
 package dan200.qcraft.shared;
 
 import dan200.QCraft;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -30,7 +31,8 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Facing;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -55,16 +57,16 @@ public class TileEntityQBlock extends TileEntity {
 
     // Static
     private int m_entanglementFrequency;
-    private int[] m_sideBlockTypes;
+    private EnumMap<EnumFacing, Integer> m_sideBlockTypes;
 
     // Replicated
     private long m_timeLastUpdated;
 
     private boolean m_currentlyObserved;
-    private int m_currentDisplayedSide;
+    private EnumFacing m_currentDisplayedSide;
 
-    private int m_currentlyForcedSide;
-    private final boolean[] m_forceObserved;
+    private EnumFacing m_currentlyForcedSide;
+    private final EnumMap<EnumFacing, Boolean> m_forceObserved;
 
     // Client only
     public int m_timeSinceLastChange;
@@ -74,16 +76,16 @@ public class TileEntityQBlock extends TileEntity {
     public TileEntityQBlock() {
         hasJustFallen = false;
         m_entanglementFrequency = -1;
-        m_sideBlockTypes = new int[6];
-        m_forceObserved = new boolean[6];
-        for (int i = 0; i < 6; ++i) {
-            m_sideBlockTypes[i] = 0;
-            m_forceObserved[i] = false;
+        m_sideBlockTypes = new EnumMap(EnumFacing.class);
+        m_forceObserved = new EnumMap(EnumFacing.class);
+        for (EnumFacing side : EnumFacing.values()) {
+            m_sideBlockTypes.put(side, 0);
+            m_forceObserved.put(side, false);
         }
 
         m_currentlyObserved = false;
-        m_currentlyForcedSide = -1;
-        m_currentDisplayedSide = -1;
+        m_currentlyForcedSide = null;
+        m_currentDisplayedSide = null;
 
         m_timeLastUpdated = -99;
         m_timeSinceLastChange = FUZZ_TIME;
@@ -100,34 +102,36 @@ public class TileEntityQBlock extends TileEntity {
     public void validate() {
         super.validate();
         if (m_entanglementFrequency >= 0) {
-            getEntanglementRegistry().register(m_entanglementFrequency, this, this.getWorldObj());
+            getEntanglementRegistry().register(m_entanglementFrequency, this, this.worldObj);
         }
     }
 
     @Override
     public void invalidate() {
         if (m_entanglementFrequency >= 0) {
-            getEntanglementRegistry().unregister(m_entanglementFrequency, this, this.getWorldObj());
+            getEntanglementRegistry().unregister(m_entanglementFrequency, this, this.worldObj);
         }
         super.invalidate();
     }
 
-    public void setTypes(int[] types) {
-        m_sideBlockTypes = types;
+    public void setTypes(EnumMap<EnumFacing, Integer> types) {
+        for (EnumFacing side : EnumFacing.values()) {
+            m_sideBlockTypes.put(side, types.get(side));
+        }
     }
 
-    public int[] getTypes() {
+    public EnumMap<EnumFacing, Integer> getTypes() {
         return m_sideBlockTypes;
     }
 
     public void setEntanglementFrequency(int frequency) {
         if (frequency != m_entanglementFrequency) {
             if (m_entanglementFrequency >= 0) {
-                getEntanglementRegistry().unregister(m_entanglementFrequency, this, this.getWorldObj());
+                getEntanglementRegistry().unregister(m_entanglementFrequency, this, this.worldObj);
             }
             m_entanglementFrequency = frequency;
             if (m_entanglementFrequency >= 0) {
-                getEntanglementRegistry().register(m_entanglementFrequency, this, this.getWorldObj());
+                getEntanglementRegistry().register(m_entanglementFrequency, this, this.worldObj);
             }
         }
     }
@@ -137,37 +141,37 @@ public class TileEntityQBlock extends TileEntity {
     }
 
     public int getSubType() {
-        return QCraft.Blocks.qBlock.getSubType(worldObj, xCoord, yCoord, zCoord);
+        return QCraft.Blocks.qBlock.getSubType(worldObj, pos);
     }
 
     private void blockUpdate() {
-        worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
-        worldObj.scheduleBlockUpdate(xCoord, yCoord, zCoord, QCraft.Blocks.qBlock, QCraft.Blocks.qBlock.tickRate(worldObj));
-        worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, QCraft.Blocks.qBlock);
+        worldObj.markBlockForUpdate(pos);
+        worldObj.scheduleBlockUpdate(pos, QCraft.Blocks.qBlock, QCraft.Blocks.qBlock.tickRate(worldObj), 1); //1 -> priority
+        worldObj.notifyNeighborsOfStateChange(pos, QCraft.Blocks.qBlock);
     }
 
-    public boolean isForceObserved(int side) {
-        return (m_forceObserved[side] == true);
+    public boolean isForceObserved(EnumFacing side) {
+        return (m_forceObserved.get(side) == true);
     }
 
-    public void setForceObserved(int side, boolean enable) {
+    public void setForceObserved(EnumFacing side, boolean enable) {
         if (worldObj.isRemote) {
             return;
         }
 
-        m_forceObserved[side] = enable;
+        m_forceObserved.put(side, enable);
     }
 
-    private void setDisplayedSide(boolean observed, boolean forced, int side) {
+    private void setDisplayedSide(boolean observed, boolean forced, EnumFacing side) {
         m_currentlyObserved = observed;
-        m_currentlyForcedSide = forced ? side : -1;
+        m_currentlyForcedSide = forced ? side : null;
         if (m_currentDisplayedSide != side) {
-            int oldSide = m_currentDisplayedSide;
+            EnumFacing oldSide = m_currentDisplayedSide;
             int oldType = getObservedType();
             m_currentDisplayedSide = side;
-            int newSide = m_currentDisplayedSide;
+            EnumFacing newSide = m_currentDisplayedSide;
             int newType = getObservedType();
-            if (newType != oldType || (oldSide < 0 != newSide < 0)) {
+            if (newType != oldType || ((oldSide == null) != (newSide == null))) {
                 m_timeSinceLastChange = 0;
                 blockUpdate();
             }
@@ -175,10 +179,10 @@ public class TileEntityQBlock extends TileEntity {
     }
 
     public int getObservedType() {
-        if (m_currentDisplayedSide < 0) {
-            return m_sideBlockTypes[1];
+        if (m_currentDisplayedSide == null) {
+            return m_sideBlockTypes.get(EnumFacing.UP);
         }
-        return m_sideBlockTypes[m_currentDisplayedSide];
+        return m_sideBlockTypes.get(m_currentDisplayedSide);
     }
 
     public BlockQBlock.Appearance getAppearance() {
@@ -186,11 +190,11 @@ public class TileEntityQBlock extends TileEntity {
             return BlockQBlock.Appearance.Fuzz;
         }
 
-        if (m_currentDisplayedSide < 0 || m_timeSinceLastChange < FUZZ_TIME) {
+        if (m_currentDisplayedSide == null || m_timeSinceLastChange < FUZZ_TIME) {
             return BlockQBlock.Appearance.Swirl;
         }
 
-        int type = m_sideBlockTypes[m_currentDisplayedSide];
+        int type = m_sideBlockTypes.get(m_currentDisplayedSide);
         if (type == 0 && m_wet) {
             return BlockQBlock.Appearance.Fuzz;
         }
@@ -203,21 +207,21 @@ public class TileEntityQBlock extends TileEntity {
         if (position == null) {
             return true;
         } else if (position.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-            if (position.blockX == xCoord
-                    && position.blockY == yCoord
-                    && position.blockZ == zCoord) {
+            if (position.getBlockPos().getX() == pos.getX()
+                    && position.getBlockPos().getY() == pos.getY()
+                    && position.getBlockPos().getZ() == pos.getZ()) {
                 return true;
             }
         }
         return false;
     }
 
-    private int[] collectVotes() {
+    private EnumMap<EnumFacing, Integer> collectVotes() {
         // Collect votes from all observers
-        int[] votes = new int[6];
-        double centerX = (double) xCoord + 0.5;
-        double centerY = (double) yCoord + 0.5;
-        double centerZ = (double) zCoord + 0.5;
+        EnumMap<EnumFacing, Integer> votes = new EnumMap(EnumFacing.class);
+        double centerX = (double) pos.getX() + 0.5;
+        double centerY = (double) pos.getY() + 0.5;
+        double centerZ = (double) pos.getZ() + 0.5;
 
         // For each player:
         List players = worldObj.playerEntities;
@@ -268,12 +272,12 @@ public class TileEntityQBlock extends TileEntity {
                             // Do some occlusion tests
                             Vec3 playerPos = Vec3.createVectorHelper(centerX + x, centerY + y, centerZ + z);
                             boolean lineOfSightFound = false;
-                            for (int side = 0; side < 6; ++side) {
+                            for (EnumFacing side : EnumFacing.values()) {
                                 // Only check faces that are facing the player
                                 Vec3 sideNormal = Vec3.createVectorHelper(
-                                        0.49 * Facing.offsetsXForSide[side],
-                                        0.49 * Facing.offsetsYForSide[side],
-                                        0.49 * Facing.offsetsZForSide[side]
+                                        0.49 * side.getFrontOffsetX(),
+                                        0.49 * side.getFrontOffsetY(),
+                                        0.49 * side.getFrontOffsetZ()
                                 );
                                 Vec3 blockPos = Vec3.createVectorHelper(
                                         centerX + sideNormal.xCoord,
@@ -301,67 +305,68 @@ public class TileEntityQBlock extends TileEntity {
 
                         // Block is being observed!
                         // Determine the major axis:
-                        int majoraxis = -1;
+                        EnumFacing majoraxis = null;
                         double majorweight = 0.0f;
 
                         if (-dy >= majorweight) {
-                            majoraxis = 0;
+                            majoraxis = EnumFacing.DOWN;
                             majorweight = -dy;
                         }
                         if (dy >= majorweight) {
-                            majoraxis = 1;
+                            majoraxis = EnumFacing.UP;
                             majorweight = dy;
                         }
                         if (-dz >= majorweight) {
-                            majoraxis = 2;
+                            majoraxis = EnumFacing.WEST;
                             majorweight = -dz;
                         }
                         if (dz >= majorweight) {
-                            majoraxis = 3;
+                            majoraxis = EnumFacing.EAST;
                             majorweight = dz;
                         }
                         if (-dx >= majorweight) {
-                            majoraxis = 4;
+                            majoraxis = EnumFacing.SOUTH;
                             majorweight = -dx;
                         }
                         if (dx >= majorweight) {
-                            majoraxis = 5;
+                            majoraxis = EnumFacing.NORTH;
                         }
 
                         // Vote for this axis
-                        if (majoraxis >= 0) {
+                        if (majoraxis != null) {
                             if (getSubType() == BlockQBlock.SubType.FIFTYFIFTY) {
                                 boolean flip = s_random.nextBoolean();
                                 if (flip) {
-                                    majoraxis = Facing.oppositeSide[majoraxis];
+                                    majoraxis = majoraxis.getOpposite();
                                 }
                             }
-                            votes[majoraxis]++;
+                            int temp = votes.get(majoraxis);
+                            temp++;
+                            votes.put(majoraxis, temp);
                         }
                     }
                 }
             }
         }
-
         return votes;
     }
 
-    private static int[] addVotes(int[] a, int[] b) {
-        int[] c = new int[6];
-        for (int i = 0; i < 6; ++i) {
-            c[i] = a[i] + b[i];
+    private static EnumMap<EnumFacing, Integer> addVotes(EnumMap<EnumFacing, Integer> a, EnumMap<EnumFacing, Integer> b) {
+        EnumMap<EnumFacing, Integer> c = new EnumMap(EnumFacing.class);
+        for (EnumFacing side : EnumFacing.values()) {
+            c.put(side, a.get(side) + b.get(side));
         }
         return c;
     }
 
-    private static int tallyVotes(int[] votes) {
+    private static EnumFacing tallyVotes(EnumMap<EnumFacing, Integer> votes) { //winner may be null
         // Tally the votes:
-        int winner = 0;
+        EnumFacing winner = null;
         int winnerVotes = 0;
-        for (int i = 0; i < 6; ++i) {
-            int vote = votes[i];
+        for (EnumFacing side : EnumFacing.values()) {
+            int vote = votes.get(side);
             if (vote > winnerVotes) {
-                winner = i;
+                winner = side;
                 winnerVotes = vote;
             }
         }
@@ -369,12 +374,12 @@ public class TileEntityQBlock extends TileEntity {
         if (winnerVotes > 0) {
             return winner;
         }
-        return -1;
+        return null;
     }
 
     private int getObservationResult(long currentTime) {
         // Get observer votes from entangled twins
-        int[] votes = new int[6];
+        EnumMap<EnumFacing, Integer> votes = new EnumMap(EnumFacing.class);
         //[copied to the readFromNBT method]
         if (m_entanglementFrequency >= 0) {
             List<TileEntityQBlock> twins = getEntanglementRegistry().getEntangledObjects(m_entanglementFrequency);
@@ -386,19 +391,19 @@ public class TileEntityQBlock extends TileEntity {
                         //[/copied]
                         if (twin.m_currentlyObserved && twin.m_timeLastUpdated == currentTime) {
                             // If an entangled twin is already up to date, use its result
-                            if (twin.m_currentlyForcedSide >= 0) {
-                                return twin.m_currentlyForcedSide + 6;
+                            if (twin.m_currentlyForcedSide != null) {
+                                return twin.m_currentlyForcedSide.getIndex() + 6;
                             } else {
-                                return twin.m_currentDisplayedSide;
+                                return twin.m_currentDisplayedSide.getIndex();
                             }
                         } else {
                             // Otherwise, add its votes to the pile
-                            if (twin.m_currentlyForcedSide >= 0 && twin.m_forceObserved[m_currentlyForcedSide]) {
-                                return twin.m_currentlyForcedSide + 6;
+                            if (twin.m_currentlyForcedSide != null && twin.m_forceObserved.get(m_currentlyForcedSide)) { //@TODO ?? second statement is not a logical term, is it?
+                                return twin.m_currentlyForcedSide.getIndex() + 6;
                             } else {
-                                for (int i = 0; i < 6; ++i) {
-                                    if (twin.m_forceObserved[i]) {
-                                        return i + 6;
+                                for (EnumFacing side : EnumFacing.values()) {
+                                    if (twin.m_forceObserved.get(side)) {
+                                        return side.getIndex() + 6; //only one side can be forced at once
                                     }
                                 }
                             }
@@ -410,19 +415,20 @@ public class TileEntityQBlock extends TileEntity {
         }
 
         // Get local observer votes
-        if (m_currentlyForcedSide >= 0 && m_forceObserved[m_currentlyForcedSide]) {
-            return m_currentlyForcedSide + 6;
+        if (m_currentlyForcedSide != null && m_forceObserved.get(m_currentlyForcedSide)) {
+            return m_currentlyForcedSide.getIndex() + 6;
         } else {
-            for (int i = 0; i < 6; ++i) {
-                if (m_forceObserved[i]) {
-                    return i + 6;
+            for (EnumFacing side : EnumFacing.values()) {
+                if (m_forceObserved.get(side)) {
+                    return side.getIndex() + 6; //only one side can be forced at once
                 }
             }
         }
         votes = addVotes(votes, collectVotes());
 
         // Tally the votes
-        return tallyVotes(votes);
+        EnumFacing returnvalue = tallyVotes(votes);
+        return (returnvalue != null ? returnvalue.getIndex() : -1); //value returned by this method can be anything from 0 to 11, and EnumFacing itself only takes 6 values
     }
 
     private void redetermineObservedSide() {
@@ -431,33 +437,34 @@ public class TileEntityQBlock extends TileEntity {
         int winner = getObservationResult(currentTime);
         if (winner >= 6) {
             // Force observed
-            winner -= 6;
-            setDisplayedSide(true, true, winner);
+            winner %= 6;  //sounds neater than "-= 6" to me
+            setDisplayedSide(true, true, EnumFacing.getFront(winner));
         } else if (winner >= 0) {
             // Passively observed
-            if ((m_currentlyForcedSide >= 0) || !m_currentlyObserved) {
-                setDisplayedSide(true, false, winner);
+            if ((m_currentlyForcedSide != null) || !m_currentlyObserved) {
+                setDisplayedSide(true, false, EnumFacing.getFront(winner));
             }
         } else // Not observed
-        if (m_currentlyObserved) {
-            if (m_currentlyForcedSide >= 0) {
-                setDisplayedSide(false, false, -1);
-            } else {
-                setDisplayedSide(false, false, m_currentDisplayedSide);
+        {
+            if (m_currentlyObserved) {
+                if (m_currentlyForcedSide != null) {
+                    setDisplayedSide(false, false, null);
+                } else {
+                    setDisplayedSide(false, false, m_currentDisplayedSide);
+                }
             }
         }
         m_timeLastUpdated = currentTime;
     }
 
     private boolean isTouchingLiquid() {
-        for (int i = 1; i < 6; ++i) // ignore down
-        {
-            int x = xCoord + Facing.offsetsXForSide[i];
-            int y = yCoord + Facing.offsetsYForSide[i];
-            int z = zCoord + Facing.offsetsZForSide[i];
-            Block block = worldObj.getBlock(x, y, z);
-            if (block != null && block instanceof BlockLiquid) {
-                return true;
+        for (EnumFacing side : EnumFacing.values()) {
+            if (side != EnumFacing.DOWN) { // ignore down
+                BlockPos temp = pos.offset(side);
+                Block block = worldObj.getBlockState(temp).getBlock();
+                if (block != null && block instanceof BlockLiquid) {
+                    return true;
+                }
             }
         }
         return false;
@@ -486,12 +493,12 @@ public class TileEntityQBlock extends TileEntity {
         // Read properties
         super.readFromNBT(nbttagcompound);
         m_currentlyObserved = nbttagcompound.getBoolean("o");
-        m_currentDisplayedSide = nbttagcompound.getInteger("d");
+        m_currentDisplayedSide = EnumFacing.getFront(nbttagcompound.getInteger("d"));
         m_entanglementFrequency = nbttagcompound.hasKey("f") ? nbttagcompound.getInteger("f") : -1;
-        m_currentlyForcedSide = nbttagcompound.hasKey("c") ? nbttagcompound.getInteger("c") : -1;
-        for (int i = 0; i < 6; ++i) {
-            m_sideBlockTypes[i] = nbttagcompound.getInteger("s" + i);
-            m_forceObserved[i] = nbttagcompound.getBoolean("c" + i);
+        m_currentlyForcedSide = nbttagcompound.hasKey("c") ? EnumFacing.getFront(nbttagcompound.getInteger("c")) : null;
+        for (EnumFacing side : EnumFacing.values()) {
+            m_sideBlockTypes.put(side, nbttagcompound.getInteger("s" + side));
+            m_forceObserved.put(side, nbttagcompound.getBoolean("c" + side));
         }
 
         if (hasJustFallen) {
@@ -507,7 +514,7 @@ public class TileEntityQBlock extends TileEntity {
                         TileEntityQBlock twin = it.next();
                         if (twin != this) {
                             //[/copied]
-                            setDisplayedSide(false, twin.isForceObserved(1), twin.m_currentlyForcedSide);
+                            setDisplayedSide(false, twin.isForceObserved(EnumFacing.UP), twin.m_currentlyForcedSide);
                             break;
                         }
                     }
@@ -523,12 +530,12 @@ public class TileEntityQBlock extends TileEntity {
         // Write properties
         super.writeToNBT(nbttagcompound);
         nbttagcompound.setBoolean("o", m_currentlyObserved);
-        nbttagcompound.setInteger("d", m_currentDisplayedSide);
+        nbttagcompound.setInteger("d", m_currentDisplayedSide.getIndex());
         nbttagcompound.setInteger("f", m_entanglementFrequency);
-        nbttagcompound.setInteger("c", m_currentlyForcedSide);
-        for (int i = 0; i < 6; ++i) {
-            nbttagcompound.setInteger("s" + i, m_sideBlockTypes[i]);
-            nbttagcompound.setBoolean("c" + i, m_forceObserved[i]);
+        nbttagcompound.setInteger("c", m_currentlyForcedSide.getIndex());
+        for (EnumFacing side : EnumFacing.values()) {
+            nbttagcompound.setInteger("s" + side.getIndex(), m_sideBlockTypes.get(side));
+            nbttagcompound.setBoolean("c" + side.getIndex(), m_forceObserved.get(side));
         }
     }
 
@@ -537,23 +544,23 @@ public class TileEntityQBlock extends TileEntity {
         // Communicate sides and frequency, changing state is calculated on the fly
         NBTTagCompound nbttagcompound = new NBTTagCompound();
         writeToNBT(nbttagcompound);
-        return new S35PacketUpdateTileEntity(this.xCoord, this.yCoord, this.zCoord, 0, nbttagcompound);
+        return new S35PacketUpdateTileEntity(this.pos, 0, nbttagcompound);
     }
 
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity packet) {
-        switch (packet.func_148853_f()) // actionType
+        switch (packet.getTileEntityType()) // actionType (tileEntityType)?
         {
             case 0: {
                 // Receive sides and frequency
-                int oldSide = m_currentDisplayedSide;
+                EnumFacing oldSide = m_currentDisplayedSide;
                 int oldType = getObservedType();
-                NBTTagCompound nbttagcompound = packet.func_148857_g(); // data
+                NBTTagCompound nbttagcompound = packet.getNbtCompound(); // data
                 readFromNBT(nbttagcompound);
                 int newType = getObservedType();
 
                 // Update state
-                if (newType != oldType || oldSide < 0) {
+                if (newType != oldType || oldSide == null) {
                     m_timeSinceLastChange = 0;
                     blockUpdate();
                 }
