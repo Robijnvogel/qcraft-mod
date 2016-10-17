@@ -116,13 +116,8 @@ public class BlockQuantumLogic extends BlockDirectional {
 
     @Override
     public boolean canConnectRedstone(IBlockAccess world, BlockPos pos, EnumFacing side) {
-        Block block = world.getBlockState(pos).getBlock();
-        if (block != null && block instanceof BlockDirectional) {
-            BlockDirectional blockDir = (BlockDirectional) block;
-            EnumFacing direction = blockDir.FACING; //@TODO cast to blockfacing if it's quantum logic then get FACING?
-            return (side == direction);
-        }
-        return false;
+        EnumFacing direction = world.getBlockState(pos).getValue(FACING).getOpposite(); //@TODO This has something to do with the models, right?
+        return (side == direction);
     }
 
     @Override
@@ -150,8 +145,9 @@ public class BlockQuantumLogic extends BlockDirectional {
         }
 
         // Redetermine subtype
-        int metadata = world.getBlockMetadata(pos);
-        EnumFacing direction = getDirection(metadata);
+        IBlockState state = world.getBlockState(pos);
+        int metadata = getMetaFromState(state);
+        EnumFacing direction = state.getValue(FACING);
         int subType = getSubType(metadata);
         int newSubType = evaluateInput(world, pos) ? SubType.OBSERVERON : SubType.OBSERVEROFF;
         if (newSubType != subType) {
@@ -170,13 +166,13 @@ public class BlockQuantumLogic extends BlockDirectional {
     }
 
     private void setDirectionAndSubType(World world, BlockPos pos, EnumFacing direction, int subType) {
-        int metadata = (direction & 0x3) + ((subType & 0x3) << 2);
-        world.setBlockMetadataWithNotify(pos, metadata, 3);
+        int metadata = (direction.getIndex() & 0x3) + ((subType & 0x3) << 2);
+        world.setBlockState(pos, getStateFromMeta(metadata), 3);
     }
 
     @Override
     public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase player, ItemStack stack) {
-        EnumFacing direction = ((MathHelper.floor_double((double) (player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3) + 2) % 4;
+        EnumFacing direction = EnumFacing.getFront(((MathHelper.floor_double((double) (player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3) + 2) % 4);
         int subType = stack.getItemDamage();
         setDirectionAndSubType(world, pos, direction, subType);
     }
@@ -198,8 +194,7 @@ public class BlockQuantumLogic extends BlockDirectional {
     }
 
     private boolean evaluateInput(World world, BlockPos pos) {
-        int metadata = world.getBlockMetadata(pos);
-        EnumFacing direction = Direction.directionToFacing[getDirection(metadata)].getOpposite();
+        EnumFacing direction = world.getBlockState(pos).getValue(FACING).getOpposite();
         EnumFacing backDir = direction.getOpposite();
         return getRedstoneSignal(world, pos, backDir);
     }

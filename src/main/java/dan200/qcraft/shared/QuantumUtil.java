@@ -32,13 +32,13 @@ public class QuantumUtil {
         Block block = getBlock(world, pos);
         if (block != null) {
             if (block == Blocks.redstone_wire) {
-                int metadata = world.getBlockMetadata(pos);
+                int metadata = block.getMetaFromState(world.getBlockState(pos));
                 return (side != EnumFacing.UP && metadata > 0);
             } else if (block.canProvidePower()) {
                 EnumFacing testSide = side.getOpposite();
                 int power = block.getWeakPower(world, pos, world.getBlockState(pos), testSide);
                 return (power > 0);
-            } else if (world.isBlockNormalCubeDefault(pos, false)) {
+            } else if (world.isBlockNormalCube(pos, false)) {
                 for (EnumFacing i : EnumFacing.values()) {
                     if (i != side) {
                         BlockPos test = pos.offset(i);

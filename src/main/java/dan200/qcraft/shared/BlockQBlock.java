@@ -260,7 +260,7 @@ public class BlockQBlock extends BlockSand
     }
 
     @Override
-    public int colorMultiplier(IBlockAccess world, BlockPos pos) {
+    public int colorMultiplier(IBlockAccess world, BlockPos pos, int renderpass) {
         Block block = getImpostorBlock(world, pos);
         if (block == Blocks.grass) {
             return block.colorMultiplier(world, pos);
@@ -528,7 +528,7 @@ public class BlockQBlock extends BlockSand
     public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase player, ItemStack stack) {
         int subType = stack.getItemDamage();
         int metadata = subType;
-        world.setBlockMetadataWithNotify(pos, metadata, 3);
+        world.setBlockState(pos, this.getStateFromMeta(metadata), 3);
     }
 
     @Override

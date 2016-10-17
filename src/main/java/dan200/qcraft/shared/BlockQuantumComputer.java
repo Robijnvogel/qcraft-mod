@@ -159,7 +159,7 @@ public class BlockQuantumComputer extends BlockDirectional
     public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase player, ItemStack stack) {
         int direction = ((MathHelper.floor_double((double) (player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 0x3) + 2) % 4;
         int metadata = (direction & 0x3);
-        world.setBlockMetadataWithNotify(pos, metadata, 3); //sets the front of the machine facing the player
+        world.setBlockState(pos, this.getStateFromMeta(metadata), 3); //sets the front of the machine facing the player
     }
 
     @Override

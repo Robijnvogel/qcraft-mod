@@ -241,7 +241,7 @@ public class TileEntityQBlock extends TileEntity {
 
                 // Get position info:
                 double x = player.posX - centerX;
-                double y = player.posY + 1.62 - (double) player.yOffset - centerY;
+                double y = player.posY + 1.62 - (double) player.getYOffset() - centerY;
                 double z = player.posZ - centerZ;
 
                 // Check distance:
@@ -270,16 +270,16 @@ public class TileEntityQBlock extends TileEntity {
                     if (dot < -0.4) {
                         if (QCraft.enableQBlockOcclusionTesting) {
                             // Do some occlusion tests
-                            Vec3 playerPos = Vec3.createVectorHelper(centerX + x, centerY + y, centerZ + z);
+                            Vec3 playerPos = new Vec3(centerX + x, centerY + y, centerZ + z);
                             boolean lineOfSightFound = false;
                             for (EnumFacing side : EnumFacing.values()) {
                                 // Only check faces that are facing the player
-                                Vec3 sideNormal = Vec3.createVectorHelper(
+                                Vec3 sideNormal = new Vec3(
                                         0.49 * side.getFrontOffsetX(),
                                         0.49 * side.getFrontOffsetY(),
                                         0.49 * side.getFrontOffsetZ()
                                 );
-                                Vec3 blockPos = Vec3.createVectorHelper(
+                                Vec3 blockPos = new Vec3(
                                         centerX + sideNormal.xCoord,
                                         centerY + sideNormal.yCoord,
                                         centerZ + sideNormal.zCoord

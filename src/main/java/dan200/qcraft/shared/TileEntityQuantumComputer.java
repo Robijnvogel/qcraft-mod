@@ -22,6 +22,7 @@ import java.util.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPane;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -392,7 +393,7 @@ public class TileEntityQuantumComputer extends TileEntity {
                         }
 
                         Block block = worldObj.getBlockState(worldPos).getBlock(); //4. just like this
-                        int meta = worldObj.getBlockMetadata(worldPos); //1. getBlockState?
+                        int meta = block.getMetaFromState(worldObj.getBlockState(worldPos)); //@TODO 1. getBlockState?
                         storedData.m_blocks[index] = block; //3. making this is redundant then?
                         storedData.m_metaData[index] = meta; //2. make this a block state as well?
                     }
@@ -522,8 +523,8 @@ public class TileEntityQuantumComputer extends TileEntity {
                     if (!(x == 0 && x == y && x == z)) {
                         Block block = storedData.m_blocks[index];
                         if (block != null) {
-                            IBlockState meta = storedData.m_metaData[index]; //hmm...
-                            worldObj.setBlockState(worldPos, meta, 2);
+                            IBlockState state = block.getStateFromMeta(storedData.m_metaData[index]);
+                            worldObj.setBlockState(worldPos, state, 2);
                         } else {
                             worldObj.setBlockToAir(worldPos);
                         }
@@ -1410,7 +1411,7 @@ public class TileEntityQuantumComputer extends TileEntity {
         try {
             // Cryptographically sign the luggage
             luggage.setString("uuid", UUID.randomUUID().toString());
-            byte[] luggageData = CompressedStreamTools.compress(luggage);//@TODO don't copy code to fix this to two separate classes?
+            byte[] luggageData = QCraft.compressNBTToByteArray(luggage);
             byte[] luggageSignature = EncryptionRegistry.Instance.signData(luggageData);
             NBTTagCompound signedLuggage = new NBTTagCompound();
             signedLuggage.setByteArray("key", EncryptionRegistry.Instance.encodePublicKey(EncryptionRegistry.Instance.getLocalKeyPair().getPublic()));
@@ -1418,7 +1419,7 @@ public class TileEntityQuantumComputer extends TileEntity {
             signedLuggage.setByteArray("signature", luggageSignature);
 
             // Send the player to the remote server with the luggage
-            byte[] signedLuggageData = CompressedStreamTools.compress(signedLuggage);
+            byte[] signedLuggageData = QCraft.compressNBTToByteArray(signedLuggage);
             QCraft.requestGoToServer(player, remoteServerAddress, signedLuggageData);
         } catch (IOException e) {
             throw new RuntimeException("Error encoding inventory");
