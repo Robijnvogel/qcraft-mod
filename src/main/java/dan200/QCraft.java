@@ -50,7 +50,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
@@ -141,43 +141,43 @@ public class QCraft {
 
         // Setup general
         Property prop = config.get(Configuration.CATEGORY_GENERAL, "enableQBlockOcclusionTesting", enableQBlockOcclusionTesting);
-        prop.comment = "Set whether QBlocks should not be observed if their line of sight to the player is obstructed. WARNING: This has a very high performance cost if you have lots of QBlocks in your world!!";
+        prop.setComment("Set whether QBlocks should not be observed if their line of sight to the player is obstructed. WARNING: This has a very high performance cost if you have lots of QBlocks in your world!!");
         enableQBlockOcclusionTesting = prop.getBoolean(enableQBlockOcclusionTesting);
 
         prop = config.get(Configuration.CATEGORY_GENERAL, "enableWorldGen", enableWorldGen);
-        prop.comment = "Set whether Quantum Ore will spawn in new chunks";
+        prop.setComment("Set whether Quantum Ore will spawn in new chunks");
         enableWorldGen = prop.getBoolean(enableWorldGen);
 
         prop = config.get(Configuration.CATEGORY_GENERAL, "enableWorldGenReplacementRecipes", enableWorldGenReplacementRecipes);
-        prop.comment = "Set whether Quantum Dust can be crafted instead of mined";
+        prop.setComment("Set whether Quantum Dust can be crafted instead of mined");
         enableWorldGenReplacementRecipes = prop.getBoolean(enableWorldGenReplacementRecipes);
 
         prop = config.get(Configuration.CATEGORY_GENERAL, "letAdminsCreatePortals", letAdminsCreatePortals);
-        prop.comment = "Set whether server admins can energize portals";
+        prop.setComment("Set whether server admins can energize portals");
         letAdminsCreatePortals = prop.getBoolean(letAdminsCreatePortals);
 
         prop = config.get(Configuration.CATEGORY_GENERAL, "letPlayersCreatePortals", letPlayersCreatePortals);
-        prop.comment = "Set whether players can energize portals.";
+        prop.setComment("Set whether players can energize portals.");
         letPlayersCreatePortals = prop.getBoolean(letPlayersCreatePortals);
 
         prop = config.get(Configuration.CATEGORY_GENERAL, "letAdminsEditPortalServerList", letAdminsEditPortalServerList);
-        prop.comment = "Set whether server admins can edit the list of Servers which portals can teleport to";
+        prop.setComment("Set whether server admins can edit the list of Servers which portals can teleport to");
         letAdminsEditPortalServerList = prop.getBoolean(letAdminsEditPortalServerList);
 
         prop = config.get(Configuration.CATEGORY_GENERAL, "letPlayersEditPortalServerList", letPlayersEditPortalServerList);
-        prop.comment = "Set whether players can edit the list of Servers which portals can teleport to";
+        prop.setComment("Set whether players can edit the list of Servers which portals can teleport to");
         letPlayersEditPortalServerList = prop.getBoolean(letPlayersEditPortalServerList);
 
         prop = config.get(Configuration.CATEGORY_GENERAL, "letAdminsVerifyPortalServers", letAdminsVerifyPortalServers);
-        prop.comment = "Set whether server admins can verify an inter-server portal link";
+        prop.setComment("Set whether server admins can verify an inter-server portal link");
         letAdminsVerifyPortalServers = prop.getBoolean(letAdminsVerifyPortalServers);
 
         prop = config.get(Configuration.CATEGORY_GENERAL, "letPlayersVerifyPortalServers", letPlayersVerifyPortalServers);
-        prop.comment = "Set whether players can verify an inter-server portal link";
+        prop.setComment("Set whether players can verify an inter-server portal link");
         letPlayersVerifyPortalServers = prop.getBoolean(letPlayersVerifyPortalServers);
 
         prop = config.get(Configuration.CATEGORY_GENERAL, "maxPortalSize", maxPortalSize);
-        prop.comment = "Set the maximum height and width for the Quantum Portal inside the frame in blocks. [min: 3, max: 16, def: 5]";
+        prop.setComment("Set the maximum height and width for the Quantum Portal inside the frame in blocks. [min: 3, max: 16, def: 5]");
         int temp = prop.getInt(maxPortalSize);
         if (temp < 3) {
             maxPortalSize = 3;
@@ -189,7 +189,7 @@ public class QCraft {
         prop.set(maxPortalSize);
 
         prop = config.get(Configuration.CATEGORY_GENERAL, "maxQTPSize", maxQTPSize);
-        prop.comment = "Set the maximum distance from the Quantum Computer that the quantization or teleportation field can extend in blocks. (3 means that there are 2 blocks between the computer and the pillar) [min: 1, max: 16, def: 8]";
+        prop.setComment("Set the maximum distance from the Quantum Computer that the quantization or teleportation field can extend in blocks. (3 means that there are 2 blocks between the computer and the pillar) [min: 1, max: 16, def: 8]");
         temp = prop.getInt(maxQTPSize);
         if (temp < 1) {
             maxQTPSize = 1;

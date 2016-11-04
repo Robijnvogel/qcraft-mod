@@ -1,25 +1,17 @@
 buildscript {
     repositories {
-        mavenCentral()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
     }
 }
-
 apply plugin: 'net.minecraftforge.gradle.forge'
 
 ext.modversion = "1.3.0-a0"
-ext.mcversion = "1.8.9"
-ext.forgeversion = "11.15.1.1902"
+ext.mcversion = "1.10.2"
+ext.forgeversion = "12.18.2.2120"
 version = mcversion + "-" + modversion
 group = "dan200.qcraft"
 archivesBaseName = "qCraft"
@@ -32,9 +24,9 @@ sourceSets {
 }
 
 minecraft {
-    version = mcversion + "-" + forgeversion + "-" + mcversion
+    version = mcversion + "-" + forgeversion
     runDir = "run"
-    mappings = "stable_22"
+    mappings = "snapshot_20160518"
     replace '${version}', project.version
 }
 
