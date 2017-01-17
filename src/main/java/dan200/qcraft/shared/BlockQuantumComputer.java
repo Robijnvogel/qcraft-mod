@@ -18,6 +18,7 @@ package dan200.qcraft.shared;
 import dan200.QCraft;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
@@ -41,13 +42,6 @@ import net.minecraft.world.World;
 public class BlockQuantumComputer extends BlockDirectional
         implements ITileEntityProvider {
 
-    private static class Icons {
-
-        public static IIcon FRONT;
-        public static IIcon TOP;
-        public static IIcon SIDE;
-    }
-
     public BlockQuantumComputer() {
         super(Material.iron);
         setCreativeTab(QCraft.getCreativeTab());
@@ -57,29 +51,20 @@ public class BlockQuantumComputer extends BlockDirectional
         setUnlocalizedName("qcraft:computer");
     }
 
+    /*
     @Override
     public boolean isOpaqueCube() {
         return false;
     }
-
-    @Override
-    public Item getItemDropped(IBlockState state, Random random, int j) {
-        return Item.getItemFromBlock(this);
-    }
-
-    @Override
-    public int damageDropped(IBlockState state) {
-        return 0;
-    }
-
+     */
     @Override
     public void dropBlockAsItemWithChance(World world, BlockPos pos, IBlockState state, float chance, int fortune) {
-        // RemoveBlockByPlayer handles this instead
+        // RemoveBlockByPlayer handles this instead ?¿?
     }
 
     @Override
-    public ArrayList<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
-        ArrayList<ItemStack> blocks = new ArrayList<ItemStack>();
+    public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+        List<ItemStack> blocks = new ArrayList();
         TileEntity entity = world.getTileEntity(pos);
         if (entity != null && entity instanceof TileEntityQuantumComputer) {
             // Get the computer back
@@ -103,7 +88,7 @@ public class BlockQuantumComputer extends BlockDirectional
 
         if (!player.capabilities.isCreativeMode || shouldDropItemsInCreative(world, pos)) {
             // Regular and silk touch block (identical)
-            ArrayList<ItemStack> items = getDrops(world, pos, world.getBlockState(pos), 0);
+            List<ItemStack> items = getDrops(world, pos, world.getBlockState(pos), 0);
             Iterator<ItemStack> it = items.iterator();
             while (it.hasNext()) {
                 ItemStack item = it.next();
@@ -121,7 +106,7 @@ public class BlockQuantumComputer extends BlockDirectional
 
     @Override
     public ItemStack getPickBlock(MovingObjectPosition target, World world, BlockPos pos) {
-        ArrayList<ItemStack> items = getDrops(world, pos, world.getBlockState(pos), 0);
+        List<ItemStack> items = getDrops(world, pos, world.getBlockState(pos), 0);
         if (items.size() > 0) {
             return items.get(0);
         }
@@ -176,44 +161,6 @@ public class BlockQuantumComputer extends BlockDirectional
     @Override
     public boolean canConnectRedstone(IBlockAccess world, BlockPos pos, EnumFacing side) {
         return true;
-    }
-
-    @Override
-    public void registerBlockIcons(IIconRegister iconRegister) {
-        Icons.FRONT = iconRegister.registerIcon("qcraft:computer");
-        Icons.TOP = iconRegister.registerIcon("qcraft:computer_top");
-        Icons.SIDE = iconRegister.registerIcon("qcraft:computer_side");
-    }
-
-    @Override
-    public IIcon getIcon(IBlockAccess world, int i, int j, int k, int side) {
-        if (side == 0 || side == 1) {
-            return Icons.TOP;
-        }
-
-        int metadata = world.getBlockMetadata(i, j, k);
-        int direction = Direction.directionToFacing[getDirection(metadata)];
-        if (side == direction) {
-            return Icons.FRONT;
-        }
-
-        return Icons.SIDE;
-    }
-
-    @Override
-    public IIcon getIcon(int side, int damage) {
-        switch (side) {
-            case 0:
-            case 1: {
-                return Icons.TOP;
-            }
-            case 4: {
-                return Icons.FRONT;
-            }
-            default: {
-                return Icons.SIDE;
-            }
-        }
     }
 
     @Override

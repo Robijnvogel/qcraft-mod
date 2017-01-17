@@ -64,7 +64,7 @@ public class QCraftProxyClient extends QCraftProxyCommon {
 
         // Setup renderers
         int gateID = RenderingRegistry.getNextAvailableRenderId();
-        QCraft.Blocks.quantumLogic.blockRenderID = gateID;
+        QCraft.Blocks.powered_observer.blockRenderID = gateID;
 
         m_renderBlocks = new RenderBlocks();
         QCraft.Blocks.qBlock.blockRenderID = RenderingRegistry.getNextAvailableRenderId();
@@ -187,12 +187,12 @@ public class QCraftProxyClient extends QCraftProxyCommon {
 
         @Override
         public int getRenderId() {
-            return QCraft.Blocks.quantumLogic.blockRenderID;
+            return QCraft.Blocks.powered_observer.blockRenderID;
         }
 
         @Override
         public boolean renderWorldBlock(IBlockAccess world, int i, int j, int k, Block block, int modelID, RenderBlocks renderblocks) {
-            if (modelID == QCraft.Blocks.quantumLogic.blockRenderID) {
+            if (modelID == QCraft.Blocks.powered_observer.blockRenderID) {
                 int metadata = world.getBlockMetadata(i, j, k);
                 int direction = BlockDirectional.getDirection(metadata);
                 int subType = ((BlockQuantumLogic) block).getSubType(metadata);

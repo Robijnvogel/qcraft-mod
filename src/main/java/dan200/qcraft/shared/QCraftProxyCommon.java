@@ -113,8 +113,9 @@ public abstract class QCraftProxyCommon implements IQCraftProxy {
         GameRegistry.registerBlock(QCraft.Blocks.quantumOreGlowing, "quantumoreglowing");
 
         // Quantum logic block
-        QCraft.Blocks.quantumLogic = new BlockQuantumLogic();
-        GameRegistry.registerBlock(QCraft.Blocks.quantumLogic, ItemQuantumLogic.class, "quantumlogic");
+        QCraft.Blocks.powered_observer = new BlockQuantumLogic(true);
+        QCraft.Blocks.unpowered_observer = new BlockQuantumLogic(false);
+        GameRegistry.registerBlock(QCraft.Blocks.powered_observer, ItemQuantumLogic.class, "quantumlogic");
 
         // qBlock block
         QCraft.Blocks.qBlock = new BlockQBlock();
@@ -147,7 +148,7 @@ public abstract class QCraftProxyCommon implements IQCraftProxy {
 
         // RECIPES
         // Automated Observer recipe
-        ItemStack observer = new ItemStack(QCraft.Blocks.quantumLogic, 1, BlockQuantumLogic.SubType.OBSERVEROFF);
+        ItemStack observer = new ItemStack(QCraft.Items.observer, 1);
         GameRegistry.addRecipe(observer, new Object[]{
             "XXX", "XYX", "XZX", 'X', Blocks.stone, 'Y', new ItemStack(QCraft.Items.eos, 1, ItemEOS.SubType.OBSERVATION), 'Z', Items.redstone
         });

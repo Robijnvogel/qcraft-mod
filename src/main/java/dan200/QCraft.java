@@ -88,16 +88,19 @@ public class QCraft {
 
         public static BlockQuantumOre quantumOre;
         public static BlockQuantumOre quantumOreGlowing;
-        public static BlockQuantumLogic quantumLogic;
+        public static BlockQuantumLogic powered_observer;
+        public static BlockQuantumLogic unpowered_observer;
         public static BlockQBlock qBlock;
         public static BlockQuantumComputer quantumComputer;
         public static BlockQuantumPortal quantumPortal;
+        
     }
 
     public static class Items {
 
         public static ItemQuantumDust quantumDust;
         public static ItemEOS eos;
+        public static ItemQuantumLogic observer;
         public static ItemQuantumGoggles quantumGoggles;
         public static ItemMissing missingItem;
     }

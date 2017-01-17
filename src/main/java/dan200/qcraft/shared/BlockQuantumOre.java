@@ -17,59 +17,48 @@ package dan200.qcraft.shared;
 
 import dan200.QCraft;
 import java.util.Random;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
+import net.minecraft.block.BlockRedstoneOre;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.IIcon;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class BlockQuantumOre extends Block {
-
-    private static IIcon s_icon;
-    private final boolean m_glowing;
+public class BlockQuantumOre extends BlockRedstoneOre {
+    
+    private final boolean isOn;
 
     public BlockQuantumOre(boolean glowing) {
-        super(Material.rock);
+        super(glowing);
+        setLightLevel(0.625f);
         setHardness(3.0f);
         setResistance(5.0f);
-        setUnlocalizedName("qcraft:ore");
-
-        m_glowing = glowing;
-        if (m_glowing) {
-            setCreativeTab(QCraft.getCreativeTab());
-            setLightLevel(0.625f);
-            setTickRandomly(true);
-        }
-    }
-
-    @Override
-    public int tickRate(World par1World) {
-        return 30;
+        setUnlocalizedName("ore");
+        setStepSound(soundTypePiston);
+        setUnlocalizedName("oreRedstone");
+        setCreativeTab(QCraft.getCreativeTab());
+        
+        isOn = glowing;
     }
 
     @Override
     public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
-        this.glow(world, pos);
+        this.activate(world, pos);
         super.onBlockClicked(world, pos, player);
     }
 
     @Override
     public void onEntityCollidedWithBlock(World par1World, BlockPos pos, Entity par5Entity) {
-        this.glow(par1World, pos);
+        this.activate(par1World, pos);
         super.onEntityCollidedWithBlock(par1World, pos, par5Entity);
     }
 
     @Override
     public boolean onBlockActivated(World par1World, BlockPos pos, IBlockState state, EntityPlayer par5EntityPlayer, EnumFacing side, float par7, float par8, float par9) {
-        this.glow(par1World, pos);
+        this.activate(par1World, pos);
         return super.onBlockActivated(par1World, pos, state, par5EntityPlayer, side, par7, par8, par9);
     }
 
@@ -86,33 +75,18 @@ public class BlockQuantumOre extends Block {
     }
 
     @Override
-    public int quantityDroppedWithBonus(int par1, Random par2Random) {
-        return this.quantityDropped(par2Random) + par2Random.nextInt(par1 + 1);
-    }
-
-    @Override
     public int quantityDropped(Random par1Random) {
         return 1 + par1Random.nextInt(2);
     }
-
-    @Override
-    public void dropBlockAsItemWithChance(World world, BlockPos pos, IBlockState state, float par6, int par7) {
-        super.dropBlockAsItemWithChance(world, pos, state, par6, par7);
-
-        if (this.getItemDropped(state, world.rand, par7) != Item.getItemFromBlock(this)) {
-            int j1 = 1 + world.rand.nextInt(5);
-            this.dropXpOnBlockBreak(world, pos, j1);
-        }
-    }
-
+    
     @Override
     public void randomDisplayTick(World world, BlockPos pos, IBlockState state, Random par5Random) {
-        if (m_glowing) {
-            this.sparkle(world, pos);
+        if (this.isOn) {
+            this.spawnParticles(world, pos);
         }
     }
 
-    private void sparkle(World world, BlockPos pos) {
+    private void spawnParticles(World world, BlockPos pos) {
         if (!world.isRemote) {
             return;
         }
@@ -164,8 +138,8 @@ public class BlockQuantumOre extends Block {
         }
     }
 
-    private void glow(World world, BlockPos pos) {
-        this.sparkle(world, pos);
+    private void activate(World world, BlockPos pos) {
+        this.spawnParticles(world, pos);
         if (this == QCraft.Blocks.quantumOre) {
             world.setBlockState(pos, QCraft.Blocks.quantumOreGlowing.getDefaultState());
         }
@@ -174,20 +148,5 @@ public class BlockQuantumOre extends Block {
     @Override
     protected ItemStack createStackedBlock(IBlockState state) {
         return new ItemStack(QCraft.Blocks.quantumOre);
-    }
-
-    @Override
-    public void registerBlockIcons(IIconRegister iconRegister) {
-        s_icon = iconRegister.registerIcon("qcraft:ore");
-    }
-
-    @Override
-    public IIcon getIcon(IBlockAccess world, BlockPos pos, EnumFacing side) {
-        return s_icon;
-    }
-
-    @Override
-    public IIcon getIcon(EnumFacing side, int damage) {
-        return s_icon;
     }
 }
