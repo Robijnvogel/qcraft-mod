@@ -17,6 +17,7 @@ package dan200.qcraft.shared;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
 
@@ -36,7 +37,13 @@ public class QuantumTeleporter extends Teleporter {
     @Override
     public void placeInPortal(Entity entity, double par2, double par4, double par6, float par8) {
         if (entity instanceof EntityPlayer) {
-            ((EntityPlayer) entity).setPositionAndUpdate(m_xPos, m_yPos, m_zPos);
+            EntityPlayer player = (EntityPlayer) entity;
+
+            // Todo: test if this works inter-dimensionally
+            //Setting rotation and position
+            PortalRegistry.getPortalRegistry(entity.worldObj).updatePlayerRotation(player);
+            //Note that rotation MUST be set first
+            player.setPositionAndUpdate(m_xPos, m_yPos, m_zPos);
             entity.motionX = entity.motionY = entity.motionZ = 0.0;
         }
     }

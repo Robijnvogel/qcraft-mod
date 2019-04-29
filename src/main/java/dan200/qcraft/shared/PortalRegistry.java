@@ -15,8 +15,12 @@ limitations under the License.
  */
 package dan200.qcraft.shared;
 
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -52,10 +56,49 @@ public class PortalRegistry {
     private final List<Server> m_servers;
     private final Map<String, TileEntityQuantumComputer.PortalLocation> m_portals;
 
+    // Todo: If the player entity's inventory is sent to this server over a network, the locationFrom facing direction must be extracted from the packet
+    private TileEntityQuantumComputer.PortalLocation locationFrom;
+    private TileEntityQuantumComputer.PortalLocation locationTo;
+
     // Methods
     public PortalRegistry() {
         m_servers = new ArrayList<Server>();
         m_portals = new HashMap<String, TileEntityQuantumComputer.PortalLocation>();
+    }
+
+    public void setLocationFrom(String portalID) {
+        locationFrom = m_portals.get(portalID);
+    }
+
+    public TileEntityQuantumComputer.PortalLocation getLocationFrom() {
+        return locationFrom;
+    }
+
+    public void setLocationTo(String portalID) {
+        locationTo = m_portals.get(portalID);
+    }
+
+    public TileEntityQuantumComputer.PortalLocation getLocationTo() {
+        return locationTo;
+    }
+
+    public void updatePlayerRotation(EntityPlayer p_player) {
+        EnumFacing directionFrom = DirectionUtil.getFacing(locationFrom.getDir());
+        EnumFacing directionTo = DirectionUtil.getFacing(locationTo.getDir());
+        // Todo: Test this shit till oblivion
+
+        // Todo: Need to use NetHandlerPlayClient.handleEntityHeadLook() instead?
+
+        float newYaw = DirectionUtil.transformYaw(
+                p_player.rotationYaw,
+                directionFrom,
+                directionTo);
+        float newHeadYaw = DirectionUtil.transformYaw(
+                p_player.rotationYawHead,
+                directionFrom,
+                directionTo);
+        p_player.setPositionAndRotation(p_player.posX, p_player.posY, p_player.posZ, newYaw, p_player.rotationPitch);
+        p_player.setRotationYawHead(newHeadYaw);
     }
 
     public void reset() {

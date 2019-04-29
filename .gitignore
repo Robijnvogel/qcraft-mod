@@ -3,3 +3,10 @@
 /run/
 /build/
 gradle.properties
+OpenCommandWindowHere.bat
+classes/
+out/
+.idea/
+qcraft-mod.iml
+qcraft-mod.ipr
+qcraft-mod.iws

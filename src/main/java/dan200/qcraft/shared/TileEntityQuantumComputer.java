@@ -752,6 +752,8 @@ public class TileEntityQuantumComputer extends TileEntity {
             return false;
         }
 
+        // Todo: this function needs an overhaul for 4-directions
+
         TileEntity entity = worldObj.getTileEntity(x, y, z);
         if (entity != null && entity instanceof TileEntityQBlock) {
             TileEntityQBlock quantum = (TileEntityQBlock) entity;
@@ -792,6 +794,15 @@ public class TileEntityQuantumComputer extends TileEntity {
             m_z2 = z2;
         }
 
+        // Todo: make this better
+        public int getDir() {
+            if (this.m_x1 == this.m_x2) {
+                return 4; //West
+            } else {
+                return 2; //North
+            }
+        }
+
         public NBTTagCompound encode() {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
             nbttagcompound.setInteger("dimensionID", m_dimensionID);
@@ -826,11 +837,11 @@ public class TileEntityQuantumComputer extends TileEntity {
         int c1;
         int c2;
         if (location.m_x1 == location.m_x2) {
-            lookDir = 4;
+            lookDir = 4; //West
             c1 = location.m_z1;
             c2 = location.m_z2;
         } else {
-            lookDir = 2;
+            lookDir = 2; //North
             c1 = location.m_x1;
             c2 = location.m_x2;
         }
@@ -1361,6 +1372,9 @@ public class TileEntityQuantumComputer extends TileEntity {
         if (m_remoteServerAddress != null) {
             queryTeleportPlayerRemote(player);
         } else {
+            // Todo: Use this on other points as well?
+            getPortalRegistry().setLocationFrom(m_portalID);
+            getPortalRegistry().setLocationTo(m_remotePortalID);
             teleportPlayerLocal(player, m_remotePortalID);
         }
     }
@@ -1459,6 +1473,10 @@ public class TileEntityQuantumComputer extends TileEntity {
             double zPos = ((double) location.m_z1 + location.m_z2 + 1) / 2;
             if (location.m_dimensionID == player.dimension) {
                 player.timeUntilPortal = 40;
+
+                //Setting rotation and position
+                PortalRegistry.getPortalRegistry(player.worldObj).updatePlayerRotation(player);
+                //Note that rotation MUST be set first
                 player.setPositionAndUpdate(xPos, yPos, zPos);
             } else if (player instanceof EntityPlayerMP) {
                 player.timeUntilPortal = 40;
